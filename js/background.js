@@ -3,4 +3,3 @@ chrome.browserAction.onClicked.addListener(function (tab) {
     file: "UberStats.js"
   });
 });
-

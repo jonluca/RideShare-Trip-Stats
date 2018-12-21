@@ -12,6 +12,12 @@ var MAX_LIMIT = 50;
 var TRIPS_ENDPOINT = 'https://riders.uber.com/api/getTripsForClient';
 
 $(_ => {
+  if (window.location.hostname !== "riders.uber.com") {
+    if (confirm("You must be on https://riders.uber.com/trips! Redirecting now.")) {
+      window.location.href = "https://riders.uber.com/trips";
+    }
+    return;
+  }
   startAnalysis();
 });
 
