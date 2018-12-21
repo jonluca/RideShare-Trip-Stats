@@ -1,0 +1,47 @@
+{
+  "manifest_version": 2,
+  "name": "Uber Trip Stats",
+  "description": "Analyzes your uber profile to show statistics on your rides!",
+  "version": "0.1",
+  "permissions": [
+    "*://uber.com/*",
+    "*://*.uber.com/*",
+    "storage",
+    "activeTab"
+  ],
+  "background": {
+    "persistent": true,
+    "scripts": [
+      "js/background.js",
+      "js/common.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://uber.com/*",
+        "*://*.uber.com/*"
+      ],
+      "js": [
+        "js/libs/jquery.js"
+      ]
+    }
+  ],
+  "icons": {
+    "64": "images/icon64.png",
+    "32": "images/icon32.png",
+    "38": "images/icon.png",
+    "128": "images/icon128.png"
+  },
+  "browser_action": {
+    "default_icon": "images/icon.png"
+  },
+  "homepage_url": "https://jonlu.ca",
+  "web_accessible_resources": [
+    "js/*",
+    "html/*",
+    "css/*",
+    "fonts/*",
+    "images/*"
+  ]
+}

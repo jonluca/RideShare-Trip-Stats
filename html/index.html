@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" href="../css/main.css"/>
+    <script src="../js/libs/jquery.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/temp.js"></script>
+</head>
+<body>
+<header>Uber Stats</header>
+<h1>Lifetime</h1>
+<div class="container">
+    <div class="stats-view">
+        <div class="individual-stat">
+            <span># Payment Methods</span>
+            <span class="stat" id="num-payment"></span>
+        </div>
+        <div class="individual-stat">
+            <span>Total Spent</span>
+            <div id="total-spent"></div>
+        </div>
+        <div class="individual-stat">
+            <span>Average Price</span>
+            <span class="stat" id="average-price"></span>
+        </div>
+        <br class="spacer">
+        <div class="individual-stat">
+            <span>Total Time</span>
+            <div id="total-time"></div>
+        </div>
+        <div class="individual-stat">
+            <span>Shortest Time</span>
+            <span class="stat" id="shortest-ride"></span>
+        </div>
+        <div class="individual-stat">
+            <span>Longest Time</span>
+            <span class="stat" id="longest-ride"></span>
+        </div>
+        <br class="spacer">
+    </div>
+    <div class="stats-view">
+        <div class="individual-stat">
+            <span>Total Rides</span>
+            <span class="stat" id="total-rides"></span>
+        </div>
+        <div class="individual-stat">
+            <span>Completed Rides</span>
+            <span class="stat" id="completed-rides"></span>
+        </div>
+        <div class="individual-stat">
+            <span>User Canceled Rides</span>
+            <span class="stat" id="canceled-rides"></span>
+        </div>
+        <div class="individual-stat">
+            <span>Driver Canceled Rides</span>
+            <span class="stat" id="driver-canceled-rides"></span>
+        </div>
+        <div class="individual-stat">
+            <span>Surge Rides</span>
+            <span class="stat" id="surge-rides"></span>
+        </div>
+        <br class="spacer">
+        <div class="individual-stat">
+            <span>Rides By Type</span>
+            <div id="rides-by-type"></div>
+        </div>
+        <br class="spacer">
+    </div>
+</div>
+<button id="export">Export</button>
+</body>
+</html>

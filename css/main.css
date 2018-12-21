@@ -1,0 +1,64 @@
+@font-face {
+  font-family: "Regular";
+  src: url('chrome-extension://__MSG_@@extension_id__/fonts/thin-uber-font.woff2') format("woff2")
+;
+}
+
+@font-face {
+  font-family: "Medium";
+  src: url('chrome-extension://__MSG_@@extension_id__/fonts/thick-uber-font.woff2') format("woff2")
+;
+}
+
+body {
+  font-family: Regular, serif;
+  background-color: black;
+  color: white;
+}
+
+header {
+  font-size: 56px;
+  margin-left: 50px;
+}
+
+h1 {
+  font-family: Medium, serif;
+  margin-left: 50px;
+
+}
+
+.container {
+  margin: 10px 0px 10px 50px;
+  display: flex;
+}
+
+.individual-stat {
+  font-size: 18px;
+  padding-top: 5px;
+}
+
+.stat {
+  color: #a8a8a8;
+}
+
+.subheading {
+  font-size: 14px;
+  padding-left: 5px;
+}
+
+#export {
+  margin: 0 auto;
+  font-size: 20px;
+  width: 200px;
+  height: 100px;
+  text-transform: uppercase;
+  color: black;
+  background-color: white;
+}
+
+#export:hover {
+  color: white;
+  background-color: black;
+  cursor: pointer;
+  border: 1px solid white;
+}
