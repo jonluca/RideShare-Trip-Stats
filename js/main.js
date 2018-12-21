@@ -59,10 +59,14 @@ function startStatistics() {
     }
 
     if (t.vehicleViewName) {
-      if (!tripTypes.hasOwnProperty(t.vehicleViewName)) {
-        tripTypes[t.vehicleViewName] = 0;
+      let name = t.vehicleViewName;
+      // Some have :MATCHED appended, randomly?
+      name = name.split(":")[0];
+      name = uppercaseFirst(name);
+      if (!tripTypes.hasOwnProperty(name)) {
+        tripTypes[name] = 0;
       }
-      tripTypes[t.vehicleViewName]++;
+      tripTypes[name]++;
     }
 
     if (t.driverUUID) {
@@ -246,4 +250,8 @@ function convertArrayOfObjectsToCSV(args) {
   });
 
   return result;
+}
+
+function uppercaseFirst(txt) {
+  return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
 }
