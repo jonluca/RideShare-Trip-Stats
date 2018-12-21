@@ -1,15 +1,15 @@
 // Make all global variables "var" so that they can be redeclared upon multiple executions of the script
-const global = {};
+var global = {};
 
 global.payment = new Map();
 global.drivers = new Map();
 global.trips = new Map();
 global.cities = new Map();
 
-let csrf = null;
-let requestsActive = 0;
-const MAX_LIMIT = 50;
-const TRIPS_ENDPOINT = 'https://riders.uber.com/api/getTripsForClient';
+var csrf = null;
+var requestsActive = 0;
+var MAX_LIMIT = 50;
+var TRIPS_ENDPOINT = 'https://riders.uber.com/api/getTripsForClient';
 
 $(_ => {
   startAnalysis();
@@ -72,7 +72,12 @@ function requestDataFromUber(csrf, limit, offset) {
       --requestsActive;
       if (requestsActive === 0) {
         // Once all requests have completed, trigger a new tab and send the data
-        chrome.runtime.sendMessage({global: global});
+        let serialized = {};
+        serialized.payment = [...global.payment];
+        serialized.drivers = [...global.drivers];
+        serialized.trips = [...global.trips];
+        serialized.cities = [...global.cities];
+        chrome.runtime.sendMessage({global: serialized});
       }
     }
   });

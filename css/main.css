@@ -41,6 +41,14 @@ h1 {
   color: #a8a8a8;
 }
 
+.stats-view {
+  padding-right: 40px;
+}
+
+.spacer {
+  line-height: 40px;
+}
+
 .subheading {
   font-size: 14px;
   padding-left: 5px;

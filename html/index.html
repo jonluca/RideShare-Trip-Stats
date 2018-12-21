@@ -4,6 +4,7 @@
     <meta charset="utf-8"/>
     <link rel="stylesheet" href="../css/main.css"/>
     <script src="../js/libs/jquery.js"></script>
+    <script src="../js/currencies.js"></script>
     <script src="../js/main.js"></script>
     <script src="../js/temp.js"></script>
 </head>
@@ -18,6 +19,7 @@
         </div>
         <div class="individual-stat">
             <span>Total Spent</span>
+            <span class="stat" id="total-payment"></span>
             <div id="total-spent"></div>
         </div>
         <div class="individual-stat">
@@ -43,22 +45,20 @@
         <div class="individual-stat">
             <span>Total Rides</span>
             <span class="stat" id="total-rides"></span>
-        </div>
-        <div class="individual-stat">
-            <span>Completed Rides</span>
-            <span class="stat" id="completed-rides"></span>
-        </div>
-        <div class="individual-stat">
-            <span>User Canceled Rides</span>
-            <span class="stat" id="canceled-rides"></span>
-        </div>
-        <div class="individual-stat">
-            <span>Driver Canceled Rides</span>
-            <span class="stat" id="driver-canceled-rides"></span>
-        </div>
-        <div class="individual-stat">
-            <span>Surge Rides</span>
-            <span class="stat" id="surge-rides"></span>
+            <div>
+                <span class="subheading">Completed Rides</span>
+                <span class="stat" id="completed-rides"></span>
+                <br class="spacer">
+                <span class="subheading">User Canceled Rides</span>
+                <span class="stat" id="canceled-rides"></span>
+                <br class="spacer">
+                <span class="subheading">Driver Canceled Rides</span>
+                <span class="stat" id="driver-canceled-rides"></span>
+                <br class="spacer">
+                <span class="subheading">Surge Rides</span>
+                <span class="stat" id="surge-rides"></span>
+                <br class="spacer">
+            </div>
         </div>
         <br class="spacer">
         <div class="individual-stat">

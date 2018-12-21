@@ -1,18 +1,15 @@
 let global = {};
 let filtered = {};
 
-chrome.runtime.sendMessage({requestData: true}, function (response) {
-  console.log(response);
-  // global = response;
-});
-
 $(_ => {
-  global.cities = new Map(global.cities);
-  global.payment = new Map(global.payment);
-  global.trips = new Map(global.trips);
-  global.drivers = new Map(global.drivers);
-  startStatistics();
-  registerClickHandlers();
+  chrome.runtime.sendMessage({requestData: true}, function (response) {
+    global.cities = new Map(response.data.cities);
+    global.payment = new Map(response.data.payment);
+    global.trips = new Map(response.data.trips);
+    global.drivers = new Map(response.data.drivers);
+    startStatistics();
+    registerClickHandlers();
+  });
 });
 
 function startStatistics() {
@@ -25,6 +22,7 @@ function startStatistics() {
 
   // Analysis of trips
   let totalSpent = {};
+  let totalAcrossAllCurrencies = 0;
   let tripTypes = {};
   let surgeTrips = 0;
   let tripLengths = [];
@@ -37,6 +35,7 @@ function startStatistics() {
         totalSpent[t.currencyCode] = 0;
       }
       totalSpent[t.currencyCode] += t.clientFare;
+      totalAcrossAllCurrencies += t.clientFare;
     }
     if (t.isSurgeTrip) {
       surgeTrips++;
@@ -61,12 +60,15 @@ function startStatistics() {
     }
   });
 
-  // Total $ spent
+  // $ spent stats
+  $("#total-payment").text("$" + totalAcrossAllCurrencies.toFixed(2));
   let totalSpentText = "";
   for (const key of Object.keys(totalSpent)) {
-    totalSpentText += `<span class="subheading">${key}</span><span class="stat"> ${totalSpent[key].toFixed(2)}</span><br>`;
+    let currencySymbol = getSymbolFromCode(key);
+    totalSpentText += `<span class="subheading">${key}</span><span class="stat"> ${currencySymbol + totalSpent[key].toFixed(2)}</span><br>`;
   }
   $("#total-spent").html(totalSpentText);
+  $("#average-price").text("$" + (totalAcrossAllCurrencies / completedTrips).toFixed(2));
 
   // Completed and canceled rides
   $("#canceled-rides").text(canceledTrips);
