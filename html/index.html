@@ -15,10 +15,6 @@
     <div class="lifetime">
         <div class="stats-view">
             <div class="individual-stat">
-                <span># Payment Methods</span>
-                <span class="stat" id="num-payment"></span>
-            </div>
-            <div class="individual-stat">
                 <span>Total Spent</span>
                 <span class="stat" id="total-payment"></span>
                 <div id="total-spent"></div>
@@ -41,6 +37,10 @@
                 <span class="stat" id="longest-ride"></span>
             </div>
             <br class="spacer">
+            <div class="individual-stat">
+                <span>Most Rides With 1 Driver</span><br>
+                <span class="stat" id="same-driver"></span>
+            </div>
         </div>
         <div class="stats-view">
             <div class="individual-stat">
@@ -67,6 +67,27 @@
                 <div id="rides-by-type"></div>
             </div>
             <br class="spacer">
+        </div>
+        <div class="stats-view">
+            <div class="individual-stat">
+                <span>Rides By City</span>
+                <div id="rides-by-city"></div>
+            </div>
+            <br class="spacer">
+            <div class="individual-stat">
+                <span>Favorite Pickup Location</span><br>
+                <span class="stat" id="fave-pickup"></span>
+            </div>
+            <br class="spacer">
+            <div class="individual-stat">
+                <span>Favorite Dropoff Location</span><br>
+                <span class="stat" id="fave-dropoff"></span>
+            </div>
+            <br class="spacer">
+            <div class="individual-stat">
+                <span># Payment Methods</span>
+                <span class="stat" id="num-payment"></span>
+            </div>
         </div>
     </div>
     <div id="export">Export</div>

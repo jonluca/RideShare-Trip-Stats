@@ -22,13 +22,19 @@ function startStatistics() {
 
   // Analysis of trips
   let totalSpent = {};
-  let totalAcrossAllCurrencies = 0;
   let tripTypes = {};
+  let driverCounts = {};
+  let cityCounts = {};
+  let pickups = {};
+  let dropoffs = {};
+
+  let totalAcrossAllCurrencies = 0;
   let surgeTrips = 0;
   let tripLengths = [];
   let canceledTrips = 0;
   let completedTrips = 0;
   let driverCanceledTrips = 0;
+
   global.trips.forEach(t => {
     if (t.clientFare) {
       if (!totalSpent.hasOwnProperty(t.currencyCode)) {
@@ -57,6 +63,31 @@ function startStatistics() {
         tripTypes[t.vehicleViewName] = 0;
       }
       tripTypes[t.vehicleViewName]++;
+    }
+
+    if (t.driverUUID) {
+      if (!driverCounts.hasOwnProperty(t.driverUUID)) {
+        driverCounts[t.driverUUID] = 0;
+      }
+      driverCounts[t.driverUUID]++;
+    }
+    if (t.cityID) {
+      if (!cityCounts.hasOwnProperty(t.cityID)) {
+        cityCounts[t.cityID] = 0;
+      }
+      cityCounts[t.cityID]++;
+    }
+    if (t.dropoffFormattedAddress) {
+      if (!dropoffs.hasOwnProperty(t.dropoffFormattedAddress)) {
+        dropoffs[t.dropoffFormattedAddress] = 0;
+      }
+      dropoffs[t.dropoffFormattedAddress]++;
+    }
+    if (t.begintripFormattedAddress) {
+      if (!pickups.hasOwnProperty(t.begintripFormattedAddress)) {
+        pickups[t.begintripFormattedAddress] = 0;
+      }
+      pickups[t.begintripFormattedAddress]++;
     }
   });
 
@@ -106,6 +137,46 @@ function startStatistics() {
   }
   $("#rides-by-type").html(rideTypesText);
 
+  let drivers = Object.keys(driverCounts);
+  drivers.sort((a, b) => {
+    return driverCounts[b] - driverCounts[a];
+  });
+
+  let favoriteDriver = global.drivers.get(drivers[0]);
+  $("#same-driver").text(`${favoriteDriver.firstname} ${favoriteDriver.lastname} - ${driverCounts[favoriteDriver.uuid]} rides`);
+
+  let cities = Object.keys(cityCounts);
+  cities.sort((a, b) => {
+    return cityCounts[b] - cityCounts[a];
+  });
+
+  let cityCountsText = '';
+  for (const key of cities) {
+    cityCountsText += `<span class="subheading">${global.cities.get(parseInt(key)).name}</span><span class="stat"> ${cityCounts[key]}</span><br>`;
+  }
+  $("#rides-by-city").html(cityCountsText);
+
+  let pickupKeys = Object.keys(pickups);
+  pickupKeys.sort((a, b) => {
+    return pickups[b] - pickups[a];
+  });
+  let max = Math.min(3, pickupKeys.length);
+  let pickupText = '';
+  for (let i = 0; i < max; i++) {
+    pickupText += `<span class="stat">${pickupKeys[i]}</span> <span class="subheading">${pickups[pickupKeys[i]]}</span><br>`;
+  }
+  $("#fave-pickup").html(pickupText);
+
+  let dropoffKeys = Object.keys(dropoffs);
+  dropoffKeys.sort((a, b) => {
+    return dropoffs[b] - dropoffs[a];
+  });
+  let maxDropoff = Math.min(3, pickupKeys.length);
+  let dropoffText = '';
+  for (let i = 0; i < maxDropoff; i++) {
+    dropoffText += `<span class="stat"> ${dropoffKeys[i]}</span> <span class="subheading">${dropoffs[dropoffKeys[i]]}</span><br>`;
+  }
+  $("#fave-dropoff").html(dropoffText);
 }
 
 function filterData() {
