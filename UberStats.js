@@ -20,6 +20,37 @@ function startAnalysis() {
     let text = $("#__CSRF_TOKEN__").text();
     csrf = text.replace(/\\u0022/g, '');
   }
+  // Insert CSS for overlay
+  $(document.head).append(`<style>
+#overlay {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 999;
+  cursor: pointer;
+}
+
+#text{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 50px;
+  color: white;
+  transform: translate(-50%,-50%);
+  -ms-transform: translate(-50%,-50%);
+  text-align: center;
+}</style>`);
+
+  // Set text to "Processing"
+  $('body').prepend(`<div id="overlay">
+  <div id="text">Processing API</div>
+</div>
+`);
   requestDataFromUber(csrf, MAX_LIMIT, 0);
 }
 
@@ -46,6 +77,8 @@ function requestDataFromUber(csrf, limit, offset) {
         let cities = contents.cities;
         let trips = contents.trips;
         if (trips.pagingResult && trips.pagingResult.hasMore) {
+          // Update text with current progress
+          $("#text").html(`Processing API <br>${trips.pagingResult.nextCursor} of ${trips.count}`);
           requestDataFromUber(csrf, MAX_LIMIT, trips.pagingResult.nextCursor);
         }
         payment.map(pm => {
@@ -78,6 +111,7 @@ function requestDataFromUber(csrf, limit, offset) {
         serialized.trips = [...global.trips];
         serialized.cities = [...global.cities];
         chrome.runtime.sendMessage({global: serialized});
+        $("#overlay").hide();
       }
     }
   });

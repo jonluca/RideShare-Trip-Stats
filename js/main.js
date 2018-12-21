@@ -142,8 +142,13 @@ function startStatistics() {
     return driverCounts[b] - driverCounts[a];
   });
 
-  let favoriteDriver = global.drivers.get(drivers[0]);
-  $("#same-driver").text(`${favoriteDriver.firstname} ${favoriteDriver.lastname} - ${driverCounts[favoriteDriver.uuid]} rides`);
+  let iterNum = Math.min(5, drivers.length);
+  let driverText = "";
+  for (let i = 0; i < iterNum; i++) {
+    let favoriteDriver = global.drivers.get(drivers[i]);
+    driverText += `<span class="subheading">${favoriteDriver.firstname} ${favoriteDriver.lastname}</span><span class="stat"> ${driverCounts[favoriteDriver.uuid]} rides</span><br>`;
+  }
+  $("#same-driver").html(driverText);
 
   let cities = Object.keys(cityCounts);
   cities.sort((a, b) => {
