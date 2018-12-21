@@ -21,13 +21,24 @@ header {
   margin-left: 50px;
 }
 
+footer {
+  position: relative;
+  bottom: 0;
+  text-align: center;
+  margin-top: 20px;
+}
+
 h1 {
   font-family: Medium, serif;
   margin-left: 50px;
-
 }
 
-.container {
+a {
+  text-decoration: none;
+  color: white;
+}
+
+.lifetime {
   margin: 10px 0px 10px 50px;
   display: flex;
 }
@@ -59,14 +70,19 @@ h1 {
   font-size: 20px;
   width: 200px;
   height: 100px;
+  line-height: 100px;
   text-transform: uppercase;
+  padding: 1px;
   color: black;
+  text-align: center;
   background-color: white;
+  border: 1px transparent;
 }
 
 #export:hover {
   color: white;
   background-color: black;
   cursor: pointer;
+  padding: 0px;
   border: 1px solid white;
 }
