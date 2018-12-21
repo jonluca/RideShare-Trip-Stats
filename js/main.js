@@ -27,6 +27,8 @@ function startStatistics() {
   let cityCounts = {};
   let pickups = {};
   let dropoffs = {};
+  let years = {};
+  let months = {};
 
   let totalAcrossAllCurrencies = 0;
   let surgeTrips = 0;
@@ -52,6 +54,7 @@ function startStatistics() {
       let lengthMs = dropoffTime.getTime() - requestTime.getTime();
       tripLengths.push(lengthMs);
       completedTrips++;
+
     } else if (t.status === "CANCELED") {
       canceledTrips++;
     } else if (t.status === "DRIVER_CANCELED") {
@@ -93,6 +96,19 @@ function startStatistics() {
       }
       pickups[t.begintripFormattedAddress]++;
     }
+    let date = new Date(t.requestTime);
+    let year = date.getFullYear();
+    let month = date.toLocaleString("en-us", {
+      month: "long"
+    });
+    if (!years.hasOwnProperty(year)) {
+      years[year] = 0;
+    }
+    years[year]++;
+    if (!months.hasOwnProperty(month)) {
+      months[month] = 0;
+    }
+    months[month]++;
   });
 
   // $ spent stats
@@ -188,6 +204,41 @@ function startStatistics() {
     dropoffText += `<span class="stat"> ${dropoffKeys[i]}</span> <span class="subheading">${dropoffs[dropoffKeys[i]]}</span><br>`;
   }
   $("#fave-dropoff").html(dropoffText);
+
+  let yearKeys = Object.keys(years);
+  yearKeys.sort((a, b) => {
+    return yearKeys[a] - yearKeys[b];
+  });
+  let yearText = '';
+  for (const key of yearKeys) {
+    yearText += `<span class="subheading">${key}</span><span class="stat"> ${years[key]}</span><br>`;
+  }
+  $("#rides-by-year").html(yearText);
+  // object which holds the order value of the month
+  var monthNames = {
+    "January": 1,
+    "February": 2,
+    "March": 3,
+    "April": 4,
+    "May": 5,
+    "June": 6,
+    "July": 7,
+    "August": 8,
+    "September": 9,
+    "October": 10,
+    "November": 11,
+    "December": 12
+  };
+
+  let monthKeys = Object.keys(months);
+  monthKeys.sort((a, b) => {
+    return monthNames[a] - monthNames[b];
+  });
+  let monthText = '';
+  for (const key of monthKeys) {
+    monthText += `<span class="subheading">${key}</span><span class="stat"> ${months[key]}</span><br>`;
+  }
+  $("#rides-by-month").html(monthText);
 }
 
 function filterData() {
