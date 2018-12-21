@@ -98,7 +98,9 @@ function startStatistics() {
   // $ spent stats
   $("#total-payment").text("$" + totalAcrossAllCurrencies.toFixed(2));
   let totalSpentText = "";
-  for (const key of Object.keys(totalSpent)) {
+  let currencyKeys = Object.keys(totalSpent);
+  currencyKeys.sort((a, b) => totalSpent[b] - totalSpent[a]);
+  for (const key of currencyKeys) {
     let currencySymbol = getSymbolFromCode(key);
     totalSpentText += `<span class="subheading">${key}</span><span class="stat"> ${currencySymbol + totalSpent[key].toFixed(2)}</span><br>`;
   }
