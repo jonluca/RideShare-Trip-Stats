@@ -422,7 +422,7 @@ function addDistanceChart() {
       datasets: [{
         label: "Total Traveled",
         data: finalCounts,
-        fill: false,
+        fill: true,
         borderColor: 'black'
 
       }]
@@ -491,9 +491,8 @@ function addPriceChart() {
       datasets: [{
         label: "Total Spent (Aggregate, no currency conversion)",
         data: finalCounts,
-        fill: false,
+        fill: true,
         borderColor: 'black'
-
       }]
     },
     options: {
