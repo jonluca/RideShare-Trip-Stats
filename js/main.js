@@ -48,6 +48,7 @@ function calculateMoneySpent() {
   }
   $("#total-spent").html(totalSpentText);
   $("#average-price").text("$" + (totalAcrossAllCurrencies / completedTrips).toFixed(2));
+  addPriceChart();
 }
 
 function calculateTripTypesStat() {
@@ -456,6 +457,75 @@ function addDistanceChart() {
     }
   });
   $("#distance-chart").css('background-color', 'white');
+  window.chart = chart;
+  chart.render();
+
+}
+
+function addPriceChart() {
+  const ctx = document.getElementById("price-chart").getContext('2d');
+  let data = {};
+  global.trips.forEach(t => {
+    if (t && t.clientFare) {
+      let requestTime = new Date(t.requestTime);
+      if (!data.hasOwnProperty(requestTime.getTime())) {
+        let price = parseFloat(t.clientFare);
+        data[requestTime.getTime()] = price;
+      }
+    }
+  });
+  const times = Object.keys(data);
+  times.sort((a, b) => a - b);
+  let finalCounts = [];
+  let totalSpent = 0;
+  for (const key of times) {
+    totalSpent += data[key];
+    finalCounts.push({
+      x: new Date(parseInt(key)),
+      y: totalSpent
+    });
+  }
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      datasets: [{
+        label: "Total Spent (Aggregate, no currency conversion)",
+        data: finalCounts,
+        fill: false,
+        borderColor: 'black'
+
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      title: {
+        display: true,
+        text: "Total Spent"
+      },
+      scales: {
+        xAxes: [{
+          type: "time",
+          time: {
+            unit: 'month'
+          },
+          display: true,
+          scaleLabel: {
+            display: true,
+            labelString: 'Date'
+          }
+        }],
+        yAxes: [{
+          display: true,
+          scaleLabel: {
+            display: true,
+            labelString: 'value'
+          }
+        }]
+      }
+    }
+  });
+  $("#price-chart").css('background-color', 'white');
   window.chart = chart;
   chart.render();
 
