@@ -215,7 +215,7 @@ function startStatistics() {
   }
   $("#rides-by-year").html(yearText);
   // object which holds the order value of the month
-  var monthNames = {
+  const monthNames = {
     "January": 1,
     "February": 2,
     "March": 3,
@@ -239,9 +239,84 @@ function startStatistics() {
     monthText += `<span class="subheading">${key}</span><span class="stat"> ${months[key]}</span><br>`;
   }
   $("#rides-by-month").html(monthText);
+
+  addChart();
 }
 
-function filterData() {
+function addChart() {
+  const ctx = document.getElementById("rides-chart").getContext('2d');
+  let data = {};
+  global.trips.forEach(t => {
+    let requestTime = new Date(t.requestTime);
+    let lowerBound = new Date(requestTime.getFullYear(), requestTime.getMonth(), 1);
+    if (!data.hasOwnProperty(lowerBound.getTime())) {
+      data[lowerBound.getTime()] = 0;
+    }
+    data[lowerBound.getTime()]++;
+  });
+  const times = Object.keys(data);
+  times.sort((a, b) => a - b);
+  let finalCounts = [];
+  for (const key of times) {
+    finalCounts.push({
+      x: new Date(parseInt(key)),
+      y: data[key]
+    });
+
+  }
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      datasets: [{
+        label: "Rides Taken",
+        data: finalCounts,
+        fill: false,
+        borderColor: 'black'
+
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      title: {
+        display: true,
+        text: "Chart.js Time Point Data"
+      },
+      scales: {
+        xAxes: [{
+          type: "time",
+          time: {
+            unit: 'month'
+          },
+          display: true,
+          scaleLabel: {
+            display: true,
+            labelString: 'Date'
+          }
+        }],
+        yAxes: [{
+          display: true,
+          scaleLabel: {
+            display: true,
+            labelString: 'value'
+          }
+        }]
+      },
+      tooltips: {
+        enabled: true,
+        mode: 'single',
+        callbacks: {
+          title: function (tooltipItem, data) {
+            return tooltipItem[0].xLabel.replace("1, ", "");
+
+          }
+        }
+      }
+    }
+  });
+  $("#rides-chart").css('background-color', 'white');
+  window.chart = chart;
+  chart.render();
 
 }
 
