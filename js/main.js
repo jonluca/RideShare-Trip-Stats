@@ -281,12 +281,13 @@ function startStatistics() {
       distanceText += `<span class="subheading">${key}</span><span class="stat"> ${distances[key].toFixed(2)}</span><br>`;
     }
     $("#distances").html(distanceText);
+    addDistanceChart();
   }
 
-  addChart();
+  addNumTripsChart();
 }
 
-function addChart() {
+function addNumTripsChart() {
   const ctx = document.getElementById("rides-chart").getContext('2d');
   let data = {};
   global.trips.forEach(t => {
@@ -357,6 +358,74 @@ function addChart() {
     }
   });
   $("#rides-chart").css('background-color', 'white');
+  window.chart = chart;
+  chart.render();
+
+}
+
+function addDistanceChart() {
+  const ctx = document.getElementById("distance-chart").getContext('2d');
+  let data = {};
+  global.trips.forEach(t => {
+    if (t && t.receipt) {
+      let requestTime = new Date(t.requestTime);
+      if (!data.hasOwnProperty(requestTime.getTime())) {
+        data[requestTime.getTime()] = parseFloat(t.receipt.distance);
+      }
+    }
+  });
+  const times = Object.keys(data);
+  times.sort((a, b) => a - b);
+  let finalCounts = [];
+  let distanceTraveled = 0;
+  for (const key of times) {
+    distanceTraveled += data[key];
+    finalCounts.push({
+      x: new Date(parseInt(key)),
+      y: distanceTraveled
+    });
+  }
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      datasets: [{
+        label: "Distance Traveled as of",
+        data: finalCounts,
+        fill: false,
+        borderColor: 'black'
+
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      title: {
+        display: true,
+        text: "Total Distance Traveled"
+      },
+      scales: {
+        xAxes: [{
+          type: "time",
+          time: {
+            unit: 'month'
+          },
+          display: true,
+          scaleLabel: {
+            display: true,
+            labelString: 'Date'
+          }
+        }],
+        yAxes: [{
+          display: true,
+          scaleLabel: {
+            display: true,
+            labelString: 'value'
+          }
+        }]
+      }
+    }
+  });
+  $("#distance-chart").css('background-color', 'white');
   window.chart = chart;
   chart.render();
 

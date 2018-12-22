@@ -89,10 +89,11 @@ a {
   border: 1px solid white;
 }
 
-#chart-container {
+.chart-container {
   width: 1000px;
   height: 600px;
   margin: 0 auto;
+  padding: 20px;
 }
 
 .hidden {
