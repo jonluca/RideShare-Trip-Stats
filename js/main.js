@@ -211,7 +211,14 @@ function calculateMonthAndYearStats() {
     months[month]++;
   });
 
-  let yearText = constructTextSpan(years);
+  let yearKeys = Object.keys(years);
+  yearKeys.sort((a, b) => {
+    return yearKeys[a] - yearKeys[b];
+  });
+  let yearText = '';
+  for (const key of yearKeys) {
+    yearText += `<span class="subheading">${key}</span><span class="stat"> ${years[key]}</span><br>`;
+  }
   $("#rides-by-year").html(yearText);
   // object which holds the order value of the month
   const monthNames = {
