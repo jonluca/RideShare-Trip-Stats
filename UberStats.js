@@ -57,10 +57,10 @@ function startAnalysis() {
   <div id="text">Processing API</div>
 </div>
 `);
-  requestDataFromUber(csrf, MAX_LIMIT, 0);
+  requestDataFromUber(csrf, MAX_LIMIT, 0, true);
 }
 
-function requestDataFromUber(csrf, limit, offset) {
+function requestDataFromUber(csrf, limit, offset, isFirst) {
   ++requestsActive;
   $.ajax({
     method: 'POST',
@@ -82,10 +82,13 @@ function requestDataFromUber(csrf, limit, offset) {
         let drivers = contents.drivers;
         let cities = contents.cities;
         let trips = contents.trips;
-        if (trips.pagingResult && trips.pagingResult.hasMore) {
+        if (trips.pagingResult && trips.pagingResult.hasMore && isFirst) {
           // Update text with current progress
-          $("#text").html(`Processing API <br>${trips.pagingResult.nextCursor} of ${trips.count}`);
-          requestDataFromUber(csrf, MAX_LIMIT, trips.pagingResult.nextCursor);
+          let next = MAX_LIMIT;
+          while (next < trips.count) {
+            requestDataFromUber(csrf, MAX_LIMIT, next, false);
+            next += MAX_LIMIT;
+          }
         }
         payment.map(pm => {
           if (!global.payment.get(pm.uuid)) {
@@ -100,6 +103,7 @@ function requestDataFromUber(csrf, limit, offset) {
         trips.trips.map(t => {
           if (!global.trips.get(t.uuid)) {
             global.trips.set(t.uuid, t);
+            $("#text").html(`Processing API <br>${global.trips.size} of ${trips.count}`);
           }
         });
         cities.map(c => {
