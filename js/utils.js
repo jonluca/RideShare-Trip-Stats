@@ -46,3 +46,30 @@ function convertArrayOfObjectsToCSV(args) {
 function uppercaseFirst(txt) {
   return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
 }
+
+function constructTextSpan(obj, reverseSort = false, numText) {
+  let keys = getSortedKeysFromObject(obj, reverseSort);
+  let text = '';
+  if (numText) {
+    let iterNum = Math.min(numText, keys.length);
+    for (let i = 0; i < iterNum; i++) {
+      text += `<span class="subheading">${keys[i]}</span><span class="stat"> ${obj[keys[i]]}</span><br>`;
+    }
+  } else {
+    for (const key of keys) {
+      text += `<span class="subheading">${key}</span><span class="stat"> ${obj[key]}</span><br>`;
+    }
+  }
+  return text;
+}
+
+function getSortedKeysFromObject(obj, reverse = false) {
+  let keys = Object.keys(obj);
+  if (reverse) {
+    keys.sort((a, b) => obj[b] - obj[a]);
+  } else {
+    keys.sort((a, b) => obj[a] - obj[b]);
+  }
+
+  return keys;
+}
