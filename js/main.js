@@ -369,7 +369,11 @@ function addDistanceChart() {
     if (t && t.receipt) {
       let requestTime = new Date(t.requestTime);
       if (!data.hasOwnProperty(requestTime.getTime())) {
-        data[requestTime.getTime()] = parseFloat(t.receipt.distance);
+        let distance = parseFloat(t.receipt.distance);
+        if (t.receipt.distance_label_short === "km") {
+          distance /= 0.62137119; // convert km to miles
+        }
+        data[requestTime.getTime()] = distance;
       }
     }
   });
@@ -388,7 +392,7 @@ function addDistanceChart() {
     type: 'line',
     data: {
       datasets: [{
-        label: "Distance Traveled as of",
+        label: "Total Traveled",
         data: finalCounts,
         fill: false,
         borderColor: 'black'
@@ -400,7 +404,7 @@ function addDistanceChart() {
       maintainAspectRatio: false,
       title: {
         display: true,
-        text: "Total Distance Traveled"
+        text: "Total Distance Traveled (miles)"
       },
       scales: {
         xAxes: [{
