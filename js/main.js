@@ -1,5 +1,4 @@
 let global = {};
-let filtered = {};
 
 $(_ => {
   chrome.runtime.sendMessage({requestData: true}, function (response) {
@@ -278,7 +277,7 @@ function startStatistics() {
     });
     let distanceText = '';
     for (const key of distanceKeys) {
-      distanceText += `<span class="subheading">${key}</span><span class="stat"> ${distances[key].toFixed(2)}</span><br>`;
+      distanceText += `<span class="subheading">${uppercaseFirst(key)}</span><span class="stat"> ${distances[key].toFixed(2)}</span><br>`;
     }
     $("#distances").html(distanceText);
     addDistanceChart();
