@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="../css/main.css"/>
     <script src="../js/libs/jquery.js"></script>
     <script src="../js/libs/Chart.js"></script>
+    <script src="../js/utils.js"></script>
     <script src="../js/currencies.js"></script>
     <script src="../js/main.js"></script>
 </head>
@@ -90,6 +91,17 @@
             </div>
             <br class="spacer">
             <div class="individual-stat">
+                <span>Distances</span>
+                <div id="distances"></div>
+            </div>
+        </div>
+        <div class="stats-view hidden">
+            <div class="individual-stat">
+                <span>Most Popular Cars</span>
+                <div id="rides-by-car"></div>
+            </div>
+            <br class="spacer">
+            <div class="individual-stat">
                 <span>Favorite Pickup Location</span><br>
                 <span class="stat" id="fave-pickup"></span>
             </div>
@@ -103,7 +115,7 @@
     <div id="chart-container">
         <canvas id="rides-chart" width="400" height="400"></canvas>
     </div>
-    <div id="export">Export</div>
+    <div class="button" id="export">Export</div>
 </div>
 <footer>&copy; 2019 JonLuca DeCaro - <a href="https://github.com/jonluca/Uber-Trip-Stats">View Source</a></footer>
 </body>

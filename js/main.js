@@ -29,6 +29,8 @@ function startStatistics() {
   let dropoffs = {};
   let years = {};
   let months = {};
+  let distances = {};
+  let carMakes = {};
 
   let totalAcrossAllCurrencies = 0;
   let surgeTrips = 0;
@@ -109,6 +111,19 @@ function startStatistics() {
       months[month] = 0;
     }
     months[month]++;
+
+    if (t.receipt) {
+      let receipt = t.receipt;
+      if (!distances.hasOwnProperty(receipt.distance_label)) {
+        distances[receipt.distance_label] = 0;
+      }
+      distances[receipt.distance_label] += parseFloat(receipt.distance);
+
+      if (!carMakes.hasOwnProperty(receipt.car_make)) {
+        carMakes[receipt.car_make] = 0;
+      }
+      carMakes[receipt.car_make]++;
+    }
   });
 
   // $ spent stats
@@ -240,6 +255,34 @@ function startStatistics() {
   }
   $("#rides-by-month").html(monthText);
 
+  let carMakeKeys = Object.keys(carMakes);
+  if (carMakeKeys.length) {
+    $(".hidden").removeClass("hidden");
+    carMakeKeys.sort((a, b) => {
+      return carMakes[b] - carMakes[a];
+    });
+    let carText = '';
+    let iter = Math.min(3, carMakeKeys.length);
+    for (let i = 0; i < iter; i++) {
+      carText += `<span class="subheading">${carMakeKeys[i]}</span><span class="stat"> ${carMakes[carMakeKeys[i]]}</span><br>`;
+
+    }
+    $("#rides-by-car").html(carText);
+  }
+
+  let distanceKeys = Object.keys(distances);
+  if (distanceKeys.length) {
+    $(".hidden").removeClass("hidden");
+    distanceKeys.sort((a, b) => {
+      return distances[b] - distances[a];
+    });
+    let distanceText = '';
+    for (const key of distanceKeys) {
+      distanceText += `<span class="subheading">${key}</span><span class="stat"> ${distances[key].toFixed(2)}</span><br>`;
+    }
+    $("#distances").html(distanceText);
+  }
+
   addChart();
 }
 
@@ -280,7 +323,7 @@ function addChart() {
       maintainAspectRatio: false,
       title: {
         display: true,
-        text: "Chart.js Time Point Data"
+        text: "Rides by Month"
       },
       scales: {
         xAxes: [{
@@ -308,7 +351,6 @@ function addChart() {
         callbacks: {
           title: function (tooltipItem, data) {
             return tooltipItem[0].xLabel.replace("1, ", "");
-
           }
         }
       }
@@ -336,50 +378,4 @@ function registerClickHandlers() {
     hiddenElement.download = 'trips.csv';
     hiddenElement.click();
   });
-}
-
-function convertArrayOfObjectsToCSV(args) {
-  let result,
-    ctr,
-    keys,
-    columnDelimiter,
-    lineDelimiter,
-    data;
-
-  data = args.data || null;
-  if (data == null || !data.length) {
-    return null;
-  }
-
-  columnDelimiter = args.columnDelimiter || ',';
-  lineDelimiter = args.lineDelimiter || '\n';
-
-  keys = Object.keys(data[0]);
-
-  result = '';
-  result += keys.join(columnDelimiter);
-  result += lineDelimiter;
-
-  data.forEach(function (item) {
-    ctr = 0;
-    keys.forEach(function (key) {
-      if (ctr > 0) {
-        result += columnDelimiter;
-      }
-      let val = item[key];
-      if (val && typeof (val) === "string") {
-        val = val.replace(/,/g, '-');
-        val = val.normalize("NFKD").replace(/[^\w]/g, '');
-      }
-      result += val;
-      ctr++;
-    });
-    result += lineDelimiter;
-  });
-
-  return result;
-}
-
-function uppercaseFirst(txt) {
-  return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
 }

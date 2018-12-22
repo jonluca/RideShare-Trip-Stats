@@ -10,6 +10,7 @@ var csrf = null;
 var requestsActive = 0;
 var MAX_LIMIT = 50;
 var TRIPS_ENDPOINT = 'https://riders.uber.com/api/getTripsForClient';
+var TRIP_ENDPOINT = 'https://riders.uber.com/api/getTrip';
 
 $(_ => {
   if (window.location.hostname !== "riders.uber.com") {
@@ -112,7 +113,73 @@ function requestDataFromUber(csrf, limit, offset, isFirst) {
           }
         });
       }
+      completeOriginalAPI();
+    },
+    error: function (xhr, ajaxOptions, thrownError) {
+      completeOriginalAPI();
+    }
+  });
+}
+
+function completeOriginalAPI() {
+  --requestsActive;
+  if (requestsActive === 0) {
+    // Once all requests have completed, trigger a new tab and send the data
+    let serialized = {};
+    serialized.payment = [...global.payment];
+    serialized.drivers = [...global.drivers];
+    serialized.trips = [...global.trips];
+    serialized.cities = [...global.cities];
+    if (confirm("Request individual trip data (split fares, distance, etc)? Note: Takes significantly longer!")) {
+      requestAllTripInfo();
+    } else {
+      chrome.runtime.sendMessage({global: serialized});
+      $("#overlay").hide();
+    }
+  }
+}
+
+function requestAllTripInfo() {
+  let uuids = global.trips.keys();
+  for (const uuid of uuids) {
+    requestIndividualTripInfo(uuid);
+  }
+}
+
+function requestIndividualTripInfo(tripUUID) {
+  ++requestsActive;
+  $.ajax({
+    method: 'POST',
+    url: TRIP_ENDPOINT,
+    data: {
+      "tripUUID": tripUUID
+    },
+    headers: {"x-csrf-token": csrf},
+    type: 'json',
+    success(response, textStatus, jqXHR) {
+      if (response && response.data) {
+        let contents = response.data;
+        let trip = global.trips.get(tripUUID);
+        trip.tripMap = contents.tripMap;
+        trip.receipt = contents.receipt;
+        global.trips.set(tripUUID, trip);
+      }
       --requestsActive;
+      $("#text").html(`Requests Left <br>${requestsActive} of ${global.trips.size}`);
+      if (requestsActive === 0) {
+        // Once all requests have completed, trigger a new tab and send the data
+        let serialized = {};
+        serialized.payment = [...global.payment];
+        serialized.drivers = [...global.drivers];
+        serialized.trips = [...global.trips];
+        serialized.cities = [...global.cities];
+        chrome.runtime.sendMessage({global: serialized});
+        $("#overlay").hide();
+      }
+    },
+    error: function (xhr, ajaxOptions, thrownError) {
+      --requestsActive;
+      $("#text").html(`Requests Left <br>${requestsActive} of ${global.trips.size}`);
       if (requestsActive === 0) {
         // Once all requests have completed, trigger a new tab and send the data
         let serialized = {};

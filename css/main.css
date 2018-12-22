@@ -66,7 +66,7 @@ a {
   color: white;
 }
 
-#export {
+.button {
   margin: 0 auto;
   font-size: 20px;
   width: 200px;
@@ -81,7 +81,7 @@ a {
   border: 1px transparent;
 }
 
-#export:hover {
+.button:hover {
   color: white;
   background-color: black;
   cursor: pointer;
@@ -93,4 +93,8 @@ a {
   width: 1000px;
   height: 600px;
   margin: 0 auto;
+}
+
+.hidden {
+  display: none;
 }
