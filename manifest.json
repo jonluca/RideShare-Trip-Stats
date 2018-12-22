@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Uber Trip Stats",
   "description": "Analyzes your uber profile to show statistics on your rides!",
-  "version": "0.1",
+  "version": "1.0",
   "permissions": [
     "*://uber.com/*",
     "*://*.uber.com/*",
