@@ -1,5 +1,8 @@
 // Make all global variables "var" so that they can be redeclared upon multiple executions of the script
 var global = {};
+var s = document.createElement('script');
+s.src = chrome.extension.getURL('js/libs/jquery.js');
+(document.head || document.documentElement).appendChild(s);
 
 global.payment = new Map();
 global.drivers = new Map();
@@ -130,7 +133,7 @@ function completeOriginalAPI() {
     serialized.drivers = [...global.drivers];
     serialized.trips = [...global.trips];
     serialized.cities = [...global.cities];
-    if (confirm("Request individual trip data (split fares, distance, etc)? Note: Takes significantly longer!")) {
+    if (confirm("Request individual trip data (split fares, distance, etc)? Note: Takes significantly longer! Clicking Cancel will still show you most stats.")) {
       requestAllTripInfo();
     } else {
       chrome.runtime.sendMessage({global: serialized});
