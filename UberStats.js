@@ -119,6 +119,10 @@ function requestDataFromUber(csrf, limit, offset, isFirst) {
       completeOriginalAPI();
     },
     error: function (xhr, ajaxOptions, thrownError) {
+      if (isFirst) {
+        alert("Please sign in and click UberStats icon again!");
+        return;
+      }
       completeOriginalAPI();
     }
   });
