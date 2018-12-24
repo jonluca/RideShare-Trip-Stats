@@ -57,10 +57,7 @@ function startAnalysis() {
 }</style>`);
 
   // Set text to "Processing"
-  $('body').prepend(`<div id="overlay">
-  <div id="text">Processing API</div>
-</div>
-`);
+  $('body').prepend(`<div id="overlay"><div id="text">Processing API</div></div>`);
   requestDataFromUber(csrf, MAX_LIMIT, 0, true);
 }
 
