@@ -133,15 +133,15 @@ function completeOriginalAPI() {
   --requestsActive;
   if (requestsActive === 0) {
     $("#overlay").hide();
-    // Once all requests have completed, trigger a new tab and send the data
-    let serialized = {};
-    serialized.payment = [...global.payment];
-    serialized.drivers = [...global.drivers];
-    serialized.trips = [...global.trips];
-    serialized.cities = [...global.cities];
     if (confirm("Request individual trip data (split fares, distance, etc)? Note: Takes significantly longer! Clicking Cancel will still show you most stats.")) {
       requestAllTripInfo();
     } else {
+      // Once all requests have completed, trigger a new tab and send the data
+      let serialized = {};
+      serialized.payment = [...global.payment];
+      serialized.drivers = [...global.drivers];
+      serialized.trips = [...global.trips];
+      serialized.cities = [...global.cities];
       chrome.runtime.sendMessage({global: serialized});
       $("#overlay").hide();
     }
@@ -169,36 +169,30 @@ function requestIndividualTripInfo(tripUUID) {
       if (response && response.data) {
         let contents = response.data;
         let trip = global.trips.get(tripUUID);
+        // Add new information to original trip and save back into global trip map
         trip.tripMap = contents.tripMap;
         trip.receipt = contents.receipt;
         global.trips.set(tripUUID, trip);
       }
-      --requestsActive;
-      $("#text").html(`Requests Left <br>${requestsActive} of ${global.trips.size}`);
-      if (requestsActive === 0) {
-        // Once all requests have completed, trigger a new tab and send the data
-        let serialized = {};
-        serialized.payment = [...global.payment];
-        serialized.drivers = [...global.drivers];
-        serialized.trips = [...global.trips];
-        serialized.cities = [...global.cities];
-        chrome.runtime.sendMessage({global: serialized});
-        $("#overlay").hide();
-      }
+      updateIndividualTripInfo();
     },
     error: function (xhr, ajaxOptions, thrownError) {
-      --requestsActive;
-      $("#text").html(`Requests Left <br>${requestsActive} of ${global.trips.size}`);
-      if (requestsActive === 0) {
-        // Once all requests have completed, trigger a new tab and send the data
-        let serialized = {};
-        serialized.payment = [...global.payment];
-        serialized.drivers = [...global.drivers];
-        serialized.trips = [...global.trips];
-        serialized.cities = [...global.cities];
-        chrome.runtime.sendMessage({global: serialized});
-        $("#overlay").hide();
-      }
+      updateIndividualTripInfo();
     }
   });
+}
+
+function updateIndividualTripInfo() {
+  --requestsActive;
+  $("#text").html(`Requests Left <br>${requestsActive} of ${global.trips.size}`);
+  if (requestsActive === 0) {
+    // Once all requests have completed, trigger a new tab and send the data
+    let serialized = {};
+    serialized.payment = [...global.payment];
+    serialized.drivers = [...global.drivers];
+    serialized.trips = [...global.trips];
+    serialized.cities = [...global.cities];
+    chrome.runtime.sendMessage({global: serialized});
+    $("#overlay").hide();
+  }
 }
