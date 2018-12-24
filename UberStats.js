@@ -64,7 +64,7 @@ function startAnalysis() {
   requestDataFromUber(csrf, MAX_LIMIT, 0, true);
 }
 
-function requestDataFromUber(csrf, limit, offset, isFirst) {
+function requestDataFromUber(csrf, limit, offset, isFirstRun) {
   ++requestsActive;
   $.ajax({
     method: 'POST',
@@ -86,8 +86,8 @@ function requestDataFromUber(csrf, limit, offset, isFirst) {
         let drivers = contents.drivers;
         let cities = contents.cities;
         let trips = contents.trips;
-        if (trips.pagingResult && trips.pagingResult.hasMore && isFirst) {
-          // Update text with current progress
+        if (trips.pagingResult && trips.pagingResult.hasMore && isFirstRun) {
+          // Request all results in increments of MAX_LIMIT until we've reached the total amount of trips
           let next = MAX_LIMIT;
           while (next < trips.count) {
             requestDataFromUber(csrf, MAX_LIMIT, next, false);
@@ -119,7 +119,8 @@ function requestDataFromUber(csrf, limit, offset, isFirst) {
       completeOriginalAPI();
     },
     error: function (xhr, ajaxOptions, thrownError) {
-      if (isFirst) {
+      if (isFirstRun) {
+        $("#overlay").hide();
         alert("Please sign in and click UberStats icon again!");
         return;
       }
@@ -131,6 +132,7 @@ function requestDataFromUber(csrf, limit, offset, isFirst) {
 function completeOriginalAPI() {
   --requestsActive;
   if (requestsActive === 0) {
+    $("#overlay").hide();
     // Once all requests have completed, trigger a new tab and send the data
     let serialized = {};
     serialized.payment = [...global.payment];
