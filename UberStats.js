@@ -77,7 +77,9 @@ function requestDataFromUber(csrf, limit, offset, isFirstRun) {
         "toTime": null
       }
     },
-    headers: {"x-csrf-token": csrf},
+    headers: {
+      "x-csrf-token": csrf
+    },
     type: 'json',
     success(response, textStatus, jqXHR) {
       if (response && response.data) {
@@ -116,7 +118,7 @@ function requestDataFromUber(csrf, limit, offset, isFirstRun) {
           }
         });
       }
-      completeOriginalAPI();
+      checkIfCompleteOriginalAPI();
     },
     error: function (xhr, ajaxOptions, thrownError) {
       if (isFirstRun) {
@@ -124,12 +126,12 @@ function requestDataFromUber(csrf, limit, offset, isFirstRun) {
         alert("Please sign in and click UberStats icon again!");
         return;
       }
-      completeOriginalAPI();
+      checkIfCompleteOriginalAPI();
     }
   });
 }
 
-function completeOriginalAPI() {
+function checkIfCompleteOriginalAPI() {
   --requestsActive;
   if (requestsActive === 0) {
     $("#overlay").hide();
@@ -163,7 +165,9 @@ function requestIndividualTripInfo(tripUUID) {
     data: {
       "tripUUID": tripUUID
     },
-    headers: {"x-csrf-token": csrf},
+    headers: {
+      "x-csrf-token": csrf
+    },
     type: 'json',
     success(response, textStatus, jqXHR) {
       if (response && response.data) {
@@ -174,15 +178,15 @@ function requestIndividualTripInfo(tripUUID) {
         trip.receipt = contents.receipt;
         global.trips.set(tripUUID, trip);
       }
-      updateIndividualTripInfo();
+      checkIfCompleteAdditionalTripInfo();
     },
     error: function (xhr, ajaxOptions, thrownError) {
-      updateIndividualTripInfo();
+      checkIfCompleteAdditionalTripInfo();
     }
   });
 }
 
-function updateIndividualTripInfo() {
+function checkIfCompleteAdditionalTripInfo() {
   --requestsActive;
   $("#text").html(`Requests Left <br>${requestsActive} of ${global.trips.size}`);
   if (requestsActive === 0) {
