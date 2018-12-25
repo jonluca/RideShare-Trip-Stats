@@ -325,16 +325,18 @@ function addNumTripsChart() {
     }
     data[lowerBound.getTime()]++;
   });
-  const times = Object.keys(data);
-  times.sort((a, b) => a - b);
+
+ 
+  
+
   let finalCounts = [];
   for (const key of times) {
     finalCounts.push({
       x: new Date(parseInt(key)),
       y: data[key]
     });
-
   }
+
   const chart = new Chart(ctx, {
     type: 'line',
     data: {
