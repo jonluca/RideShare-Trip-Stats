@@ -326,9 +326,6 @@ function addNumTripsChart() {
     data[lowerBound.getTime()]++;
   });
 
- 
-  
-
   let finalCounts = [];
   for (const key of times) {
     finalCounts.push({
@@ -387,7 +384,6 @@ function addNumTripsChart() {
     }
   });
   $("#rides-chart").css('background-color', 'white');
-  window.chart = chart;
   chart.render();
 
 }
@@ -459,7 +455,6 @@ function addDistanceChart() {
     }
   });
   $("#distance-chart").css('background-color', 'white');
-  window.chart = chart;
   chart.render();
 
 }
@@ -527,7 +522,6 @@ function addPriceChart() {
     }
   });
   $("#price-chart").css('background-color', 'white');
-  window.chart = chart;
   chart.render();
 
 }
