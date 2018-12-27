@@ -11,6 +11,26 @@ $(_ => {
   });
 });
 
+function startStatistics() {
+  console.log(global);
+
+  addTotalRidesStat();
+  addTotalPaymentMethodsStat();
+
+  calculateMoneySpent();
+  calculateTripTypesStat();
+  calculateTripCompletionStats();
+  calculateTripLengthsStat();
+  calculateDriverStats();
+  calculateCityStats();
+  calculatePickupAndDropoffStats();
+  calculateMonthAndYearStats();
+  calculateDistanceStats();
+  calculateCarMakeStats();
+
+  addNumTripsChart();
+}
+
 function addTotalRidesStat() {
   // Total # trips
   $("#total-rides").text(global.trips.size);
@@ -295,31 +315,12 @@ function calculateCarMakeStats() {
   }
 }
 
-function startStatistics() {
-  console.log(global);
-
-  addTotalRidesStat();
-  addTotalPaymentMethodsStat();
-
-  calculateMoneySpent();
-  calculateTripTypesStat();
-  calculateTripCompletionStats();
-  calculateTripLengthsStat();
-  calculateDriverStats();
-  calculateCityStats();
-  calculatePickupAndDropoffStats();
-  calculateMonthAndYearStats();
-  calculateDistanceStats();
-  calculateCarMakeStats();
-
-  addNumTripsChart();
-}
-
 function addNumTripsChart() {
   const ctx = document.getElementById("rides-chart").getContext('2d');
   let data = {};
   global.trips.forEach(t => {
     let requestTime = new Date(t.requestTime);
+    // Get date that is first of the month to provide lower bound
     let lowerBound = new Date(requestTime.getFullYear(), requestTime.getMonth(), 1);
     if (!data.hasOwnProperty(lowerBound.getTime())) {
       data[lowerBound.getTime()] = 0;
@@ -328,8 +329,9 @@ function addNumTripsChart() {
   });
   let times = Object.keys(data);
   times.sort((a, b) => a - b);
-
+  // Fill in 0s for months with no rides
   if (times && times.length) {
+    // Month of first uber ride ever
     let monthToCheck = new Date(parseInt(times[0]));
     let now = new Date();
     while (monthToCheck < now) {
@@ -339,6 +341,7 @@ function addNumTripsChart() {
       monthToCheck = monthToCheck.next().month();
     }
   }
+  // Get the keys again, as we might've just added some 0 months
   times = Object.keys(data);
   times.sort((a, b) => a - b);
   let finalCounts = [];

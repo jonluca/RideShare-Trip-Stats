@@ -132,7 +132,11 @@ function getSymbolFromCode(code) {
 
 function getCurrencyConversionIfExists(code, currencyAmount) {
   if (typeof (currencyAmount) !== "number") {
-    currencyAmount = parseFloat(currencyAmount);
+    try {
+      currencyAmount = parseFloat(currencyAmount);
+    } catch (e) {
+      return 0; // Failed to parse number, bail and return 0 as exchange
+    }
   }
 
   if (!currencyConversionToUSD || !currencyConversionToUSD.rates) {
@@ -143,6 +147,6 @@ function getCurrencyConversionIfExists(code, currencyAmount) {
     let exchangeToUSD = currencyConversionToUSD.rates[code];
     return exchangeToUSD * currencyAmount;
   }
-  return currencyAmount;
+  return 0; // return nothing if we weren't able to convert
 
 }
