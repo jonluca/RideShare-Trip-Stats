@@ -1,4 +1,6 @@
-# Uber-Trip-Stats
+# UberStats
+
+[Live version on Chrome Web Store](https://chrome.google.com/webstore/detail/uber-trip-stats/kddlnbejbpknoedebeojobofnbdfhpnm)
 
 ![logo](images/icon500.png)
 
