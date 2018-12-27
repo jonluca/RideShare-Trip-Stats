@@ -90,7 +90,7 @@ function calculateTripLengthsStat() {
   let totalTime = tripLengths.reduce((a, b) => a + b, 0);
   totalTimeText += `<span class="subheading">Seconds</span><span class="stat"> ${Math.round(totalTime /= 1000)}</span><br>`;
   if (totalTime > 60) {
-    totalTimeText += `<span class="subheading">Minutes</span><span class="stat"> ${Math.round(totalTime /= 60)}</span><br>`;
+    totalTimeText += `<span class="subheading">Minutes</span><span id="minutes" class="stat"> ${Math.round(totalTime /= 60)}</span><br>`;
   }
   if (totalTime > 60) {
     totalTimeText += `<span class="subheading">Hours</span><span class="stat"> ${Math.round(totalTime /= 60)}</span><br>`;
@@ -555,5 +555,16 @@ function registerClickHandlers() {
     hiddenElement.target = '_blank';
     hiddenElement.download = 'trips.csv';
     hiddenElement.click();
+  });
+
+  $("#share").click(e => {
+    let minutes = $("#minutes").text();
+    if (minutes) {
+      minutes = minutes.trim();
+    }
+    let numUbers = global.trips.size;
+    let text = `I've taken ${numUbers} Ubers, and have spent ${minutes} minutes in Ubers! Check out your numbers using UberStats by @jonlucadecaro here: `;
+    window.open("https://twitter.com/share?url=https://chrome.google.com/webstore/detail/uber-trip-stats/kddlnbejbpknoedebeojobofnbdfhpnm&text=" + encodeURIComponent(text), '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');
+    return false;
   });
 }

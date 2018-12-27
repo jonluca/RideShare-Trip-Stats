@@ -66,17 +66,24 @@ a {
   color: white;
 }
 
-.button {
+.buttons {
+  display: flex;
+  width: 500px;
   margin: 0 auto;
+}
+
+.button {
   font-size: 20px;
   width: 200px;
   height: 100px;
   line-height: 100px;
+  flex: 1 1 auto;
   text-transform: uppercase;
   padding: 1px;
-  margin-top: 20px;
+  margin: 20px 5px 5px;
   color: black;
   text-align: center;
+  display: inline-block;
   background-color: white;
   border: 1px transparent;
 }
