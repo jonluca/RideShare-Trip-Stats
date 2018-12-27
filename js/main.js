@@ -31,7 +31,8 @@ function calculateMoneySpent() {
         totalSpent[t.currencyCode] = 0;
       }
       totalSpent[t.currencyCode] += t.clientFare;
-      totalAcrossAllCurrencies += t.clientFare;
+
+      totalAcrossAllCurrencies += getCurrencyConversionIfExists(t.currencyCode, t.clientFare);
     }
     if (t.status === "COMPLETED") {
       completedTrips++;
@@ -39,7 +40,7 @@ function calculateMoneySpent() {
   });
 
   // $ spent stats
-  $("#total-payment").text("$" + totalAcrossAllCurrencies.toFixed(2));
+  $("#total-payment").text("~$" + totalAcrossAllCurrencies.toFixed(2));
   let totalSpentText = "";
   let currencyKeys = getSortedKeysFromObject(totalSpent, true);
   for (const key of currencyKeys) {
@@ -47,7 +48,7 @@ function calculateMoneySpent() {
     totalSpentText += `<span class="subheading">${key}</span><span class="stat"> ${currencySymbol + totalSpent[key].toFixed(2)}</span><br>`;
   }
   $("#total-spent").html(totalSpentText);
-  $("#average-price").text("$" + (totalAcrossAllCurrencies / completedTrips).toFixed(2));
+  $("#average-price").text("~$" + (totalAcrossAllCurrencies / completedTrips).toFixed(2));
   addPriceChart();
 }
 
@@ -325,7 +326,21 @@ function addNumTripsChart() {
     }
     data[lowerBound.getTime()]++;
   });
+  let times = Object.keys(data);
+  times.sort((a, b) => a - b);
 
+  if (times && times.length) {
+    let monthToCheck = new Date(parseInt(times[0]));
+    let now = new Date();
+    while (monthToCheck < now) {
+      if (!data.hasOwnProperty((monthToCheck.getTime()))) {
+        data[monthToCheck.getTime()] = 0;
+      }
+      monthToCheck = monthToCheck.next().month();
+    }
+  }
+  times = Object.keys(data);
+  times.sort((a, b) => a - b);
   let finalCounts = [];
   for (const key of times) {
     finalCounts.push({
@@ -466,8 +481,7 @@ function addPriceChart() {
     if (t && t.clientFare) {
       let requestTime = new Date(t.requestTime);
       if (!data.hasOwnProperty(requestTime.getTime())) {
-        let price = parseFloat(t.clientFare);
-        data[requestTime.getTime()] = price;
+        data[requestTime.getTime()] = getCurrencyConversionIfExists(t.currencyCode, parseFloat(t.clientFare));
       }
     }
   });

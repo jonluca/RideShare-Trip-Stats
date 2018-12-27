@@ -1,3 +1,15 @@
+let currencyConversionToUSD = null;
+$(_ => {
+  $.ajax({
+    method: 'GET',
+    url: chrome.runtime.getURL("js/currency.json"),
+    type: 'json',
+    success(data, textStatus, jqXHR) {
+      currencyConversionToUSD = data;
+    }
+  });
+});
+
 let currencyMappings = {
   "ALL": "Lek",
   "AFN": "؋",
@@ -116,4 +128,21 @@ function getSymbolFromCode(code) {
     return currencyMappings[code];
   }
   return "";
+}
+
+function getCurrencyConversionIfExists(code, currencyAmount) {
+  if (typeof (currencyAmount) !== "number") {
+    currencyAmount = parseFloat(currencyAmount);
+  }
+
+  if (!currencyConversionToUSD || !currencyConversionToUSD.rates) {
+    return currencyAmount;
+  }
+  code = code.toUpperCase();
+  if (currencyConversionToUSD.rates.hasOwnProperty(code)) {
+    let exchangeToUSD = currencyConversionToUSD.rates[code];
+    return exchangeToUSD * currencyAmount;
+  }
+  return currencyAmount;
+
 }
