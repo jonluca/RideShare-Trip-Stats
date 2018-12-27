@@ -1,8 +1,5 @@
 // Make all global variables "var" so that they can be redeclared upon multiple executions of the script
 var global = {};
-var s = document.createElement('script');
-s.src = chrome.extension.getURL('js/libs/jquery.js');
-(document.head || document.documentElement).appendChild(s);
 
 global.payment = new Map();
 global.drivers = new Map();
@@ -16,6 +13,7 @@ var TRIPS_ENDPOINT = 'https://riders.uber.com/api/getTripsForClient';
 var TRIP_ENDPOINT = 'https://riders.uber.com/api/getTrip';
 
 $(_ => {
+
   if (window.location.hostname !== "riders.uber.com") {
     if (confirm("You must be on https://riders.uber.com/trips! Redirecting now.")) {
       window.location.href = "https://riders.uber.com/trips";
@@ -132,22 +130,34 @@ function checkIfCompleteOriginalAPI() {
   --requestsActive;
   if (requestsActive === 0) {
     $("#overlay").hide();
-    if (confirm("Request individual trip data (split fares, distance, etc)? Note: Takes significantly longer! Clicking Cancel will still show you most stats.")) {
-      requestAllTripInfo();
-    } else {
-      // Once all requests have completed, trigger a new tab and send the data
-      let serialized = {};
-      serialized.payment = [...global.payment];
-      serialized.drivers = [...global.drivers];
-      serialized.trips = [...global.trips];
-      serialized.cities = [...global.cities];
-      chrome.runtime.sendMessage({global: serialized});
-      $("#overlay").hide();
-    }
+    window.Swal({
+      title: 'Request individual trip data?',
+      text: "Note: Takes significantly longer, and might trigger email receipts due to Ubers cache! Clicking No will still show most stats.",
+      type: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes!'
+    }).then((result) => {
+      if (result.value) {
+        requestAllTripInfo();
+      } else {
+        // Once all requests have completed, trigger a new tab and send the data
+        let serialized = {};
+        serialized.payment = [...global.payment];
+        serialized.drivers = [...global.drivers];
+        serialized.trips = [...global.trips];
+        serialized.cities = [...global.cities];
+        chrome.runtime.sendMessage({global: serialized});
+        $("#overlay").hide();
+      }
+    });
+
   }
 }
 
 function requestAllTripInfo() {
+  $("#overlay").show();
   let uuids = global.trips.keys();
   for (const uuid of uuids) {
     requestIndividualTripInfo(uuid);

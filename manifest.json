@@ -20,10 +20,12 @@
     {
       "matches": [
         "*://uber.com/*",
-        "*://*.uber.com/*"
+        "*://*.uber.com/*",
+        "https://riders.uber.com/*"
       ],
       "js": [
-        "js/libs/jquery.js"
+        "js/libs/jquery.js",
+        "js/libs/sweetalert2.all.min.js"
       ]
     }
   ],
