@@ -567,4 +567,19 @@ function registerClickHandlers() {
     window.open("https://twitter.com/share?url=https://chrome.google.com/webstore/detail/uber-trip-stats/kddlnbejbpknoedebeojobofnbdfhpnm&text=" + encodeURIComponent(text), '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');
     return false;
   });
+
+  $("#export-image").click(e => {
+    $(".should-hide-in-image").hide();
+    let options = {backgroundColor: '#000'};
+    html2canvas($('.container')[0], options).then(function (canvas) {
+      console.log(canvas);
+      let a = document.createElement('a');
+      // toDataURL defaults to png, so we need to request a jpeg, then convert for file download.
+      a.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+      a.download = 'uber-stats.png';
+      a.style.display = 'none';
+      a.click();
+      $(".should-hide-in-image").show();
+    });
+  });
 }

@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="../css/main.css"/>
     <script src="../js/libs/jquery.js"></script>
     <script src="../js/libs/date.js"></script>
+    <script src="../js/libs/html2canvas.min.js"></script>
     <script src="../js/libs/Chart.js"></script>
     <script src="../js/utils.js"></script>
     <script src="../js/currencies.js"></script>
@@ -102,12 +103,12 @@
                 <div id="rides-by-car"></div>
             </div>
             <br class="spacer hidden">
-            <div class="individual-stat">
+            <div class="individual-stat should-hide-in-image">
                 <span>Favorite Pickup Location</span><br>
                 <span class="stat" id="fave-pickup"></span>
             </div>
             <br class="spacer">
-            <div class="individual-stat">
+            <div class="individual-stat should-hide-in-image">
                 <span>Favorite Dropoff Location</span><br>
                 <span class="stat" id="fave-dropoff"></span>
             </div>
@@ -122,10 +123,11 @@
     <div class="chart-container hidden">
         <canvas id="price-chart" width="400" height="400"></canvas>
     </div>
-    <div class="buttons">
-        <div class="button" id="export">Export</div>
-        <div class="button" id="share">Share on Twitter</div>
-    </div>
+</div>
+<div class="buttons">
+    <div class="button" id="export">Export</div>
+    <div class="button" id="share">Share on Twitter</div>
+    <div class="button" id="export-image">Download Image</div>
 </div>
 <footer>&copy; 2019 JonLuca DeCaro - <a href="https://github.com/jonluca/Uber-Trip-Stats">View Source</a></footer>
 </body>
