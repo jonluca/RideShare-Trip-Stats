@@ -566,7 +566,7 @@ function registerClickHandlers() {
       minutes = minutes.trim();
     }
     let numUbers = global.trips.size;
-    let text = `I've taken ${numUbers} Ubers, and have spent ${minutes} minutes in Ubers! Check out your numbers using UberStats by @jonlucadecaro here: `;
+    let text = `I've taken ${numUbers} Ubers, and have spent ${minutes} minutes in Ubers! Check out your numbers using RideShareStats by @jonlucadecaro here: `;
     window.open("https://twitter.com/share?url=https://chrome.google.com/webstore/detail/uber-trip-stats/kddlnbejbpknoedebeojobofnbdfhpnm&text=" + encodeURIComponent(text), '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');
     return false;
   });
@@ -579,7 +579,7 @@ function registerClickHandlers() {
       let a = document.createElement('a');
       // toDataURL defaults to png, so we need to request a jpeg, then convert for file download.
       a.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-      a.download = 'uber-stats.png';
+      a.download = 'stats.png';
       a.style.display = 'none';
       a.click();
       $(".should-hide-in-image").show();
