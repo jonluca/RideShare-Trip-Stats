@@ -1,10 +1,10 @@
-# UberStats
+# RideShareStats
 
 [Live version on Chrome Web Store](https://chrome.google.com/webstore/detail/uber-trip-stats/kddlnbejbpknoedebeojobofnbdfhpnm)
 
 ![logo](images/icon500.png)
 
-View your uber profile statistics!
+View your rideshare profile statistics!
 
 To use this extension, go to https://rides.uber.com/trips and sign in. Then click the extension logo from the top bar in Chrome!
 
