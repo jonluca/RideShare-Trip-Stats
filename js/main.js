@@ -163,8 +163,10 @@ function calculateDriverStats() {
   let iterNum = Math.min(5, drivers.length);
   let driverText = "";
   for (let i = 0; i < iterNum; i++) {
-    let favoriteDriver = global.drivers.get(drivers[i]);
-    driverText += `<span class="subheading">${favoriteDriver.firstname} ${favoriteDriver.lastname}</span><span class="stat"> ${driverCounts[favoriteDriver.uuid]} rides</span><br>`;
+    const favoriteDriver = global.drivers.get(drivers[i]);
+    const firstname = favoriteDriver.firstname || "";
+    const lastname = favoriteDriver.lastname || "";
+    driverText += `<span class="subheading">${firstname} ${lastname}</span><span class="stat"> ${driverCounts[favoriteDriver.uuid]} rides</span><br>`;
   }
   $("#same-driver").html(driverText);
 }

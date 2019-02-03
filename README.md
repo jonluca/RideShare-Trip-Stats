@@ -12,4 +12,8 @@ To use this extension, go to https://rides.uber.com/trips and sign in. Then clic
 
 ## Note
 
-Currency conversion for total spent and averages are currently done using a locally cached conversion chart. It uses exchange rates as of 12/27/2018. These will slowly become incorrect, and may need updating.
+Currency conversion for total spent and averages are currently done using a locally cached conversion chart. It uses exchange rates as of 2/3/2018. These will slowly become incorrect, and may need updating.
+
+They were taken from https://www.xe.com/currencytables/?from=USD. Copy the column and use the following regex replace to update.
+
+The regex for matching is `(.*)?	(.*)?	(.*)	(.*)`. Replace with `"$1":"$4",` and place in `rates` key within `currency.json`.
