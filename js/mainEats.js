@@ -14,6 +14,7 @@ function startStatistics() {
   addTotalOrdersStat();
   calculateTotalSpent();
   calculateEndOrderStates();
+  calculateTimeStats();
 }
 
 function addTotalOrdersStat() {
@@ -42,6 +43,59 @@ function calculateEndOrderStates() {
   $("#completed-orders").text(counts.success);
   $("#restaurant-canceled-orders").text(counts.restaurant_canceled);
   $("#other-orders").text(counts.other);
+}
+
+function calculateTimeStats() {
+  let longest = {
+    uid: null,
+    length: null
+  };
+  let shortest = {
+    uid: null,
+    length: null
+  };
+  let totalTime = 0;
+  global.orders.forEach(o => {
+    if (o.states) {
+      let start = null;
+      let end = null;
+      for (const entry of o.states) {
+        if (entry.type === "orderReceived") {
+          start = entry.timeStarted;
+        } else if (entry.type === "orderArrived") {
+          end = entry.timeStarted;
+        }
+      }
+      if (start && end) {
+        const total = end - start;
+        totalTime += total;
+        if (!longest.uid) {
+          longest.uid = o.uuid;
+          longest.length = total;
+        }
+        if (!shortest.uid) {
+          shortest.uid = o.uuid;
+          shortest.length = total;
+        }
+
+        if (total > longest.length) {
+          longest.uid = o.uuid;
+          longest.length = total;
+        }
+        if (total < shortest.length) {
+          shortest.uid = o.uuid;
+          shortest.length = total;
+        }
+      }
+    }
+  });
+  const longestTime = secondsToMinutes(longest.length / 1000);
+  const shortestTime = secondsToMinutes(shortest.length / 1000);
+  const totalTimeString = secondsToMinutes(totalTime / 1000);
+
+  $("#longest-order").text(longestTime);
+  $("#shortest-order").text(shortestTime);
+  $("#total-time").text(totalTimeString);
 }
 
 function calculateTotalSpent() {
