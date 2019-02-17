@@ -210,7 +210,6 @@ function registerClickHandlers() {
         hiddenElement.click();
       }
     }
-
   });
 
   $("#share").click(e => {

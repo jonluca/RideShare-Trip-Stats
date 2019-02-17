@@ -546,20 +546,40 @@ function addPriceChart() {
 }
 
 function registerClickHandlers() {
-  $("#export").click(e => {
+  $("#export").click(async e => {
     let trips = [...global.trips.values()];
-    let csv = convertArrayOfObjectsToCSV({
-      data: trips
+    const {value} = await Swal.fire({
+      title: 'CSV or JSON',
+      input: 'radio',
+      inputOptions: {
+        csv: "CSV",
+        json: "JSON"
+      }
     });
-    if (csv == null) {
-      return;
-    }
+    if (value) {
+      if (value === 'csv') {
+        let csv = convertArrayOfObjectsToCSV({
+          data: trips
+        });
+        if (csv == null) {
+          return;
+        }
+        let hiddenElement = document.createElement('a');
+        hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+        hiddenElement.target = '_blank';
+        hiddenElement.download = 'trips.csv';
+        hiddenElement.click();
+        alert("Note: Fields that are JSON objects are base64 encoded");
 
-    let hiddenElement = document.createElement('a');
-    hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
-    hiddenElement.target = '_blank';
-    hiddenElement.download = 'trips.csv';
-    hiddenElement.click();
+      } else if (value === "json") {
+        let json = JSON.stringify(trips);
+        let hiddenElement = document.createElement('a');
+        hiddenElement.href = 'data:text/json;charset=utf-8,' + encodeURI(json);
+        hiddenElement.target = '_blank';
+        hiddenElement.download = 'trips.json';
+        hiddenElement.click();
+      }
+    }
   });
 
   $("#share").click(e => {
@@ -571,6 +591,42 @@ function registerClickHandlers() {
     let text = `I've taken ${numUbers} Ubers, and have spent ${minutes} minutes in Ubers! Check out your numbers using RideShareStats by @jonlucadecaro here: `;
     window.open("https://twitter.com/share?url=https://chrome.google.com/webstore/detail/uber-trip-stats/kddlnbejbpknoedebeojobofnbdfhpnm&text=" + encodeURIComponent(text), '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');
     return false;
+  });
+
+  $("#export").click(async (e) => {
+    let orders = [...global.orders.values()];
+    const {value} = await Swal.fire({
+      title: 'CSV or JSON',
+      input: 'radio',
+      inputOptions: {
+        csv: "CSV",
+        json: "JSON"
+      }
+    });
+    if (value) {
+      if (value === 'csv') {
+        let csv = convertArrayOfObjectsToCSV({
+          data: orders
+        });
+        if (csv == null) {
+          return;
+        }
+        let hiddenElement = document.createElement('a');
+        hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+        hiddenElement.target = '_blank';
+        hiddenElement.download = 'orders.csv';
+        hiddenElement.click();
+        alert("Note: Fields that are JSON objects are base64 encoded");
+
+      } else if (value === "json") {
+        let json = JSON.stringify(orders);
+        let hiddenElement = document.createElement('a');
+        hiddenElement.href = 'data:text/json;charset=utf-8,' + encodeURI(json);
+        hiddenElement.target = '_blank';
+        hiddenElement.download = 'orders.json';
+        hiddenElement.click();
+      }
+    }
   });
 
   $("#export-image").click(e => {
