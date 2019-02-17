@@ -29,7 +29,7 @@ function convertArrayOfObjectsToCSV(args) {
       let val = item[key];
       try {
         if (typeof (val) === "object") {
-          val = btoa(unescape(encodeURIComponent(JSON.stringify(val)));
+          val = btoa(unescape(encodeURIComponent(JSON.stringify(val))));
         }
       } catch (e) {
         console.log(val);
