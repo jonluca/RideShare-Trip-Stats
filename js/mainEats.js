@@ -3,6 +3,10 @@ let global = {};
 $(_ => {
   chrome.runtime.sendMessage({requestDataEats: true}, function (response) {
     global.orders = new Map(response.data.orders);
+    global.stores = new Map();
+    global.orders.forEach(e => {
+      global.stores.set(e.store.uuid, e.store);
+    });
     startStatistics();
     registerClickHandlers();
   });
@@ -16,6 +20,7 @@ function startStatistics() {
   calculateEndOrderStates();
   calculateTimeStats();
   calculateIndivItemStats();
+  calculateFavoriteRestaurants();
 }
 
 function addTotalOrdersStat() {
@@ -72,6 +77,7 @@ function calculateIndivItemStats() {
   const totalSpentOnFaveItem = faveItemPrice * favoriteCount;
   let faveItemText = `<span class="subheading">Favorite Item</span><span class="stat-eats">${favoriteItem.item.title}</span><br>`;
   faveItemText += `<span class="subheading">Total Spent on Fav. Item</span><span class="stat-eats">${totalSpentOnFaveItem.toFixed(2)}</span><br>`;
+  faveItemText += `<span class="subheading">Location of Fav. Item</span><span class="stat-eats">${(global.orders.get(favoriteItem.restaurant)).storeName}</span><br>`;
   $("#favorite-item").html(faveItemText);
 
 }
@@ -120,13 +126,16 @@ function calculateTimeStats() {
       }
     }
   });
+  const averageTime = totalTime / global.orders.size;
   const longestTime = secondsToMinutes(longest.length / 1000);
   const shortestTime = secondsToMinutes(shortest.length / 1000);
   const totalTimeString = secondsToMinutes(totalTime / 1000);
+  const averageTimeString = secondsToMinutes(averageTime / 1000);
 
   $("#longest-order").text(longestTime);
   $("#shortest-order").text(shortestTime);
   $("#total-time").text(totalTimeString);
+  $("#average-time-order").text(averageTimeString);
 }
 
 function calculateTotalSpent() {
@@ -173,6 +182,24 @@ function calculateTotalSpent() {
   $("#total-deliv").text("~$" + (totalDelivFeesAcrossAllCurrencies).toFixed(2));
   $("#total-food").text("~$" + (totalFoodAcrossAllCurrencies).toFixed(2));
   // addPriceChart();
+}
+
+function calculateFavoriteRestaurants() {
+  let counts = {};
+  global.orders.forEach(o => {
+    if (!counts.hasOwnProperty(o.store.uuid)) {
+      counts[o.store.uuid] = 0;
+    }
+    counts[o.store.uuid]++;
+  });
+  let sortedCounts = getSortedKeysFromObject(counts, true);
+  let max = sortedCounts.length > 5 ? 5 : sortedCounts.length;
+  let faveString = "";
+  for (let i = 0; i < max; i++) {
+    const restaurant = global.stores.get(sortedCounts[i]);
+    faveString += `<span class="subheading">${restaurant.title}</span><span class="stat-eats"> ${counts[sortedCounts[i]]}</span><br>`;
+  }
+  $("#fave-restaurants").html(faveString);
 }
 
 function registerClickHandlers() {
