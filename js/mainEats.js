@@ -15,6 +15,7 @@ function startStatistics() {
   calculateTotalSpent();
   calculateEndOrderStates();
   calculateTimeStats();
+  calculateIndivItemStats();
 }
 
 function addTotalOrdersStat() {
@@ -43,6 +44,22 @@ function calculateEndOrderStates() {
   $("#completed-orders").text(counts.success);
   $("#restaurant-canceled-orders").text(counts.restaurant_canceled);
   $("#other-orders").text(counts.other);
+}
+
+function calculateIndivItemStats() {
+  let counts = {};
+  global.orders.forEach(o => {
+    if (o.completionStatus && o.completionStatus.completionState) {
+      const state = o.completionStatus.completionState;
+      if (state === "SUCCESS") {
+        counts.success++;
+      } else if (state === "RESTAURANT_CANCELLED") {
+        counts.restaurant_canceled++;
+      } else {
+        counts.other++;
+      }
+    }
+  });
 }
 
 function calculateTimeStats() {
