@@ -240,19 +240,18 @@ function registerClickHandlers() {
   });
 
   $("#share").click(e => {
-    let minutes = $("#minutes").text();
-    if (minutes) {
-      minutes = minutes.trim();
+    let orders = $("#total-orders").text();
+    if (orders) {
+      orders = orders.trim();
     }
-    let numUbers = global.trips.size;
-    let text = `I've taken ${numUbers} Ubers, and have spent ${minutes} minutes in Ubers! Check out your numbers using RideShareStats by @jonlucadecaro here: `;
+    let text = `I've ordered ${orders} orders from UberEats, and have spent ${$("#total-spent").text()}! Check out your numbers using RideShareStats by @jonlucadecaro here: `;
     window.open("https://twitter.com/share?url=https://chrome.google.com/webstore/detail/rideshare-trip-stats/kddlnbejbpknoedebeojobofnbdfhpnm&text=" + encodeURIComponent(text), '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');
     return false;
   });
 
   $("#export-image").click(e => {
     $(".should-hide-in-image").hide();
-    let options = {backgroundColor: '#000'};
+    let options = {backgroundColor: '#75b437'};
     html2canvas($('.container')[0], options).then(function (canvas) {
       console.log(canvas);
       let a = document.createElement('a');
