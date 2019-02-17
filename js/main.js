@@ -592,43 +592,7 @@ function registerClickHandlers() {
     window.open("https://twitter.com/share?url=https://chrome.google.com/webstore/detail/uber-trip-stats/kddlnbejbpknoedebeojobofnbdfhpnm&text=" + encodeURIComponent(text), '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');
     return false;
   });
-
-  $("#export").click(async (e) => {
-    let orders = [...global.orders.values()];
-    const {value} = await Swal.fire({
-      title: 'CSV or JSON',
-      input: 'radio',
-      inputOptions: {
-        csv: "CSV",
-        json: "JSON"
-      }
-    });
-    if (value) {
-      if (value === 'csv') {
-        let csv = convertArrayOfObjectsToCSV({
-          data: orders
-        });
-        if (csv == null) {
-          return;
-        }
-        let hiddenElement = document.createElement('a');
-        hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
-        hiddenElement.target = '_blank';
-        hiddenElement.download = 'orders.csv';
-        hiddenElement.click();
-        alert("Note: Fields that are JSON objects are base64 encoded");
-
-      } else if (value === "json") {
-        let json = JSON.stringify(orders);
-        let hiddenElement = document.createElement('a');
-        hiddenElement.href = 'data:text/json;charset=utf-8,' + encodeURI(json);
-        hiddenElement.target = '_blank';
-        hiddenElement.download = 'orders.json';
-        hiddenElement.click();
-      }
-    }
-  });
-
+  
   $("#export-image").click(e => {
     $(".should-hide-in-image").hide();
     let options = {backgroundColor: '#000'};
