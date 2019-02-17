@@ -48,18 +48,32 @@ function calculateEndOrderStates() {
 
 function calculateIndivItemStats() {
   let counts = {};
+  let favoriteItem = null;
+  let favoriteCount = null;
   global.orders.forEach(o => {
-    if (o.completionStatus && o.completionStatus.completionState) {
-      const state = o.completionStatus.completionState;
-      if (state === "SUCCESS") {
-        counts.success++;
-      } else if (state === "RESTAURANT_CANCELLED") {
-        counts.restaurant_canceled++;
-      } else {
-        counts.other++;
+    if (o.items && o.items.length) {
+      for (const item of o.items) {
+        if (!counts.hasOwnProperty(item.uuid)) {
+          counts[item.uuid] = 0;
+        }
+        counts[item.uuid]++;
+        if (counts[item.uuid] > favoriteCount) {
+          favoriteCount = counts[item.uuid];
+          favoriteItem = {
+            item,
+            restaurant: o.uuid
+          };
+        }
       }
     }
   });
+  console.log(favoriteItem);
+  const faveItemPrice = (favoriteItem.item.price / favoriteItem.item.quantity) / 100;
+  const totalSpentOnFaveItem = faveItemPrice * favoriteCount;
+  let faveItemText = `<span class="subheading">Favorite Item</span><span class="stat-eats">${favoriteItem.item.title}</span><br>`;
+  faveItemText += `<span class="subheading">Total Spent on Fav. Item</span><span class="stat-eats">${totalSpentOnFaveItem.toFixed(2)}</span><br>`;
+  $("#favorite-item").html(faveItemText);
+
 }
 
 function calculateTimeStats() {

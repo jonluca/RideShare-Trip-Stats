@@ -27,9 +27,15 @@ function convertArrayOfObjectsToCSV(args) {
         result += columnDelimiter;
       }
       let val = item[key];
-      if (typeof (val) === "object") {
-        val = btoa(JSON.stringify(val));
+      try {
+        if (typeof (val) === "object") {
+          val = btoa(unescape(encodeURIComponent(JSON.stringify(val)));
+        }
+      } catch (e) {
+        console.log(val);
+        val = "[RideShareStats - error processing]";
       }
+
       if (val && typeof (val) === "string") {
         val = val.replace(/,/g, '-');
         val = val.normalize("NFKD").replace(/[^\w]/g, '');
