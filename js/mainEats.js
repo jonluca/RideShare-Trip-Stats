@@ -176,19 +176,41 @@ function calculateTotalSpent() {
 }
 
 function registerClickHandlers() {
-  $("#export").click(e => {
+  $("#export").click(async (e) => {
     let orders = [...global.orders.values()];
-    let csv = convertArrayOfObjectsToCSV({
-      data: orders
+    const {value} = await Swal.fire({
+      title: 'CSV or JSON',
+      input: 'radio',
+      inputOptions: {
+        csv: "CSV",
+        json: "JSON"
+      }
     });
-    if (csv == null) {
-      return;
+    if (value) {
+      if (value === 'csv') {
+        let csv = convertArrayOfObjectsToCSV({
+          data: orders
+        });
+        if (csv == null) {
+          return;
+        }
+        let hiddenElement = document.createElement('a');
+        hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+        hiddenElement.target = '_blank';
+        hiddenElement.download = 'orders.csv';
+        hiddenElement.click();
+        alert("Note: Fields that are JSON objects are base64 encoded");
+
+      } else if (value === "json") {
+        let json = JSON.stringify(orders);
+        let hiddenElement = document.createElement('a');
+        hiddenElement.href = 'data:text/json;charset=utf-8,' + encodeURI(json);
+        hiddenElement.target = '_blank';
+        hiddenElement.download = 'orders.json';
+        hiddenElement.click();
+      }
     }
-    let hiddenElement = document.createElement('a');
-    hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
-    hiddenElement.target = '_blank';
-    hiddenElement.download = 'orders.csv';
-    hiddenElement.click();
+
   });
 
   $("#share").click(e => {
