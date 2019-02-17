@@ -2,16 +2,18 @@
   "manifest_version": 2,
   "name": "RideShare Trip Stats",
   "description": "Analyzes your rideshare profile to show statistics on your rides!",
-  "version": "1.3.3",
+  "version": "1.4",
   "permissions": [
     "*://uber.com/*",
     "*://*.uber.com/*",
+    "*://*.ubereats.com/*",
     "storage",
     "activeTab"
   ],
   "background": {
     "persistent": true,
     "scripts": [
+      "js/libs/jquery.js",
       "js/background.js",
       "js/common.js"
     ]
@@ -21,6 +23,7 @@
       "matches": [
         "*://uber.com/*",
         "*://*.uber.com/*",
+        "https://*.ubereats.com/*",
         "https://riders.uber.com/*"
       ],
       "js": [

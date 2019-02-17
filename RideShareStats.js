@@ -14,16 +14,17 @@ var TRIP_ENDPOINT = 'https://riders.uber.com/api/getTrip';
 
 $(_ => {
 
-  if (window.location.hostname !== "riders.uber.com") {
-    if (confirm("You must be on https://riders.uber.com/trips! Redirecting now.")) {
+  if (window.location.hostname === "riders.uber.com") {
+    startUberRidesAnalysis();
+
+  } else {
+    if (confirm("You must be on https://riders.uber.com/trips or ubereats.com to use this tool! Redirecting now.")) {
       window.location.href = "https://riders.uber.com/trips";
     }
-    return;
   }
-  startAnalysis();
 });
 
-function startAnalysis() {
+function startUberRidesAnalysis() {
   if (!csrf) {
     let text = $("#__CSRF_TOKEN__").text();
     csrf = text.replace(/\\u0022/g, '');

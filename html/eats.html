@@ -1,0 +1,138 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" href="../css/main.css"/>
+    <script src="../js/libs/jquery.js"></script>
+    <script src="../js/libs/date.js"></script>
+    <script src="../js/libs/html2canvas.min.js"></script>
+    <script src="../js/libs/Chart.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/currencies.js"></script>
+    <script src="../js/mainEats.js"></script>
+</head>
+<body class="eatsBody">
+<header>Eats Stats</header>
+<div class="container">
+    <h1>Lifetime</h1>
+    <div class="lifetime">
+        <div class="stats-view">
+            <div class="individual-stat">
+                <span>Total Spent</span>
+                <span class="stat-eats" id="total-payment"></span>
+                <div id="total-spent"></div>
+            </div>
+            <div class="individual-stat">
+                <span>Average Price</span>
+                <span class="stat-eats" id="average-price"></span>
+            </div>
+            <div class="individual-stat">
+                <span>Total Tax</span>
+                <span class="stat-eats" id="total-tax"></span>
+            </div>
+            <div class="individual-stat">
+                <span>Total Delivery Fees</span>
+                <span class="stat-eats" id="total-deliv"></span>
+            </div>
+            <div class="individual-stat">
+                <span>Total Food Cost</span>
+                <span class="stat-eats" id="total-food"></span>
+            </div>
+            <br class="spacer">
+            <div class="individual-stat">
+                <span>Total Time</span>
+                <div id="total-time"></div>
+            </div>
+            <div class="individual-stat">
+                <span>Shortest Time</span>
+                <span class="stat-eats" id="shortest-ride"></span>
+            </div>
+            <div class="individual-stat">
+                <span>Longest Time</span>
+                <span class="stat-eats" id="longest-ride"></span>
+            </div>
+        </div>
+        <div class="stats-view">
+            <div class="individual-stat">
+                <span>Total Orders</span>
+                <span class="stat-eats" id="total-orders"></span>
+                <div>
+                    <span class="subheading">Completed Orders</span>
+                    <span class="stat-eats" id="completed-orders"></span>
+                    <br class="spacer">
+                    <span class="subheading">Restaurant Canceled</span>
+                    <span class="stat-eats" id="restaurant-canceled-orders"></span>
+                    <br class="spacer">
+                    <span class="subheading">Other/Unknown</span>
+                    <span class="stat-eats" id="other-orders"></span>
+                    <br class="spacer">
+                </div>
+            </div>
+            <br class="spacer">
+            <div class="individual-stat">
+                <span>Rides By Type</span>
+                <div id="rides-by-type"></div>
+            </div>
+            <br class="spacer">
+            <div class="individual-stat">
+                <span># Payment Methods</span>
+                <span class="stat-eats" id="num-payment"></span>
+            </div>
+        </div>
+        <div class="stats-view">
+            <div class="individual-stat">
+                <span>Rides By Year</span>
+                <div id="rides-by-year"></div>
+            </div>
+            <br class="spacer">
+            <div class="individual-stat">
+                <span>Rides By Month</span><br>
+                <div id="rides-by-month"></div>
+            </div>
+        </div>
+        <div class="stats-view">
+            <div class="individual-stat">
+                <span>Rides By City</span>
+                <div id="rides-by-city"></div>
+            </div>
+            <br class="spacer">
+            <div class="individual-stat hidden">
+                <span>Distances</span>
+                <div id="distances"></div>
+            </div>
+        </div>
+        <div class="stats-view ">
+            <div class="individual-stat hidden">
+                <span>Most Popular Cars</span>
+                <div id="rides-by-car"></div>
+            </div>
+            <br class="spacer hidden">
+            <div class="individual-stat should-hide-in-image">
+                <span>Favorite Pickup Location</span><br>
+                <span class="stat-eats" id="fave-pickup"></span>
+            </div>
+            <br class="spacer">
+            <div class="individual-stat should-hide-in-image">
+                <span>Favorite Dropoff Location</span><br>
+                <span class="stat-eats" id="fave-dropoff"></span>
+            </div>
+        </div>
+    </div>
+    <div class="chart-container">
+        <canvas id="rides-chart" width="400" height="400"></canvas>
+    </div>
+    <div class="chart-container hidden">
+        <canvas id="distance-chart" width="400" height="400"></canvas>
+    </div>
+    <div class="chart-container hidden">
+        <canvas id="price-chart" width="400" height="400"></canvas>
+    </div>
+</div>
+<div class="buttons">
+    <div class="button" id="export">Export</div>
+    <div class="button" id="share">Share on Twitter</div>
+    <div class="button" id="export-image">Download Image</div>
+</div>
+<footer>&copy; 2019 JonLuca DeCaro - <a href="https://github.com/jonluca/RideShare-Trip-Stats">View Source</a></footer>
+</body>
+</html>

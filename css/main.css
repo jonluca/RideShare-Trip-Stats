@@ -16,6 +16,10 @@ body {
   color: white;
 }
 
+.eatsBody {
+  background-color: rgb(117, 180, 55);
+}
+
 header {
   font-size: 56px;
   margin-left: 50px;
@@ -50,6 +54,10 @@ a {
 
 .stat {
   color: #a8a8a8;
+}
+
+.stat-eats {
+  color: #092a00;
 }
 
 .stats-view {
