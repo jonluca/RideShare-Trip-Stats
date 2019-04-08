@@ -18,3 +18,8 @@ chrome.browserAction.onClicked.addListener(function (tab) {
     });
   }
 });
+
+chrome.runtime.onInstalled.addListener(function (object) {
+  chrome.tabs.create({url: chrome.extension.getURL("html/oninstall.html")}, function (tab) {
+  });
+});

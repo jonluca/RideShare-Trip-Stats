@@ -21,6 +21,7 @@ function startStatistics() {
   calculateTimeStats();
   calculateIndivItemStats();
   calculateFavoriteRestaurants();
+  addPriceChart();
 }
 
 function addTotalOrdersStat() {
@@ -263,4 +264,79 @@ function registerClickHandlers() {
       $(".should-hide-in-image").show();
     });
   });
+}
+
+function addPriceChart() {
+  const ctx = document.getElementById("spent-chart").getContext('2d');
+  let data = {};
+  global.orders.forEach(o => {
+    if (o.checkoutInfo) {
+      for (const priceEntry of o.checkoutInfo) {
+        if (priceEntry.key === "eats_fare.total") {
+          for (const state of o.states) {
+            if (state.type === "orderReceived") {
+              let requestTime = new Date(state.timeStarted);
+              if (!data.hasOwnProperty(requestTime.getTime())) {
+                data[requestTime.getTime()] = getCurrencyConversionIfExists(o.currencyCode, priceEntry.rawValue);
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  const times = Object.keys(data);
+  times.sort((a, b) => a - b);
+  let finalCounts = [];
+  let totalSpent = 0;
+  for (const key of times) {
+    totalSpent += data[key];
+    finalCounts.push({
+      x: new Date(parseInt(key)),
+      y: totalSpent
+    });
+  }
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      datasets: [{
+        label: "Total Spent (Aggregate, no currency conversion)",
+        data: finalCounts,
+        fill: true,
+        borderColor: 'black'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      title: {
+        display: true,
+        text: "Total Spent"
+      },
+      scales: {
+        xAxes: [{
+          type: "time",
+          time: {
+            unit: 'month'
+          },
+          display: true,
+          scaleLabel: {
+            display: true,
+            labelString: 'Date'
+          }
+        }],
+        yAxes: [{
+          display: true,
+          scaleLabel: {
+            display: true,
+            labelString: 'value'
+          }
+        }]
+      }
+    }
+  });
+  $("#spent-chart").css('background-color', 'white');
+  chart.render();
+
 }

@@ -2,6 +2,7 @@ var choice = async () => {
   const {value} = await Swal.fire({
     title: 'You are not on an uber site. Please select an option then click the icon again.',
     input: 'radio',
+    showCancelButton: true,
     inputOptions: {
       eats: "UberEats",
       rides: "Uber Rides"
