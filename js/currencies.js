@@ -122,14 +122,32 @@ let currencyMappings = {
   "ZWD": "Z$"
 };
 
+/**
+ * Returns the currency symbol ($) from its 3 letter code (USD)
+ *
+ * @param {string} code - 3 letter currency code
+ * @returns {string} - either empty string if not found or the currency code
+ */
 function getSymbolFromCode(code) {
+  if (!code) {
+    return "";
+  }
   code = code.toUpperCase();
+  code = code.trim();
   if (currencyMappings.hasOwnProperty(code)) {
     return currencyMappings[code];
   }
   return "";
 }
 
+/**
+ * Returns the currency conversion, if its known (i.e. Euro to USD)
+ *
+ * @param {string} code - 3 letter currency code
+ * @param {number} currencyAmount - the amount of the currency
+ * @returns {number} returns either 0, if invalid values were passed to the function or its unable to do the
+ *   conversion, or the currency conversion to USD
+ */
 function getCurrencyConversionIfExists(code, currencyAmount) {
   if (typeof (currencyAmount) !== "number") {
     try {
@@ -139,10 +157,11 @@ function getCurrencyConversionIfExists(code, currencyAmount) {
     }
   }
 
-  if (!currencyConversionToUSD || !currencyConversionToUSD.rates) {
-    return currencyAmount;
+  if (!currencyConversionToUSD || !currencyConversionToUSD.rates || !code) {
+    return 0;
   }
   code = code.toUpperCase();
+  code = code.trim();
   if (currencyConversionToUSD.rates.hasOwnProperty(code)) {
     let exchangeToUSD = currencyConversionToUSD.rates[code];
     return exchangeToUSD * currencyAmount;

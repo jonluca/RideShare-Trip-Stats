@@ -28,7 +28,7 @@ function startStatistics() {
   calculateDistanceStats();
   calculateCarMakeStats();
 
-  addNumTripsChart();
+  addTripsAndSpentByMonthChart();
 }
 
 function addTotalRidesStat() {
@@ -317,28 +317,53 @@ function calculateCarMakeStats() {
   }
 }
 
-function addNumTripsChart() {
-  const ctx = document.getElementById("rides-chart").getContext('2d');
+function addTripsAndSpentByMonthChart() {
+  const numTripsByMonthCtx = document.getElementById("rides-chart").getContext('2d');
+  const amountSpentByMonthCtx = document.getElementById("monthly-spend-chart").getContext('2d');
+  /*
+   data is an object that stores unix timestamps, by month, along with stats for that month
+   This includes the number of trips and the amount spent.
+
+   example:
+
+   data = {
+   1559101412066: {
+   numTrips: 0,
+   amountSpent: 0
+   }
+   }
+   */
   let data = {};
   global.trips.forEach(t => {
     let requestTime = new Date(t.requestTime);
     // Get date that is first of the month to provide lower bound
     let lowerBound = new Date(requestTime.getFullYear(), requestTime.getMonth(), 1);
     if (!data.hasOwnProperty(lowerBound.getTime())) {
-      data[lowerBound.getTime()] = 0;
+      data[lowerBound.getTime()] = {
+        numTrips: 0,
+        amountSpent: 0
+      };
     }
-    data[lowerBound.getTime()]++;
+    if (t.clientFare) {
+      const amountSpentOnTrip = getCurrencyConversionIfExists(t.currencyCode, t.clientFare);
+      data[lowerBound.getTime()].amountSpent += amountSpentOnTrip;
+    }
+    data[lowerBound.getTime()].numTrips++;
   });
   let times = Object.keys(data);
+  // times stores Unix time stamp kv pairs
   times.sort((a, b) => a - b);
   // Fill in 0s for months with no rides
-  if (times && times.length) {
+  if (times.length) {
     // Month of first uber ride ever
     let monthToCheck = new Date(parseInt(times[0]));
     let now = new Date();
     while (monthToCheck < now) {
       if (!data.hasOwnProperty((monthToCheck.getTime()))) {
-        data[monthToCheck.getTime()] = 0;
+        data[monthToCheck.getTime()] = {
+          numTrips: 0,
+          amountSpent: 0
+        };
       }
       monthToCheck = monthToCheck.next().month();
     }
@@ -346,20 +371,25 @@ function addNumTripsChart() {
   // Get the keys again, as we might've just added some 0 months
   times = Object.keys(data);
   times.sort((a, b) => a - b);
-  let finalCounts = [];
+  let finalCountsTripCounts = [];
+  let finalCountsSpendCounts = [];
   for (const key of times) {
-    finalCounts.push({
+    finalCountsTripCounts.push({
       x: new Date(parseInt(key)),
-      y: data[key]
+      y: data[key].numTrips
+    });
+    finalCountsSpendCounts.push({
+      x: new Date(parseInt(key)),
+      y: data[key].amountSpent
     });
   }
 
-  const chart = new Chart(ctx, {
+  const chart = new Chart(numTripsByMonthCtx, {
     type: 'line',
     data: {
       datasets: [{
         label: "Rides Taken",
-        data: finalCounts,
+        data: finalCountsTripCounts,
         fill: false,
         borderColor: 'black'
 
@@ -397,6 +427,8 @@ function addNumTripsChart() {
         mode: 'single',
         callbacks: {
           title: function (tooltipItem, data) {
+            // xlabel is always in the format Month 1, Year
+            // remove the '1, ' so that it's just "Month Year"
             return tooltipItem[0].xLabel.replace("1, ", "");
           }
         }
@@ -405,6 +437,66 @@ function addNumTripsChart() {
   });
   $("#rides-chart").css('background-color', 'white');
   chart.render();
+
+  const monthlySpend = new Chart(amountSpentByMonthCtx, {
+    type: 'line',
+    data: {
+      datasets: [{
+        label: "Amount Spent",
+        data: finalCountsSpendCounts,
+        fill: false,
+        borderColor: 'black'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      title: {
+        display: true,
+        text: "Amount Spent by Month"
+      },
+      scales: {
+        xAxes: [{
+          type: "time",
+          time: {
+            unit: 'month'
+          },
+          display: true,
+          scaleLabel: {
+            display: true,
+            labelString: 'Date'
+          }
+        }],
+        yAxes: [{
+          display: true,
+          scaleLabel: {
+            display: true,
+            labelString: 'value'
+          }
+        }]
+      },
+      tooltips: {
+        enabled: true,
+        mode: 'single',
+        callbacks: {
+          title: function (tooltipItem, data) {
+            return tooltipItem[0].xLabel.replace("1, ", "");
+          },
+          label: function (tooltipItem, data) {
+            var label = data.datasets[tooltipItem.datasetIndex].label || '';
+
+            if (label) {
+              label += ': ';
+            }
+            label += Math.round(tooltipItem.yLabel * 100) / 100;
+            return label;
+          }
+        }
+      }
+    }
+  });
+  $("#monthly-spend-chart").css('background-color', 'white');
+  monthlySpend.render();
 
 }
 
@@ -592,7 +684,7 @@ function registerClickHandlers() {
     window.open("https://twitter.com/share?url=https://chrome.google.com/webstore/detail/uber-trip-stats/kddlnbejbpknoedebeojobofnbdfhpnm&text=" + encodeURIComponent(text), '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');
     return false;
   });
-  
+
   $("#export-image").click(e => {
     $(".should-hide-in-image").hide();
     let options = {backgroundColor: '#000'};
