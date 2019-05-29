@@ -8,7 +8,7 @@
     "*://*.uber.com/*",
     "*://*.ubereats.com/*",
     "storage",
-    "newTab",
+    "tabs",
     "activeTab"
   ],
   "background": {
