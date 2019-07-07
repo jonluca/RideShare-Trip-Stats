@@ -4,8 +4,8 @@ $(_ => {
   chrome.runtime.sendMessage({requestDataEats: true}, function (response) {
     global.orders = new Map(response.data.orders);
     global.stores = new Map();
-    global.orders.forEach(e => {
-      global.stores.set(e.store.uuid, e.store);
+    global.orders.forEach(o => {
+      global.stores.set(o.storeInfo.uuid, o.storeInfo);
     });
     startStatistics();
     registerClickHandlers();
@@ -13,8 +13,6 @@ $(_ => {
 });
 
 function startStatistics() {
-  console.log(global);
-
   addTotalOrdersStat();
   calculateTotalSpent();
   calculateEndOrderStates();
@@ -36,15 +34,16 @@ function calculateEndOrderStates() {
     other: 0
   };
   global.orders.forEach(o => {
-    if (o.completionStatus && o.completionStatus.completionState) {
-      const state = o.completionStatus.completionState;
-      if (state === "SUCCESS") {
+    if (o.baseEaterOrder) {
+      if (o.baseEaterOrder.isCompleted.type === "COMPLETED") {
         counts.success++;
-      } else if (state === "RESTAURANT_CANCELLED") {
+      } else if (o.baseEaterOrder.isCancelled.type === "CANCELED") {
         counts.restaurant_canceled++;
       } else {
         counts.other++;
       }
+    } else {
+      counts.other++;
     }
   });
   $("#completed-orders").text(counts.success);
@@ -57,8 +56,10 @@ function calculateIndivItemStats() {
   let favoriteItem = null;
   let favoriteCount = null;
   global.orders.forEach(o => {
-    if (o.items && o.items.length) {
-      for (const item of o.items) {
+    const uuid = o.baseEaterOrder.uuid;
+    if (o.baseEaterOrder.shoppingCart.items && o.baseEaterOrder.shoppingCart.items.length) {
+      const items = o.baseEaterOrder.shoppingCart.items;
+      for (const item of items) {
         if (!counts.hasOwnProperty(item.uuid)) {
           counts[item.uuid] = 0;
         }
@@ -67,18 +68,17 @@ function calculateIndivItemStats() {
           favoriteCount = counts[item.uuid];
           favoriteItem = {
             item,
-            restaurant: o.uuid
+            restaurant: uuid
           };
         }
       }
     }
   });
-  console.log(favoriteItem);
   const faveItemPrice = (favoriteItem.item.price / favoriteItem.item.quantity) / 100;
   const totalSpentOnFaveItem = faveItemPrice * favoriteCount;
   let faveItemText = `<span class="subheading">Favorite Item</span><span class="stat-eats">${favoriteItem.item.title}</span><br>`;
   faveItemText += `<span class="subheading">Total Spent on Fav. Item</span><span class="stat-eats">${totalSpentOnFaveItem.toFixed(2)}</span><br>`;
-  faveItemText += `<span class="subheading">Location of Fav. Item</span><span class="stat-eats">${(global.orders.get(favoriteItem.restaurant)).storeName}</span><br>`;
+  faveItemText += `<span class="subheading">Location of Fav. Item</span><span class="stat-eats">${(global.orders.get(favoriteItem.restaurant)).storeInfo.title}</span><br>`;
   $("#favorite-item").html(faveItemText);
 
 }
@@ -94,34 +94,35 @@ function calculateTimeStats() {
   };
   let totalTime = 0;
   global.orders.forEach(o => {
-    if (o.states) {
+    if (o.baseEaterOrder.orderStateChanges) {
       let start = null;
       let end = null;
-      for (const entry of o.states) {
-        if (entry.type === "orderReceived") {
-          start = entry.timeStarted;
-        } else if (entry.type === "orderArrived") {
-          end = entry.timeStarted;
+      for (const entry of o.baseEaterOrder.orderStateChanges) {
+        if (entry.type === "CREATED") {
+          start = new Date(entry.stateChangeTime);
+        } else if (entry.type === "COMPLETED") {
+          end = new Date(entry.stateChangeTime);
         }
       }
       if (start && end) {
         const total = end - start;
         totalTime += total;
+        const uuid = o.baseEaterOrder.uuid;
         if (!longest.uid) {
-          longest.uid = o.uuid;
+          longest.uid = uuid;
           longest.length = total;
         }
         if (!shortest.uid) {
-          shortest.uid = o.uuid;
+          shortest.uid = uuid;
           shortest.length = total;
         }
 
         if (total > longest.length) {
-          longest.uid = o.uuid;
+          longest.uid = uuid;
           longest.length = total;
         }
         if (total < shortest.length) {
-          shortest.uid = o.uuid;
+          shortest.uid = uuid;
           shortest.length = total;
         }
       }
@@ -147,24 +148,26 @@ function calculateTotalSpent() {
   let totalDelivFeesAcrossAllCurrencies = 0;
   let completedOrders = 0;
   global.orders.forEach(o => {
-    if (o.checkoutInfo) {
-      if (!totalSpent.hasOwnProperty(o.currencyCode)) {
-        totalSpent[o.currencyCode] = 0;
+    if (o.fareInfo) {
+      const currencyCode = o.baseEaterOrder.currencyCode;
+      if (!totalSpent.hasOwnProperty(currencyCode)) {
+        totalSpent[currencyCode] = 0;
       }
-      for (const priceEntry of o.checkoutInfo) {
+      for (const priceEntry of o.fareInfo.checkoutInfo) {
+        const amount = priceEntry.rawValue;
         if (priceEntry.key === "eats_fare.total") {
-          totalSpent[o.currencyCode] += parseFloat(priceEntry.rawValue);
-          totalAcrossAllCurrencies += getCurrencyConversionIfExists(o.currencyCode, priceEntry.rawValue);
+          totalSpent[currencyCode] += parseFloat(amount);
+          totalAcrossAllCurrencies += getCurrencyConversionIfExists(currencyCode, amount);
         } else if (priceEntry.key === "eats.mp.charges.booking_fee") {
-          totalDelivFeesAcrossAllCurrencies += getCurrencyConversionIfExists(o.currencyCode, priceEntry.rawValue);
+          totalDelivFeesAcrossAllCurrencies += getCurrencyConversionIfExists(currencyCode, amount);
         } else if (priceEntry.key === "eats_fare.subtotal") {
-          totalFoodAcrossAllCurrencies += getCurrencyConversionIfExists(o.currencyCode, priceEntry.rawValue);
+          totalFoodAcrossAllCurrencies += getCurrencyConversionIfExists(currencyCode, amount);
         } else if (priceEntry.key === "eats.tax.base") {
-          totalTaxAcrossAllCurrencies += getCurrencyConversionIfExists(o.currencyCode, priceEntry.rawValue);
+          totalTaxAcrossAllCurrencies += getCurrencyConversionIfExists(currencyCode, amount);
         }
       }
     }
-    if (o.completionStatus.completionState === "SUCCESS") {
+    if (o.baseEaterOrder.isCompleted && o.baseEaterOrder.isCompleted.type === "COMPLETED") {
       completedOrders++;
     }
   });
@@ -182,16 +185,15 @@ function calculateTotalSpent() {
   $("#total-tax").text("~$" + (totalTaxAcrossAllCurrencies).toFixed(2));
   $("#total-deliv").text("~$" + (totalDelivFeesAcrossAllCurrencies).toFixed(2));
   $("#total-food").text("~$" + (totalFoodAcrossAllCurrencies).toFixed(2));
-  // addPriceChart();
 }
 
 function calculateFavoriteRestaurants() {
   let counts = {};
   global.orders.forEach(o => {
-    if (!counts.hasOwnProperty(o.store.uuid)) {
-      counts[o.store.uuid] = 0;
+    if (!counts.hasOwnProperty(o.storeInfo.uuid)) {
+      counts[o.storeInfo.uuid] = 0;
     }
-    counts[o.store.uuid]++;
+    counts[o.storeInfo.uuid]++;
   });
   let sortedCounts = getSortedKeysFromObject(counts, true);
   let max = sortedCounts.length > 5 ? 5 : sortedCounts.length;
@@ -270,14 +272,14 @@ function addPriceChart() {
   const ctx = document.getElementById("spent-chart").getContext('2d');
   let data = {};
   global.orders.forEach(o => {
-    if (o.checkoutInfo) {
-      for (const priceEntry of o.checkoutInfo) {
+    if (o.fareInfo.checkoutInfo) {
+      for (const priceEntry of o.fareInfo.checkoutInfo) {
         if (priceEntry.key === "eats_fare.total") {
-          for (const state of o.states) {
-            if (state.type === "orderReceived") {
-              let requestTime = new Date(state.timeStarted);
+          for (const state of o.baseEaterOrder.orderStateChanges) {
+            if (state.type === "CREATED") {
+              let requestTime = new Date(state.stateChangeTime);
               if (!data.hasOwnProperty(requestTime.getTime())) {
-                data[requestTime.getTime()] = getCurrencyConversionIfExists(o.currencyCode, priceEntry.rawValue);
+                data[requestTime.getTime()] = getCurrencyConversionIfExists(o.baseEaterOrder.currencyCode, priceEntry.rawValue);
               }
             }
           }

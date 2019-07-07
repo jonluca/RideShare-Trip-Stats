@@ -5,9 +5,7 @@ global.orders = new Map();
 
 var csrf = null;
 var requestsActive = 0;
-var MAX_LIMIT = 100;
-var EATS_ENDPOINT = 'https://www.ubereats.com/rtapi/eats/v1/eaters/me/orders';
-var STORE_ENDPOINT = 'https://www.ubereats.com/rtapi/eats/v2/eater-store/';
+var EATS_ENDPOINT = 'https://www.ubereats.com/api/getPastOrdersV1';
 
 $(_ => {
   if (window.location.hostname.endsWith("ubereats.com")) {
@@ -21,7 +19,8 @@ $(_ => {
 
 function startUberEatsAnalysis() {
   if (!csrf) {
-    csrf = window.csrfToken; // lol
+    // csrf = window.csrfToken; // lol
+    csrf = 'x';
   }
   // Insert CSS for overlay
   $(document.head).append(`<style>
@@ -51,47 +50,45 @@ function startUberEatsAnalysis() {
 
   // Set text to "Processing"
   $('body').prepend(`<div id="overlay"><div id="text">Processing API</div></div>`);
-  requestDataFromUber(csrf, MAX_LIMIT, '', true);
+  requestDataFromUber(csrf, null, true);
 }
 
-function requestDataFromUber(csrf, limit, lastWorkflowUuid, isFirstRun) {
+function requestDataFromUber(csrf, cursor, isFirstRun) {
   ++requestsActive;
-  const params = {
-    limit: limit,
-    lastWorkflowUuid: lastWorkflowUuid,
-    status: 'inactive'
-  };
-  const urlParams = $.param(params);
-  $.ajax({
-    method: 'GET',
-    url: `${EATS_ENDPOINT}?${urlParams}`,
+
+  fetch(EATS_ENDPOINT, {
+    method: 'POST',
     headers: {
-      "x-csrf-token": csrf
+      "x-csrf-token": csrf,
+      'Content-Type': 'application/json'
     },
-    type: 'json',
-    success(response, textStatus, jqXHR) {
-      if (response && response.orders) {
-        for (const order of response.orders) {
-          global.orders.set(order.uuid, order);
-        }
-        if (response.orders.length) {
-          const lastOrder = response.orders.pop();
-          requestDataFromUber(csrf, limit, lastOrder.uuid, false);
-        }
+    body: JSON.stringify({
+      cursor: cursor
+    })
+  }).then(function (response) {
+    return response.json();
+  }).then(response => {
+    if (response && response.data.orders) {
+      const orders = response.data.orders;
+      for (const order of orders) {
+        global.orders.set(order.baseEaterOrder.uuid, order);
       }
-      $("#text").html(`Processing API <br>Loaded ${global.orders.size} orders`);
-      checkIfCompleteOriginalAPI();
-    },
-    error: function (xhr, ajaxOptions, thrownError) {
-      $("#text").html(`Processing API <br>Loaded ${global.orders.size} orders`);
-      if (isFirstRun) {
-        $("#overlay").hide();
-        alert("Please sign in and click UberStats icon again! Make sure you are on https://www.ubereats.com/en-US/orders/");
-        return;
+      if (response.data.meta.hasMore) {
+        requestDataFromUber(csrf, response.data.paginationData.nextCursor, false);
       }
-      checkIfCompleteOriginalAPI();
     }
+    $("#text").html(`Processing API <br>Loaded ${global.orders.size} orders`);
+    checkIfCompleteOriginalAPI();
+  }).catch(error => {
+    $("#text").html(`Processing API <br>Loaded ${global.orders.size} orders`);
+    if (isFirstRun) {
+      $("#overlay").hide();
+      alert(`Please sign in and click UberStats icon again! Make sure you are on https://www.ubereats.com/en-US/orders/. Error: ${error}`);
+      return;
+    }
+    checkIfCompleteOriginalAPI();
   });
+
 }
 
 function checkIfCompleteOriginalAPI() {
