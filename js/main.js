@@ -92,6 +92,10 @@ function calculateTripTypesStat() {
   $("#rides-by-type").html(rideTypesText);
 }
 
+function _genTimeLink(id, time){
+  return `<a target="_blank" class="link" href="https://riders.uber.com/trips/${id}">${time} Minutes</a>`
+}
+
 function calculateTripLengthsStat() {
   let tripLengths = [];
   global.trips.forEach(t => {
@@ -99,15 +103,22 @@ function calculateTripLengthsStat() {
       let requestTime = new Date(t.requestTime);
       let dropoffTime = new Date(t.dropoffTime);
       let lengthMs = dropoffTime.getTime() - requestTime.getTime();
-      tripLengths.push(lengthMs);
+      tripLengths.push({time: lengthMs, id: t.uuid});
     }
   });
   // Trip lengths
-  tripLengths.sort((a, b) => a - b);
-  $("#shortest-ride").text(Math.abs(Math.round(tripLengths[0] / (60 * 1000))) + " Minutes");
-  $("#longest-ride").text(Math.abs(Math.round(tripLengths[tripLengths.length - 1] / (60 * 1000))) + " Minutes");
+  tripLengths.sort((a, b) => a.time - b.time);
+  
+  const shortestTime = Math.abs(Math.round(tripLengths[0].time / (60 * 1000)));
+  const longestTime = Math.abs(Math.round(tripLengths[tripLengths.length - 1].time / (60 * 1000)));
+
+  $("#shortest-ride").html(_genTimeLink(tripLengths[0].id, shortestTime));
+  $("#longest-ride").html(_genTimeLink(tripLengths[tripLengths.length - 1].id, longestTime));
   let totalTimeText = "";
-  let totalTime = tripLengths.reduce((a, b) => a + b, 0);
+  let totalTime = 0;
+  for(const trip of tripLengths){
+    totalTime += trip.time;
+  }
   totalTimeText += `<span class="subheading">Seconds</span><span class="stat"> ${Math.round(totalTime /= 1000)}</span><br>`;
   if (totalTime > 60) {
     totalTimeText += `<span class="subheading">Minutes</span><span id="minutes" class="stat"> ${Math.round(totalTime /= 60)}</span><br>`;

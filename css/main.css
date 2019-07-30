@@ -16,6 +16,10 @@ body {
   color: white;
 }
 
+.link {
+  text-decoration: underline;
+}
+
 .eatsBody {
   background-color: rgb(117, 180, 55);
 }
