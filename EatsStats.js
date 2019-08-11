@@ -95,13 +95,6 @@ function checkIfCompleteOriginalAPI() {
   --requestsActive;
   if (requestsActive === 0) {
     $("#overlay").hide();
-    // window.Swal({
-    //   title: 'Request individual trip data?',
-    //   html: "Takes significantly longer, and might trigger email receipts due to Uber's cache!<br><br>Clicking No
-    // will still show most stats.", type: 'question', showCancelButton: true, confirmButtonColor: '#3085d6',
-    // cancelButtonColor: '#d33', confirmButtonText: 'Yes!', cancelButtonText: 'No' }).then((result) => { if
-    // (result.value) { requestAllTripInfo(); } else {  } });
-    // Once all requests have completed, trigger a new tab and send the data
     let serialized = {};
     serialized.orders = [...global.orders];
     chrome.runtime.sendMessage({globalEats: serialized});

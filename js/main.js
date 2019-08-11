@@ -92,8 +92,8 @@ function calculateTripTypesStat() {
   $("#rides-by-type").html(rideTypesText);
 }
 
-function _genTimeLink(id, time){
-  return `<a target="_blank" class="link" href="https://riders.uber.com/trips/${id}">${time} Minutes</a>`
+function _genTimeLink(id, time) {
+  return `<a target="_blank" class="link" href="https://riders.uber.com/trips/${id}">${time} Minutes</a>`;
 }
 
 function calculateTripLengthsStat() {
@@ -103,12 +103,15 @@ function calculateTripLengthsStat() {
       let requestTime = new Date(t.requestTime);
       let dropoffTime = new Date(t.dropoffTime);
       let lengthMs = dropoffTime.getTime() - requestTime.getTime();
-      tripLengths.push({time: lengthMs, id: t.uuid});
+      tripLengths.push({
+        time: lengthMs,
+        id: t.uuid
+      });
     }
   });
   // Trip lengths
   tripLengths.sort((a, b) => a.time - b.time);
-  
+
   const shortestTime = Math.abs(Math.round(tripLengths[0].time / (60 * 1000)));
   const longestTime = Math.abs(Math.round(tripLengths[tripLengths.length - 1].time / (60 * 1000)));
 
@@ -116,7 +119,7 @@ function calculateTripLengthsStat() {
   $("#longest-ride").html(_genTimeLink(tripLengths[tripLengths.length - 1].id, longestTime));
   let totalTimeText = "";
   let totalTime = 0;
-  for(const trip of tripLengths){
+  for (const trip of tripLengths) {
     totalTime += trip.time;
   }
   totalTimeText += `<span class="subheading">Seconds</span><span class="stat"> ${Math.round(totalTime /= 1000)}</span><br>`;
@@ -229,12 +232,22 @@ function calculatePickupAndDropoffStats() {
 function calculateMonthAndYearStats() {
   let years = {};
   let months = {};
+  const today = new Date();
+  let totalSpentThisYear = {};
   global.trips.forEach(t => {
     let date = new Date(t.requestTime);
     let year = date.getFullYear();
     let month = date.toLocaleString("en-us", {
       month: "long"
     });
+
+    if (date.getFullYear() === today.getFullYear()) {
+      if (!totalSpentThisYear.hasOwnProperty(month)) {
+        totalSpentThisYear[month] = 0;
+      }
+      totalSpentThisYear[month] += getCurrencyConversionIfExists(t.currencyCode, t.clientFare)
+    }
+
     if (!years.hasOwnProperty(year)) {
       years[year] = 0;
     }
@@ -279,6 +292,17 @@ function calculateMonthAndYearStats() {
     monthText += `<span class="subheading">${key}</span><span class="stat"> ${months[key]}</span><br>`;
   }
   $("#rides-by-month").html(monthText);
+
+  let monthSpentKeys = Object.keys(totalSpentThisYear);
+  monthSpentKeys.sort((a, b) => {
+    return monthNames[a] - monthNames[b];
+  });
+  let monthlySpendSoFar = '';
+  for (const key of monthSpentKeys) {
+    monthlySpendSoFar += `<span class="subheading">${key}</span><span class="stat">$${totalSpentThisYear[key].toFixed(2)}</span><br>`;
+  }
+  $("#monthly-prices").html(monthlySpendSoFar);
+
 }
 
 function calculateDistanceStats() {
