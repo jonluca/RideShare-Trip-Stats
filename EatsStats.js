@@ -63,15 +63,16 @@ function requestDataFromUber(csrf, cursor, isFirstRun) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      cursor: cursor
+      cursor: cursor,
+      limit: 200
     })
   }).then(function (response) {
     return response.json();
   }).then(response => {
-    if (response && response.data.orders) {
-      const orders = response.data.orders;
-      for (const order of orders) {
-        global.orders.set(order.baseEaterOrder.uuid, order);
+    if (response && response.data.ordersMap) {
+      const orders = response.data.ordersMap;
+      for (const order of Object.keys(orders)) {
+        global.orders.set(order, orders[order]);
       }
       if (response.data.meta.hasMore) {
         requestDataFromUber(csrf, response.data.paginationData.nextCursor, false);
