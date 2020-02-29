@@ -12,13 +12,11 @@ chrome.browserAction.onClicked.addListener(function (tab) {
     chrome.tabs.executeScript(null, {
       file: "js/libs/sweetalert2.all.min.js"
     }, _ => {
-      chrome.tabs.executeScript(null, {
-        file: "js/incorrect-site-error.js"
+      chrome.tabs.create({url: chrome.extension.getURL("html/oninstall.html")}, function (tab) {
       });
     });
   }
 });
-
 chrome.runtime.onInstalled.addListener(function (object) {
   chrome.tabs.create({url: chrome.extension.getURL("html/oninstall.html")}, function (tab) {
   });

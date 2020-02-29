@@ -47,7 +47,7 @@ a {
 }
 
 .lifetime {
-  margin: 10px 0px 10px 50px;
+  margin: 10px 0 10px 50px;
   display: flex;
 }
 
@@ -105,7 +105,7 @@ a {
   color: white;
   background-color: black;
   cursor: pointer;
-  padding: 0px;
+  padding: 0;
   border: 1px solid white;
 }
 

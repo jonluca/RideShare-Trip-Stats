@@ -7,9 +7,7 @@
     "*://uber.com/*",
     "*://*.uber.com/*",
     "*://*.ubereats.com/*",
-    "storage",
-    "tabs",
-    "activeTab"
+    "tabs"
   ],
   "background": {
     "persistent": true,
