@@ -679,7 +679,8 @@ function registerClickHandlers() {
       input: 'radio',
       inputOptions: {
         csv: "CSV",
-        json: "JSON"
+        json: "JSON",
+        full: "JSON (Full Details)",
       }
     });
     if (value) {
@@ -696,6 +697,14 @@ function registerClickHandlers() {
       } else if (value === "json") {
         let json = JSON.stringify(trips);
         downloadFile('trips.json', json);
+      } else if (value === "full") {
+        let json = JSON.stringify({
+          trips,
+          cities: [...global.cities.values()],
+          drivers: [...global.drivers.values()],
+          payment: [...global.payment.values()],
+        });
+        downloadFile('trips-full.json', json);
       }
     }
   });
