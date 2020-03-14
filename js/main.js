@@ -690,20 +690,12 @@ function registerClickHandlers() {
         if (csv == null) {
           return;
         }
-        let hiddenElement = document.createElement('a');
-        hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
-        hiddenElement.target = '_blank';
-        hiddenElement.download = 'trips.csv';
-        hiddenElement.click();
+        downloadFile('trips.csv', csv);
         alert("Note: Fields that are JSON objects are base64 encoded");
 
       } else if (value === "json") {
         let json = JSON.stringify(trips);
-        let hiddenElement = document.createElement('a');
-        hiddenElement.href = 'data:text/json;charset=utf-8,' + encodeURI(json);
-        hiddenElement.target = '_blank';
-        hiddenElement.download = 'trips.json';
-        hiddenElement.click();
+        downloadFile('trips.json', json);
       }
     }
   });
