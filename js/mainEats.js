@@ -224,20 +224,12 @@ function registerClickHandlers() {
         if (csv == null) {
           return;
         }
-        let hiddenElement = document.createElement('a');
-        hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
-        hiddenElement.target = '_blank';
-        hiddenElement.download = 'orders.csv';
-        hiddenElement.click();
+        downloadFile('orders.csv', csv);
         alert("Note: Fields that are JSON objects are base64 encoded");
 
       } else if (value === "json") {
         let json = JSON.stringify(orders);
-        let hiddenElement = document.createElement('a');
-        hiddenElement.href = 'data:text/json;charset=utf-8,' + encodeURI(json);
-        hiddenElement.target = '_blank';
-        hiddenElement.download = 'orders.json';
-        hiddenElement.click();
+        downloadFile('orders.json', json);
       }
     }
   });
