@@ -92,27 +92,32 @@ function requestDataFromUber(csrf, limit, offset, isFirstRun) {
             next += MAX_LIMIT;
           }
         }
-        payment.map(pm => {
-          if (!global.payment.get(pm.uuid)) {
-            global.payment.set(pm.uuid, pm);
-          }
-        });
-        drivers.map(d => {
-          if (!global.drivers.get(d.uuid)) {
-            global.drivers.set(d.uuid, d);
-          }
-        });
-        trips.trips.map(t => {
-          if (!global.trips.get(t.uuid)) {
-            global.trips.set(t.uuid, t);
-            $("#text").html(`Processing API <br>${global.trips.size} of ${trips.count}`);
-          }
-        });
-        cities.map(c => {
-          if (!global.cities.get(c.id)) {
-            global.cities.set(c.id, c);
-          }
-        });
+        try {
+          payment.map(pm => {
+            if (!global.payment.get(pm.uuid)) {
+              global.payment.set(pm.uuid, pm);
+            }
+          });
+          drivers.map(d => {
+            if (!global.drivers.get(d.uuid)) {
+              global.drivers.set(d.uuid, d);
+            }
+          });
+          trips.trips.map(t => {
+            if (!global.trips.get(t.uuid)) {
+              global.trips.set(t.uuid, t);
+              $("#text").html(`Processing API <br>${global.trips.size} of ${trips.count}`);
+            }
+          });
+          cities.map(c => {
+            if (!global.cities.get(c.id)) {
+              global.cities.set(c.id, c);
+            }
+          });
+        } catch (e) {
+          // skip - failure
+        }
+
       }
       checkIfCompleteOriginalAPI();
     },
