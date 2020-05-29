@@ -79,11 +79,11 @@ function requestDataFromUber(csrf, limit, offset, isFirstRun) {
     type: 'json',
     success(response, textStatus, jqXHR) {
       if (response && response.data) {
-        let contents = response.data;
-        let payment = contents.paymentProfiles;
-        let drivers = contents.drivers;
-        let cities = contents.cities;
-        let trips = contents.trips;
+        let contents = response.data || {};
+        let payment = contents.paymentProfiles || [];
+        let drivers = contents.drivers || [];
+        let cities = contents.cities || [];
+        let trips = contents.trips || [];
         if (trips.pagingResult && trips.pagingResult.hasMore && isFirstRun) {
           // Request all results in increments of MAX_LIMIT until we've reached the total amount of trips
           let next = MAX_LIMIT;
