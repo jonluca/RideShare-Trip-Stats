@@ -45,6 +45,7 @@ function calculateMoneySpent() {
   let totalSpent = {};
   let totalAcrossAllCurrencies = 0;
   let completedTrips = 0;
+  let completedPaidTrips = 0;
   global.trips.forEach(t => {
     if (t.clientFare) {
       if (!totalSpent.hasOwnProperty(t.currencyCode)) {
@@ -56,6 +57,9 @@ function calculateMoneySpent() {
     }
     if (t.status === "COMPLETED") {
       completedTrips++;
+    }
+    if(t.clientFare !== 0){
+      completedPaidTrips++;
     }
   });
 
@@ -69,6 +73,7 @@ function calculateMoneySpent() {
   }
   $("#total-spent").html(totalSpentText);
   $("#average-price").text("~$" + (totalAcrossAllCurrencies / completedTrips).toFixed(2));
+  $("#average-price-nonZero").text("~$" + (totalAcrossAllCurrencies / completedPaidTrips).toFixed(2));
   addPriceChart();
 }
 
