@@ -6,13 +6,30 @@ $(_ => {
     global.payment = new Map(response.data.payment);
     global.trips = new Map(response.data.trips);
     global.drivers = new Map(response.data.drivers);
-    startStatistics();
     registerClickHandlers();
+
+    startStatistics();
   });
 });
 
+function getClosestItemPrice(price){
+
+  const prices = Object.keys(CAR_PRICES).map(e => Number(e)).sort((a,b) => a-b)
+  let priceToCompare = prices[0]
+  for(const nextPrice of prices){
+    if(price < nextPrice){
+      break;
+    }
+    priceToCompare = nextPrice;
+  }
+  const item = CAR_PRICES[priceToCompare];
+
+  return item || "Unknown";
+}
+
 function startStatistics() {
   console.log(global);
+  $("#year").text((new Date()).getFullYear());
 
   addTotalRidesStat();
   addTotalPaymentMethodsStat();
@@ -33,8 +50,26 @@ function startStatistics() {
 
 function addTotalRidesStat() {
   // Total # trips
-  $("#total-rides").text(global.trips.size);
+  const numTrips = global.trips.size;
+  const trips = Array.from(global.trips).map(e => e[1])
+  const times = trips.map(e => e && e.requestTime && new Date(e.requestTime)).filter(Boolean).sort((a,b) => a-b)
+  const dateDiff  = dateDiffInDays(times[0], times.pop());
+  const daysBetweenUbers = (dateDiff/numTrips).toFixed(2)
+  $("#total-rides").text(numTrips);
+  $("#daily-rides").html(`You’ve taken <span class="info-value">${numTrips.toLocaleString()}</span> trips with Uber, over <span class="info-value">${dateDiff.toLocaleString()}</span> days, for an average of 1 uber every <span class="info-value">${daysBetweenUbers}</span> days</span>`)
 }
+
+const _MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+// a and b are javascript Date objects
+function dateDiffInDays(a, b) {
+  // Discard the time and time-zone information.
+  const utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
+  const utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
+
+  return Math.floor((utc2 - utc1) / _MS_PER_DAY);
+}
+
 
 function addTotalPaymentMethodsStat() {
   // Total # payment methods
@@ -68,6 +103,7 @@ function calculateMoneySpent() {
     totalSpentText += `<span class="subheading">${key}</span><span class="stat"> ${currencySymbol + totalSpent[key].toFixed(2)}</span><br>`;
   }
   $("#total-spent").html(totalSpentText);
+  $("#total-spending").html(`You’ve spent <span class="info-value">$${totalAcrossAllCurrencies.toFixed(2)}</span> on Uber, enough to buy a <span class="info-value">${getClosestItemPrice(totalAcrossAllCurrencies)}</span>`)
   $("#average-price").text("~$" + (totalAcrossAllCurrencies / completedTrips).toFixed(2));
   addPriceChart();
 }
@@ -117,6 +153,7 @@ function calculateTripLengthsStat() {
 
   $("#shortest-ride").html(_genTimeLink(tripLengths[0].id, shortestTime));
   $("#longest-ride").html(_genTimeLink(tripLengths[tripLengths.length - 1].id, longestTime));
+  $("#longest").html(`Your longest uber trip was <span class="info-value">${longestTime.toLocaleString()}</span> minutes long`)
   let totalTimeText = "";
   let totalTime = 0;
   for (const trip of tripLengths) {
@@ -734,4 +771,9 @@ function registerClickHandlers() {
       $(".should-hide-in-image").show();
     });
   });
+
+  $("#next").click(()=> {
+    $("#first").hide();
+    $("#main-content").show();
+  })
 }

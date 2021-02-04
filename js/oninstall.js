@@ -7,13 +7,13 @@ function init() {
   var choice = async () => {
     const {test} = await Swal.fire({
       title: 'Success!',
-      text: 'You can trigger this modal at anytime by clicking the icon in the top right. Make sure you go to uber.com and sign in before clicking continue!',
+      html: 'You can trigger this modal at anytime by clicking the icon in the top right. Make sure you go to uber.com and sign in before clicking continue! <a href="https://auth.uber.com/login" target="_blank">Go to uber.com</a>',
       confirmButtonText: 'Continue &rarr;',
       showCancelButton: true
     });
     const {value} = await Swal.fire({
-      title: 'Select which site you want, then click the extension icon once the site has loaded.',
-      text: 'Also a reminder - delete this extension after you are done!',
+      title: 'Select Uber Product',
+      html: 'Important: <b>Once the page has loaded, click the extension icon in the header again</b>',
       input: 'radio',
       showCancelButton: true,
       inputOptions: {
