@@ -69,13 +69,14 @@ function requestDataFromUber(csrf, cursor, isFirstRun) {
   }).then(function (response) {
     return response.json();
   }).then(response => {
-    if (response && response.data.ordersMap) {
-      const orders = response.data.ordersMap;
+    const data = response?.data;
+    if (data?.ordersMap) {
+      const orders = data.ordersMap;
       for (const order of Object.keys(orders)) {
         global.orders.set(order, orders[order]);
       }
-      if (response.data.meta.hasMore) {
-        requestDataFromUber(csrf, response.data.paginationData.nextCursor, false);
+      if (data.paginationData.nextCursor) {
+        requestDataFromUber(csrf, data.paginationData.nextCursor, false);
       }
     }
     $("#text").html(`Processing API <br>Loaded ${global.orders.size} orders`);
