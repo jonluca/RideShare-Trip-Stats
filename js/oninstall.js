@@ -1,9 +1,20 @@
 $(() => {
   init();
 });
+const createTabAndRunScript = (url, script) => {
+  chrome.tabs.create({url}, function (newTab) {
+    chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+      // make sure the status is 'complete' and it's the right tab
+      if (tab.id === newTab.id && changeInfo.status == 'complete') {
+        chrome.tabs.executeScript(tab.id, {
+          file: script
+        });
+      }
+    });
+  });
+};
 
 function init() {
-
   var choice = async () => {
     const {test} = await Swal.fire({
       title: 'Success!',
@@ -23,13 +34,12 @@ function init() {
     });
     if (value) {
       if (value === 'eats') {
-        window.open("https://www.ubereats.com/en-US/orders/", "_blank");
+        createTabAndRunScript("https://www.ubereats.com/en-US/orders/", "EatsStats.js");
       } else if (value === "rides") {
-        window.open("https://riders.uber.com/trips", "_blank");
+        createTabAndRunScript("https://riders.uber.com/trips", "RideShareStats.js");
       }
     }
   };
-
   $("#continue").on('click', (ev) => {
     console.log('h');
     choice();
