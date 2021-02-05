@@ -434,7 +434,7 @@ function addTripsAndSpentByMonthChart() {
         label: "Rides Taken",
         data: finalCountsTripCounts,
         fill: false,
-        borderColor: '#1FD470'
+        borderColor: '#1fd470'
       }]
     },
     options: {
@@ -486,7 +486,7 @@ function addTripsAndSpentByMonthChart() {
         label: "Amount Spent",
         data: finalCountsSpendCounts,
         fill: false,
-        borderColor: '#1FD470'
+        borderColor: '#1fd470'
       }]
     },
     options: {
@@ -572,7 +572,7 @@ function addDistanceChart() {
         label: "Total Traveled",
         data: finalCounts,
         fill: true,
-        borderColor: '#1FD470'
+        borderColor: '#1fd470'
       }]
     },
     options: {
@@ -608,7 +608,7 @@ function addDistanceChart() {
   chart.render();
 }
 
-function getTotalSpent(){
+function getTotalSpent() {
   let data = {};
   global.trips.forEach(t => {
     if (t && t.clientFare) {
@@ -629,9 +629,9 @@ function getTotalSpent(){
       y: totalSpent
     });
   }
-
-  return finalCounts
+  return finalCounts;
 }
+
 function addPriceChart() {
   const ctx = document.getElementById("price-chart").getContext('2d');
   const finalCounts = getTotalSpent();
@@ -642,7 +642,7 @@ function addPriceChart() {
         label: "Total Spent (USD)",
         data: finalCounts,
         fill: true,
-        borderColor: '#1FD470'
+        borderColor: '#1fd470'
       }]
     },
     options: {
@@ -678,42 +678,45 @@ function addPriceChart() {
   chart.render();
 }
 
-function registerClickHandlers() {
-  $("#export").click(async e => {
-    let trips = [...global.trips.values()];
-    const {value} = await Swal.fire({
-      title: 'CSV or JSON',
-      input: 'radio',
-      inputOptions: {
-        csv: "CSV",
-        json: "JSON",
-        full: "JSON (Full Details)"
-      }
-    });
-    if (value) {
-      if (value === 'csv') {
-        let csv = convertArrayOfObjectsToCSV({
-          data: trips
-        });
-        if (csv == null) {
-          return;
-        }
-        downloadFile('trips.csv', csv);
-        alert("Note: Fields that are JSON objects are base64 encoded");
-      } else if (value === "json") {
-        let json = JSON.stringify(trips);
-        downloadFile('trips.json', json);
-      } else if (value === "full") {
-        let json = JSON.stringify({
-          trips,
-          cities: [...global.cities.values()],
-          drivers: [...global.drivers.values()],
-          payment: [...global.payment.values()]
-        });
-        downloadFile('trips-full.json', json);
-      }
+const exportFunc = async e => {
+  let trips = [...global.trips.values()];
+  const {value} = await Swal.fire({
+    title: 'CSV or JSON',
+    input: 'radio',
+    inputOptions: {
+      csv: "CSV",
+      json: "JSON",
+      full: "JSON (Full Details)"
     }
   });
+  if (value) {
+    if (value === 'csv') {
+      let csv = convertArrayOfObjectsToCSV({
+        data: trips
+      });
+      if (csv == null) {
+        return;
+      }
+      downloadFile('trips.csv', csv);
+      alert("Note: Fields that are JSON objects are base64 encoded");
+    } else if (value === "json") {
+      let json = JSON.stringify(trips);
+      downloadFile('trips.json', json);
+    } else if (value === "full") {
+      let json = JSON.stringify({
+        trips,
+        cities: [...global.cities.values()],
+        drivers: [...global.drivers.values()],
+        payment: [...global.payment.values()]
+      });
+      downloadFile('trips-full.json', json);
+    }
+  }
+};
+
+function registerClickHandlers() {
+  $("#export").click(exportFunc);
+  $("#export-header").click(exportFunc);
   $("#share").click(e => {
     let minutes = $("#minutes").text();
     if (minutes) {
@@ -742,11 +745,9 @@ function registerClickHandlers() {
     $("#first").hide();
     $("#main-view").show();
     $("#dashboard-content").show();
-
     const spend = document.getElementById("new-spend-chart").getContext('2d');
     const finalCounts = getTotalSpent();
-    Chart.defaults.global.defaultFontColor = 'white'
-
+    Chart.defaults.global.defaultFontColor = 'white';
     const chart = new Chart(spend, {
       type: 'line',
       data: {
@@ -754,7 +755,7 @@ function registerClickHandlers() {
           label: "Total Spent (USD)",
           data: finalCounts,
           fill: true,
-          borderColor: '#1FD470'
+          borderColor: '#1fd470'
         }]
       },
       options: {
@@ -793,12 +794,12 @@ function registerClickHandlers() {
     $("#main-content").show();
     $("#dashboard-content").hide();
     $(".menu-entry").removeClass('selected-menu');
-    $("#all-stats").addClass('selected-menu')
+    $("#all-stats").addClass('selected-menu');
   });
   $("#dashboard").click(() => {
     $("#main-content").hide();
     $("#dashboard-content").show();
     $(".menu-entry").removeClass('selected-menu');
-    $("#dashboard").addClass('selected-menu')
+    $("#dashboard").addClass('selected-menu');
   });
 }
