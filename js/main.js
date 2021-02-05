@@ -1,5 +1,4 @@
 let global = {};
-
 $(_ => {
   chrome.runtime.sendMessage({requestData: true}, function (response) {
     global.cities = new Map(response.data.cities);
@@ -7,33 +6,28 @@ $(_ => {
     global.trips = new Map(response.data.trips);
     global.drivers = new Map(response.data.drivers);
     registerClickHandlers();
-
     startStatistics();
   });
 });
 
-function getClosestItemPrice(price){
-
-  const prices = Object.keys(CAR_PRICES).map(e => Number(e)).sort((a,b) => a-b)
-  let priceToCompare = prices[0]
-  for(const nextPrice of prices){
-    if(price < nextPrice){
+function getClosestItemPrice(price) {
+  const prices = Object.keys(CAR_PRICES).map(e => Number(e)).sort((a, b) => a - b);
+  let priceToCompare = prices[0];
+  for (const nextPrice of prices) {
+    if (price < nextPrice) {
       break;
     }
     priceToCompare = nextPrice;
   }
   const item = CAR_PRICES[priceToCompare];
-
   return item || "Unknown";
 }
 
 function startStatistics() {
   console.log(global);
   $("#year").text((new Date()).getFullYear());
-
   addTotalRidesStat();
   addTotalPaymentMethodsStat();
-
   calculateMoneySpent();
   calculateTripTypesStat();
   calculateTripCompletionStats();
@@ -44,19 +38,19 @@ function startStatistics() {
   calculateMonthAndYearStats();
   calculateDistanceStats();
   calculateCarMakeStats();
-
   addTripsAndSpentByMonthChart();
 }
 
 function addTotalRidesStat() {
   // Total # trips
   const numTrips = global.trips.size;
-  const trips = Array.from(global.trips).map(e => e[1])
-  const times = trips.map(e => e && e.requestTime && new Date(e.requestTime)).filter(Boolean).sort((a,b) => a-b)
-  const dateDiff  = dateDiffInDays(times[0], times.pop());
-  const daysBetweenUbers = (dateDiff/numTrips).toFixed(2)
+  const trips = Array.from(global.trips).map(e => e[1]);
+  const times = trips.map(e => e && e.requestTime && new Date(e.requestTime)).filter(Boolean).sort((a, b) => a - b);
+  const dateDiff = dateDiffInDays(times[0], times.pop());
+  const daysBetweenUbers = (dateDiff / numTrips).toFixed(2);
   $("#total-rides").text(numTrips);
-  $("#daily-rides").html(`You’ve taken <span class="info-value">${numTrips.toLocaleString()}</span> trips with Uber, over <span class="info-value">${dateDiff.toLocaleString()}</span> days, for an average of 1 uber every <span class="info-value">${daysBetweenUbers}</span> days</span>`)
+  $("#num-rides").text(numTrips);
+  $("#daily-rides").html(`You’ve taken <span class="info-value">${numTrips.toLocaleString()}</span> trips with Uber, over <span class="info-value">${dateDiff.toLocaleString()}</span> days, for an average of 1 uber every <span class="info-value">${daysBetweenUbers}</span> days</span>`);
 }
 
 const _MS_PER_DAY = 1000 * 60 * 60 * 24;
@@ -66,10 +60,8 @@ function dateDiffInDays(a, b) {
   // Discard the time and time-zone information.
   const utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
   const utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
-
   return Math.floor((utc2 - utc1) / _MS_PER_DAY);
 }
-
 
 function addTotalPaymentMethodsStat() {
   // Total # payment methods
@@ -86,14 +78,12 @@ function calculateMoneySpent() {
         totalSpent[t.currencyCode] = 0;
       }
       totalSpent[t.currencyCode] += t.clientFare;
-
       totalAcrossAllCurrencies += getCurrencyConversionIfExists(t.currencyCode, t.clientFare);
     }
     if (t.status === "COMPLETED") {
       completedTrips++;
     }
   });
-
   // $ spent stats
   $("#total-payment").text("~$" + totalAcrossAllCurrencies.toFixed(2));
   let totalSpentText = "";
@@ -103,14 +93,15 @@ function calculateMoneySpent() {
     totalSpentText += `<span class="subheading">${key}</span><span class="stat"> ${currencySymbol + totalSpent[key].toFixed(2)}</span><br>`;
   }
   $("#total-spent").html(totalSpentText);
-  $("#total-spending").html(`You’ve spent <span class="info-value">$${totalAcrossAllCurrencies.toFixed(2)}</span> on Uber, enough to buy a <span class="info-value">${getClosestItemPrice(totalAcrossAllCurrencies)}</span>`)
-  $("#average-price").text("~$" + (totalAcrossAllCurrencies / completedTrips).toFixed(2));
+  $("#total-spending").html(`You’ve spent <span class="info-value">$${totalAcrossAllCurrencies.toFixed(2)}</span> on Uber, enough to buy a <span class="info-value">${getClosestItemPrice(totalAcrossAllCurrencies)}</span>`);
+  const averagePriceText = "~$" + (totalAcrossAllCurrencies / completedTrips).toFixed(2);
+  $("#average-price").text(averagePriceText);
+  $("#avg-px").text(averagePriceText);
   addPriceChart();
 }
 
 function calculateTripTypesStat() {
   let tripTypes = {};
-
   global.trips.forEach(t => {
     if (t.vehicleViewName) {
       let name = t.vehicleViewName;
@@ -123,7 +114,6 @@ function calculateTripTypesStat() {
       tripTypes[name]++;
     }
   });
-
   let rideTypesText = constructTextSpan(tripTypes, true);
   $("#rides-by-type").html(rideTypesText);
 }
@@ -147,13 +137,11 @@ function calculateTripLengthsStat() {
   });
   // Trip lengths
   tripLengths.sort((a, b) => a.time - b.time);
-
   const shortestTime = Math.abs(Math.round(tripLengths[0].time / (60 * 1000)));
   const longestTime = Math.abs(Math.round(tripLengths[tripLengths.length - 1].time / (60 * 1000)));
-
   $("#shortest-ride").html(_genTimeLink(tripLengths[0].id, shortestTime));
   $("#longest-ride").html(_genTimeLink(tripLengths[tripLengths.length - 1].id, longestTime));
-  $("#longest").html(`Your longest uber trip was <span class="info-value">${longestTime.toLocaleString()}</span> minutes long`)
+  $("#longest").html(`Your longest uber trip was <span class="info-value">${longestTime.toLocaleString()}</span> minutes long`);
   let totalTimeText = "";
   let totalTime = 0;
   for (const trip of tripLengths) {
@@ -166,11 +154,12 @@ function calculateTripLengthsStat() {
   if (totalTime > 60) {
     totalTimeText += `<span class="subheading">Hours</span><span class="stat"> ${Math.round(totalTime /= 60)}</span><br>`;
   }
+  let days = (totalTime /= 24).toFixed(2);
   if (totalTime > 24) {
-    totalTimeText += `<span class="subheading">Days</span><span class="stat"> ${(totalTime /= 24).toFixed(2)}</span><br>`;
+    totalTimeText += `<span class="subheading">Days</span><span class="stat"> ${days}</span><br>`;
   }
-
   $("#total-time").html(totalTimeText);
+  $("#tot-time").html(`${days} days`);
 }
 
 function calculateTripCompletionStats() {
@@ -178,7 +167,6 @@ function calculateTripCompletionStats() {
   let completedTrips = 0;
   let driverCanceledTrips = 0;
   let surgeTrips = 0;
-
   global.trips.forEach(t => {
     if (t.isSurgeTrip) {
       surgeTrips++;
@@ -191,7 +179,6 @@ function calculateTripCompletionStats() {
       driverCanceledTrips++;
     }
   });
-
   // Completed and canceled rides
   $("#canceled-rides").text(canceledTrips);
   $("#completed-rides").text(completedTrips);
@@ -201,7 +188,6 @@ function calculateTripCompletionStats() {
 
 function calculateDriverStats() {
   let driverCounts = {};
-
   global.trips.forEach(t => {
     if (t.driverUUID) {
       if (!driverCounts.hasOwnProperty(t.driverUUID)) {
@@ -223,7 +209,6 @@ function calculateDriverStats() {
 
 function calculateCityStats() {
   let cityCounts = {};
-
   global.trips.forEach(t => {
     if (t.cityID) {
       if (!cityCounts.hasOwnProperty(t.cityID)) {
@@ -232,7 +217,6 @@ function calculateCityStats() {
       cityCounts[t.cityID]++;
     }
   });
-
   let cities = getSortedKeysFromObject(cityCounts, true);
   let cityCountsText = '';
   for (const key of cities) {
@@ -258,10 +242,8 @@ function calculatePickupAndDropoffStats() {
       pickups[t.begintripFormattedAddress]++;
     }
   });
-
   let pickupText = constructTextSpan(pickups, true, 3);
   $("#fave-pickup").html(pickupText);
-
   let dropoffText = constructTextSpan(dropoffs, true, 3);
   $("#fave-dropoff").html(dropoffText);
 }
@@ -277,14 +259,12 @@ function calculateMonthAndYearStats() {
     let month = date.toLocaleString("en-us", {
       month: "long"
     });
-
     if (date.getFullYear() === today.getFullYear()) {
       if (!totalSpentThisYear.hasOwnProperty(month)) {
         totalSpentThisYear[month] = 0;
       }
-      totalSpentThisYear[month] += getCurrencyConversionIfExists(t.currencyCode, t.clientFare)
+      totalSpentThisYear[month] += getCurrencyConversionIfExists(t.currencyCode, t.clientFare);
     }
-
     if (!years.hasOwnProperty(year)) {
       years[year] = 0;
     }
@@ -294,7 +274,6 @@ function calculateMonthAndYearStats() {
     }
     months[month]++;
   });
-
   let yearKeys = Object.keys(years);
   yearKeys.sort((a, b) => {
     return yearKeys[a] - yearKeys[b];
@@ -319,7 +298,6 @@ function calculateMonthAndYearStats() {
     "November": 11,
     "December": 12
   };
-
   let monthKeys = Object.keys(months);
   monthKeys.sort((a, b) => {
     return monthNames[a] - monthNames[b];
@@ -329,7 +307,6 @@ function calculateMonthAndYearStats() {
     monthText += `<span class="subheading">${key}</span><span class="stat"> ${months[key]}</span><br>`;
   }
   $("#rides-by-month").html(monthText);
-
   let monthSpentKeys = Object.keys(totalSpentThisYear);
   monthSpentKeys.sort((a, b) => {
     return monthNames[a] - monthNames[b];
@@ -339,14 +316,11 @@ function calculateMonthAndYearStats() {
     monthlySpendSoFar += `<span class="subheading">${key}</span><span class="stat">$${totalSpentThisYear[key].toFixed(2)}</span><br>`;
   }
   $("#monthly-prices").html(monthlySpendSoFar);
-
 }
 
 function calculateDistanceStats() {
   let distances = {};
-
   global.trips.forEach(t => {
-
     if (t.receipt) {
       let receipt = t.receipt;
       if (!distances.hasOwnProperty(receipt.distance_label)) {
@@ -355,7 +329,6 @@ function calculateDistanceStats() {
       distances[receipt.distance_label] += parseFloat(receipt.distance);
     }
   });
-
   let distanceKeys = getSortedKeysFromObject(distances, true);
   if (distanceKeys.length) {
     $(".hidden").removeClass("hidden");
@@ -364,13 +337,14 @@ function calculateDistanceStats() {
       distanceText += `<span class="subheading">${uppercaseFirst(key)}</span><span class="stat"> ${Math.round(distances[key])}</span><br>`;
     }
     $("#distances").html(distanceText);
+    let miles = Math.round(distances['miles']);
+    $("#tot-distance").text(`${miles} miles`);
     addDistanceChart();
   }
 }
 
 function calculateCarMakeStats() {
   let carMakes = {};
-
   global.trips.forEach(t => {
     if (t.receipt) {
       let receipt = t.receipt;
@@ -380,7 +354,6 @@ function calculateCarMakeStats() {
       carMakes[receipt.car_make]++;
     }
   });
-
   if (Object.keys(carMakes).length) {
     $(".hidden").removeClass("hidden");
     let carText = constructTextSpan(carMakes, true, 3);
@@ -454,7 +427,6 @@ function addTripsAndSpentByMonthChart() {
       y: data[key].amountSpent
     });
   }
-
   const chart = new Chart(numTripsByMonthCtx, {
     type: 'line',
     data: {
@@ -462,8 +434,7 @@ function addTripsAndSpentByMonthChart() {
         label: "Rides Taken",
         data: finalCountsTripCounts,
         fill: false,
-        borderColor: 'black'
-
+        borderColor: '#1FD470'
       }]
     },
     options: {
@@ -506,9 +477,8 @@ function addTripsAndSpentByMonthChart() {
       }
     }
   });
-  $("#rides-chart").css('background-color', 'white');
+  $("#rides-chart").css('background-color', 'black');
   chart.render();
-
   const monthlySpend = new Chart(amountSpentByMonthCtx, {
     type: 'line',
     data: {
@@ -516,7 +486,7 @@ function addTripsAndSpentByMonthChart() {
         label: "Amount Spent",
         data: finalCountsSpendCounts,
         fill: false,
-        borderColor: 'black'
+        borderColor: '#1FD470'
       }]
     },
     options: {
@@ -555,7 +525,6 @@ function addTripsAndSpentByMonthChart() {
           },
           label: function (tooltipItem, data) {
             var label = data.datasets[tooltipItem.datasetIndex].label || '';
-
             if (label) {
               label += ': ';
             }
@@ -566,9 +535,8 @@ function addTripsAndSpentByMonthChart() {
       }
     }
   });
-  $("#monthly-spend-chart").css('background-color', 'white');
+  $("#monthly-spend-chart").css('background-color', 'black');
   monthlySpend.render();
-
 }
 
 function addDistanceChart() {
@@ -604,8 +572,7 @@ function addDistanceChart() {
         label: "Total Traveled",
         data: finalCounts,
         fill: true,
-        borderColor: 'black'
-
+        borderColor: '#1FD470'
       }]
     },
     options: {
@@ -637,13 +604,11 @@ function addDistanceChart() {
       }
     }
   });
-  $("#distance-chart").css('background-color', 'white');
+  $("#distance-chart").css('background-color', 'black');
   chart.render();
-
 }
 
-function addPriceChart() {
-  const ctx = document.getElementById("price-chart").getContext('2d');
+function getTotalSpent(){
   let data = {};
   global.trips.forEach(t => {
     if (t && t.clientFare) {
@@ -658,20 +623,26 @@ function addPriceChart() {
   let finalCounts = [];
   let totalSpent = 0;
   for (const key of times) {
-    totalSpent += data[key];
+    totalSpent += Math.round(data[key]);
     finalCounts.push({
       x: new Date(parseInt(key)),
       y: totalSpent
     });
   }
+
+  return finalCounts
+}
+function addPriceChart() {
+  const ctx = document.getElementById("price-chart").getContext('2d');
+  const finalCounts = getTotalSpent();
   const chart = new Chart(ctx, {
     type: 'line',
     data: {
       datasets: [{
-        label: "Total Spent (Aggregate, no currency conversion)",
+        label: "Total Spent (USD)",
         data: finalCounts,
         fill: true,
-        borderColor: 'black'
+        borderColor: '#1FD470'
       }]
     },
     options: {
@@ -703,9 +674,8 @@ function addPriceChart() {
       }
     }
   });
-  $("#price-chart").css('background-color', 'white');
+  $("#price-chart").css('background-color', 'black');
   chart.render();
-
 }
 
 function registerClickHandlers() {
@@ -717,7 +687,7 @@ function registerClickHandlers() {
       inputOptions: {
         csv: "CSV",
         json: "JSON",
-        full: "JSON (Full Details)",
+        full: "JSON (Full Details)"
       }
     });
     if (value) {
@@ -730,7 +700,6 @@ function registerClickHandlers() {
         }
         downloadFile('trips.csv', csv);
         alert("Note: Fields that are JSON objects are base64 encoded");
-
       } else if (value === "json") {
         let json = JSON.stringify(trips);
         downloadFile('trips.json', json);
@@ -739,13 +708,12 @@ function registerClickHandlers() {
           trips,
           cities: [...global.cities.values()],
           drivers: [...global.drivers.values()],
-          payment: [...global.payment.values()],
+          payment: [...global.payment.values()]
         });
         downloadFile('trips-full.json', json);
       }
     }
   });
-
   $("#share").click(e => {
     let minutes = $("#minutes").text();
     if (minutes) {
@@ -756,10 +724,9 @@ function registerClickHandlers() {
     window.open("https://twitter.com/share?url=https://chrome.google.com/webstore/detail/uber-trip-stats/kddlnbejbpknoedebeojobofnbdfhpnm&text=" + encodeURIComponent(text), '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');
     return false;
   });
-
   $("#export-image").click(e => {
     $(".should-hide-in-image").hide();
-    let options = {backgroundColor: '#000'};
+    let options = {backgroundColor: '#000000'};
     html2canvas($('.container')[0], options).then(function (canvas) {
       console.log(canvas);
       let a = document.createElement('a');
@@ -771,9 +738,67 @@ function registerClickHandlers() {
       $(".should-hide-in-image").show();
     });
   });
-
-  $("#next").click(()=> {
+  $("#next").click(() => {
     $("#first").hide();
+    $("#main-view").show();
+    $("#dashboard-content").show();
+
+    const spend = document.getElementById("new-spend-chart").getContext('2d');
+    const finalCounts = getTotalSpent();
+    Chart.defaults.global.defaultFontColor = 'white'
+
+    const chart = new Chart(spend, {
+      type: 'line',
+      data: {
+        datasets: [{
+          label: "Total Spent (USD)",
+          data: finalCounts,
+          fill: true,
+          borderColor: '#1FD470'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        title: {
+          display: true,
+          text: "Total Spent"
+        },
+        scales: {
+          xAxes: [{
+            type: "time",
+            time: {
+              unit: 'month'
+            },
+            display: true,
+            scaleLabel: {
+              display: true,
+              labelString: 'Date'
+            }
+          }],
+          yAxes: [{
+            display: true,
+            scaleLabel: {
+              display: true,
+              labelString: 'value'
+            }
+          }]
+        }
+      }
+    });
+    $("#price-chart").css('background-color', 'black');
+    chart.render();
+  });
+  $("#all-stats").click(() => {
     $("#main-content").show();
-  })
+    $("#dashboard-content").hide();
+    $(".menu-entry").removeClass('selected-menu');
+    $("#all-stats").addClass('selected-menu')
+  });
+  $("#dashboard").click(() => {
+    $("#main-content").hide();
+    $("#dashboard-content").show();
+    $(".menu-entry").removeClass('selected-menu');
+    $("#dashboard").addClass('selected-menu')
+  });
 }

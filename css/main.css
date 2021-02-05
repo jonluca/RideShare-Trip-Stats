@@ -1,16 +1,16 @@
 @font-face {
     font-family: "Regular";
-    src: url('chrome-extension://__MSG_@@extension_id__/fonts/sf-compact-thin.woff') format("woff2");
+    src: url("chrome-extension://__MSG_@@extension_id__/fonts/sf-compact-thin.woff") format("woff2");
 }
 
 @font-face {
     font-family: "Medium";
-    src: url('chrome-extension://__MSG_@@extension_id__/fonts/sf-compact-medium.woff') format("woff2");
+    src: url("chrome-extension://__MSG_@@extension_id__/fonts/sf-compact-medium.woff") format("woff2");
 }
 
 @font-face {
     font-family: "Bold";
-    src: url('chrome-extension://__MSG_@@extension_id__/fonts/sf-compact-bold.ttf') format("truetype");
+    src: url("chrome-extension://__MSG_@@extension_id__/fonts/sf-compact-bold.ttf") format("truetype");
 }
 
 body {
@@ -34,6 +34,49 @@ header {
     font-weight: bold;
     display: flex;
     justify-content: center;
+}
+
+.header {
+    /* Uber Stats */
+    font-style: normal;
+    font-weight: bold;
+    font-size: 28px;
+    line-height: 33px;
+    color: #ffffff;
+    font-family: Bold, serif;
+    margin: 35px 195px 0px 195px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.logo {
+    margin-right: 8px;
+}
+
+.menu {
+    display: flex;
+    flex-direction: row;
+    margin-left: 135px;
+    font-size: 18px;
+}
+
+.menu-entry {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: #ffffff;
+    opacity: 0.4;
+}
+
+.selected-menu {
+    opacity: 1.0;
+}
+
+.spacer {
+    margin: 0 45px;
 }
 
 footer {
@@ -128,7 +171,7 @@ a {
     display: none;
 }
 
-.info-container{
+.info-container {
     padding: 20px;
     width: 800px;
     border: 1px solid rgba(255, 255, 255, 0.5);
@@ -145,24 +188,19 @@ a {
     font-size: 14px;
     line-height: 17px;
     /* identical to box height */
-    color: #FFFFFF;
+    color: #ffffff;
     opacity: 0.5;
     margin-bottom: 8px;
 }
 
 .info-text {
     /* By poolsharing, you’ve saved 15kt of C02, equivalent to the anual offset of 284 trees */
-
-
     font-family: SF Compact Display;
     font-style: normal;
     font-weight: bold;
     font-size: 24px;
     line-height: 29px;
-
-    color: #FFFFFF;
-
-
+    color: #ffffff;
 }
 
 #first {
@@ -176,15 +214,25 @@ a {
     display: none;
 }
 
+#main-view {
+    display: none;
+}
+
 #page-container {
     position: relative;
     min-height: 100vh;
 }
 
 @-webkit-keyframes rightarrow {
-    0% { -webkit-transform: translateX(0);  }
-    50% { -webkit-transform: translateX(10px); }
-    100% { -webkit-transform: translateX(-0em); }
+    0% {
+        -webkit-transform: translateX(0);
+    }
+    50% {
+        -webkit-transform: translateX(10px);
+    }
+    100% {
+        -webkit-transform: translateX(-0em);
+    }
 }
 
 #next {
@@ -192,11 +240,52 @@ a {
     cursor: pointer;
     animation: rightarrow 2000ms linear infinite;
     animation-delay: 2s;
-
 }
 
-.info-value{
+.info-value {
     font-weight: bold;
-    color: #1FD470;
+    color: #1fd470;
+}
 
+.stat-box {
+    /* Rectangle 3 */
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-sizing: border-box;
+    border-radius: 5px;
+    padding: 18px;
+    height: 88px;
+    display: flex;
+    margin-right: 24px;
+    flex-direction: column;
+}
+
+.stat-header {
+    /* Total rides */
+    font-family: Medium, serif;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 17px;
+    /* identical to box height */
+    color: #ffffff;
+    opacity: 0.4;
+}
+
+.stat-value {
+    font-size: 24px;
+}
+
+#dashboard-content {
+    display: none;
+    margin-left: 195px;
+}
+
+.content-row {
+    margin-top: 24px;
+    display: flex;
+}
+
+#new-spend-chart {
+    width: 50vw;
+    max-width: 1200px;
 }
