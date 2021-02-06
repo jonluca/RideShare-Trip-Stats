@@ -72,13 +72,20 @@ function calculateMoneySpent() {
   let totalSpent = {};
   let totalAcrossAllCurrencies = 0;
   let completedTrips = 0;
+  let minSpent = 999999;
+  let maxSpent = -1;
   global.trips.forEach(t => {
     if (t.clientFare) {
       if (!totalSpent.hasOwnProperty(t.currencyCode)) {
         totalSpent[t.currencyCode] = 0;
       }
       totalSpent[t.currencyCode] += t.clientFare;
-      totalAcrossAllCurrencies += getCurrencyConversionIfExists(t.currencyCode, t.clientFare);
+      let usdEquivalentAmount = getCurrencyConversionIfExists(t.currencyCode, t.clientFare);
+      totalAcrossAllCurrencies += usdEquivalentAmount;
+      if(usdEquivalentAmount !== 0){
+        minSpent = Math.min(minSpent, usdEquivalentAmount)
+        maxSpent = Math.max(maxSpent, usdEquivalentAmount)
+      }
     }
     if (t.status === "COMPLETED") {
       completedTrips++;
@@ -86,6 +93,8 @@ function calculateMoneySpent() {
   });
   // $ spent stats
   $("#total-payment").text("~$" + totalAcrossAllCurrencies.toFixed(2));
+  $("#max-price").text("~$" + maxSpent.toFixed(2));
+  $("#min-price").text("~$" + minSpent.toFixed(2));
   let totalSpentText = "";
   let currencyKeys = getSortedKeysFromObject(totalSpent, true);
   for (const key of currencyKeys) {

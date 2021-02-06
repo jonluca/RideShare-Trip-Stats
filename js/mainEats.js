@@ -147,6 +147,8 @@ function calculateTotalSpent() {
   let totalFoodAcrossAllCurrencies = 0;
   let totalDelivFeesAcrossAllCurrencies = 0;
   let completedOrders = 0;
+  let minSpent = 999999;
+  let maxSpent = -1;
   global.orders.forEach(o => {
     if (o.fareInfo) {
       const currencyCode = o.baseEaterOrder.currencyCode;
@@ -155,15 +157,20 @@ function calculateTotalSpent() {
       }
       for (const priceEntry of o.fareInfo.checkoutInfo) {
         const amount = priceEntry.rawValue;
+        const usdEquivalentAmount = getCurrencyConversionIfExists(currencyCode, amount);
         if (priceEntry.key === "eats_fare.total") {
           totalSpent[currencyCode] += parseFloat(amount);
-          totalAcrossAllCurrencies += getCurrencyConversionIfExists(currencyCode, amount);
+          if(amount !== 0){
+            minSpent = Math.min(minSpent, usdEquivalentAmount)
+            maxSpent = Math.max(maxSpent, usdEquivalentAmount)
+          }
+          totalAcrossAllCurrencies += usdEquivalentAmount;
         } else if (priceEntry.key === "eats.mp.charges.booking_fee") {
-          totalDelivFeesAcrossAllCurrencies += getCurrencyConversionIfExists(currencyCode, amount);
+          totalDelivFeesAcrossAllCurrencies += usdEquivalentAmount;
         } else if (priceEntry.key === "eats_fare.subtotal") {
-          totalFoodAcrossAllCurrencies += getCurrencyConversionIfExists(currencyCode, amount);
+          totalFoodAcrossAllCurrencies += usdEquivalentAmount;
         } else if (priceEntry.key === "eats.tax.base") {
-          totalTaxAcrossAllCurrencies += getCurrencyConversionIfExists(currencyCode, amount);
+          totalTaxAcrossAllCurrencies += usdEquivalentAmount;
         }
       }
     }
@@ -174,6 +181,8 @@ function calculateTotalSpent() {
 
   // $ spent stats
   $("#total-payment").text("~$" + totalAcrossAllCurrencies.toFixed(2));
+  $("#max-price").text("~$" + maxSpent.toFixed(2));
+  $("#min-price").text("~$" + minSpent.toFixed(2));
   let totalSpentText = "";
   let currencyKeys = getSortedKeysFromObject(totalSpent, true);
   for (const key of currencyKeys) {
