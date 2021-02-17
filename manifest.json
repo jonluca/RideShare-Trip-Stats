@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "RideShare Trip Stats",
   "description": "Analyzes your rideshare profile to show statistics on your rides!",
-  "version": "3.0",
+  "version": "3.1",
   "permissions": [
     "*://uber.com/*",
     "*://*.uber.com/*",

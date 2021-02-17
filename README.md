@@ -21,3 +21,7 @@ The regex for matching is `(.*)?	(.*)?	(.*)	(.*)`. Replace with `"$1":"$4",` and
 ## Changelog
 
 5/29/19: Added ability to view total spent by month, updated currencies
+
+## Credits
+
+Thanks to Roberto Andrade for the designs of the stats page.
