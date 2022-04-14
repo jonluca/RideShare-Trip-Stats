@@ -9,25 +9,19 @@ global.cities = new Map();
 var csrf = null;
 var requestsActive = 0;
 var MAX_LIMIT = 50;
-var TRIPS_ENDPOINT = 'https://riders.uber.com/api/getTripsForClient';
-var TRIP_ENDPOINT = 'https://riders.uber.com/api/getTrip';
+var TRIPS_ENDPOINT = "https://riders.uber.com/api/getTripsForClient";
+var TRIP_ENDPOINT = "https://riders.uber.com/api/getTrip";
 
-$(_ => {
-
+$((_) => {
   if (window.location.hostname === "riders.uber.com") {
     startUberRidesAnalysis();
-
-  } else {
-    if (confirm("You must be on https://riders.uber.com/trips or ubereats.com to use this tool! Redirecting now.")) {
-      window.location.href = "https://riders.uber.com/trips";
-    }
   }
 });
 
 function startUberRidesAnalysis() {
   if (!csrf) {
     let text = $("#__CSRF_TOKEN__").text();
-    csrf = text.replace(/\\u0022/g, '');
+    csrf = text.replace(/\\u0022/g, "");
   }
   // Insert CSS for overlay
   $(document.head).append(`<style>
@@ -56,161 +50,154 @@ function startUberRidesAnalysis() {
 }</style>`);
 
   // Set text to "Processing"
-  $('body').prepend(`<div id="overlay"><div id="text">Processing API</div></div>`);
-  requestDataFromUber(csrf, MAX_LIMIT, 0, true);
+  $("body").prepend(
+    `<div id="overlay"><div id="text">Processing API</div></div>`
+  );
+  fetchData();
 }
 
-function requestDataFromUber(csrf, limit, offset, isFirstRun) {
-  ++requestsActive;
-  $.ajax({
-    method: 'POST',
-    url: TRIPS_ENDPOINT,
-    data: {
-      "limit": limit,
-      "offset": `${offset}`,
-      "range": {
-        "fromTime": null,
-        "toTime": null
-      }
+async function makeRequestByOffset(offset) {
+  const data = {
+    limit: MAX_LIMIT,
+    offset: `${offset}`,
+    range: {
+      fromTime: null,
+      toTime: null,
     },
-    headers: {
-      "x-csrf-token": csrf
-    },
-    type: 'json',
-    success(response, textStatus, jqXHR) {
-      if (response && response.data) {
-        let contents = response.data || {};
-        let payment = contents.paymentProfiles || [];
-        let drivers = contents.drivers || [];
-        let cities = contents.cities || [];
-        let trips = contents.trips || [];
-        if (trips.pagingResult && trips.pagingResult.hasMore && isFirstRun) {
-          // Request all results in increments of MAX_LIMIT until we've reached the total amount of trips
-          let next = MAX_LIMIT;
-          while (next < trips.count) {
-            requestDataFromUber(csrf, MAX_LIMIT, next, false);
-            next += MAX_LIMIT;
-          }
-        }
-        try {
-          payment.map(pm => {
-            if (!global.payment.get(pm.uuid)) {
-              global.payment.set(pm.uuid, pm);
-            }
-          });
-          drivers.map(d => {
-            if (!global.drivers.get(d.uuid)) {
-              global.drivers.set(d.uuid, d);
-            }
-          });
-          trips.trips.map(t => {
-            if (!global.trips.get(t.uuid)) {
-              global.trips.set(t.uuid, t);
-              $("#text").html(`Processing API <br>${global.trips.size} of ${trips.count}`);
-            }
-          });
-          cities.map(c => {
-            if (!global.cities.get(c.id)) {
-              global.cities.set(c.id, c);
-            }
-          });
-        } catch (e) {
-          // skip - failure
-        }
+    tenancy: "uber/production",
+  };
+  const headers = {
+    "x-csrf-token": csrf,
+    "Content-Type": "application/json",
+  };
+  for (let i = 0; i < 3; i++) {
+    try {
+      const resp = await fetch(TRIPS_ENDPOINT, {
+        url: TRIPS_ENDPOINT,
+        method: "POST",
+        body: JSON.stringify(data),
+        headers,
+      });
+      const response = await resp.json();
+      const { paymentProfiles, drivers, cities, trips } = response?.data || {};
 
+      (paymentProfiles || []).map((pm) => {
+        global.payment.set(pm.uuid, pm);
+      });
+      (drivers || []).map((d) => {
+        global.drivers.set(d.uuid, d);
+      });
+      (trips || []).trips.map((t) => {
+        global.trips.set(t.uuid, t);
+        $("#text").html(
+          `Processing API <br>${global.trips.size} of ${trips.count}`
+        );
+      });
+      (cities || []).map((c) => {
+        global.cities.set(c.id, c);
+      });
+      // retry 3 times when 0 response
+      if (trips.trips.length === 0) {
+        continue;
       }
-      checkIfCompleteOriginalAPI();
-    },
-    error: function (xhr, ajaxOptions, thrownError) {
-      if (isFirstRun) {
-        $("#overlay").hide();
-        alert("Please sign in and click UberStats icon again!");
-        return;
-      }
-      checkIfCompleteOriginalAPI();
+      return trips;
+    } catch (e) {
+      console.error(e);
     }
-  });
+  }
+}
+async function fetchData() {
+  const trips = await makeRequestByOffset(0);
+  let offset = global.trips.size;
+  const total = trips?.count;
+  const promises = [];
+  while (offset < total) {
+    promises.push(makeRequestByOffset(offset));
+    offset += MAX_LIMIT;
+  }
+  await Promise.all(promises);
+  completeBaseApiRequests();
 }
 
-function checkIfCompleteOriginalAPI() {
-  --requestsActive;
-  if (requestsActive === 0) {
-    $("#overlay").hide();
-    window.Swal({
-      title: 'Request individual trip data?',
-      html: "Takes significantly longer, and might trigger email receipts due to Uber's cache!<br><br>Clicking No will still show most stats.",
-      type: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes!',
-      cancelButtonText: 'No'
-    }).then((result) => {
-      if (result.value) {
-        requestAllTripInfo();
-      } else {
-        // Once all requests have completed, trigger a new tab and send the data
-        let serialized = {};
-        serialized.payment = [...global.payment];
-        serialized.drivers = [...global.drivers];
-        serialized.trips = [...global.trips];
-        serialized.cities = [...global.cities];
-        chrome.runtime.sendMessage({global: serialized});
-        $("#overlay").hide();
-      }
-    });
-
+async function completeBaseApiRequests() {
+  $("#overlay").hide();
+  const result = await window.Swal({
+    title: "Request individual trip data?",
+    html: "Takes significantly longer, and might trigger email receipts due to Uber's cache!<br><br>Clicking No will still show most stats.",
+    type: "question",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes!",
+    cancelButtonText: "No",
+  });
+  if (result.value) {
+    requestAllTripInfo();
+  } else {
+    sendCompletedDataToExtension();
   }
 }
 
-function requestAllTripInfo() {
+function chunk(arr, chunkSize) {
+  if (chunkSize <= 0) throw "Invalid chunk size";
+  var R = [];
+  for (var i = 0, len = arr.length; i < len; i += chunkSize)
+    R.push(arr.slice(i, i + chunkSize));
+  return R;
+}
+async function requestAllTripInfo() {
   $("#overlay").show();
-  let uuids = global.trips.keys();
-  for (const uuid of uuids) {
-    requestIndividualTripInfo(uuid);
+  let uuids = Array.from(global.trips.keys());
+  const chunked = chunk(uuids, 150);
+  for (const uuidChunk of chunked) {
+    await Promise.all(uuidChunk.map((uuid) => requestIndividualTripInfo(uuid)));
   }
+  sendCompletedDataToExtension();
 }
 
-function requestIndividualTripInfo(tripUUID) {
-  ++requestsActive;
-  $.ajax({
-    method: 'POST',
-    url: TRIP_ENDPOINT,
-    data: {
-      "tripUUID": tripUUID
-    },
-    headers: {
-      "x-csrf-token": csrf
-    },
-    type: 'json',
-    success(response, textStatus, jqXHR) {
-      if (response && response.data) {
-        let contents = response.data;
-        let trip = global.trips.get(tripUUID);
-        // Add new information to original trip and save back into global trip map
-        trip.tripMap = contents.tripMap;
-        trip.receipt = contents.receipt;
-        global.trips.set(tripUUID, trip);
-      }
-      checkIfCompleteAdditionalTripInfo();
-    },
-    error: function (xhr, ajaxOptions, thrownError) {
-      checkIfCompleteAdditionalTripInfo();
+async function requestIndividualTripInfo(tripUUID) {
+  let body = {
+    tripUUID: tripUUID,
+    tenancy: "uber/production",
+  };
+  const headers = {
+    "x-csrf-token": csrf,
+    "Content-Type": "application/json",
+  };
+  for (let i = 0; i < 3; i++) {
+    try {
+      const response = await fetch(TRIP_ENDPOINT, {
+        method: "POST",
+        url: TRIP_ENDPOINT,
+        body: JSON.stringify(body),
+        headers,
+      });
+      const contents = await response.json();
+      let trip = global.trips.get(tripUUID);
+      // Add new information to original trip and save back into global trip map
+      trip.tripMap = contents?.data?.tripMap;
+      trip.receipt = contents?.data?.receipt;
+      global.trips.set(tripUUID, trip);
+      const hasTripMap = Array.from(global.trips.values()).filter(
+        (l) => l.tripMap
+      );
+      $("#text").html(
+        `Requests Completed <br>${hasTripMap.length} of ${global.trips.size}`
+      );
+      return;
+    } catch (e) {
+      console.error(e);
     }
-  });
+  }
 }
 
-function checkIfCompleteAdditionalTripInfo() {
-  --requestsActive;
-  $("#text").html(`Requests Left <br>${requestsActive} of ${global.trips.size}`);
-  if (requestsActive === 0) {
-    // Once all requests have completed, trigger a new tab and send the data
-    let serialized = {};
-    serialized.payment = [...global.payment];
-    serialized.drivers = [...global.drivers];
-    serialized.trips = [...global.trips];
-    serialized.cities = [...global.cities];
-    chrome.runtime.sendMessage({global: serialized});
-    $("#overlay").hide();
-  }
+function sendCompletedDataToExtension() {
+  // Once all requests have completed, trigger a new tab and send the data
+  let serialized = {};
+  serialized.payment = [...global.payment];
+  serialized.drivers = [...global.drivers];
+  serialized.trips = [...global.trips];
+  serialized.cities = [...global.cities];
+  chrome.runtime.sendMessage({ global: serialized });
+  $("#overlay").hide();
 }
