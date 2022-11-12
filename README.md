@@ -20,6 +20,8 @@ The regex for matching is `(.*)? (.*)? (.*) (.*)`. Replace with `"$1":"$4",` and
 
 5/29/19: Added ability to view total spent by month, updated currencies
 
+11/12/22: Rewrote in React/Vite, fixed query logic to use ubers new API, rewrote front end to use data, deprecated ubereats due to changes
+
 ## Credits
 
 Thanks to Roberto Andrade for the designs of the stats page.
