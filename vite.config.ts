@@ -6,4 +6,13 @@ import manifestJson from "./manifest.json";
 const manifest: ManifestV3Export = manifestJson as ManifestV3Export;
 export default defineConfig({
   plugins: [react(), crx({ manifest })],
+  build: {
+    minify: false,
+    rollupOptions: {
+      input: {
+        oninstall: "html/oninstall.html",
+        welcome: "index.html",
+      },
+    },
+  },
 });
