@@ -1,51 +1,24 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "RideShare Trip Stats",
+  "version": "10.0",
   "description": "Analyzes your rideshare profile to show statistics on your rides!",
-  "version": "4.1",
-  "permissions": [
-    "*://uber.com/*",
-    "*://*.uber.com/*",
-    "*://*.ubereats.com/*",
-    "tabs"
+  "permissions": ["tabs", "scripting", "storage", "unlimitedStorage"],
+  "host_permissions": [
+    "https://uber.com/*",
+    "https://*.uber.com/*",
+    "https://*.ubereats.com/*"
   ],
-  "background": {
-    "persistent": true,
-    "scripts": [
-      "js/libs/jquery.js",
-      "js/background.js",
-      "js/common.js"
-    ]
-  },
-  "content_scripts": [
-    {
-      "matches": [
-        "*://uber.com/*",
-        "*://*.uber.com/*",
-        "https://*.ubereats.com/*",
-        "https://riders.uber.com/*"
-      ],
-      "js": [
-        "js/libs/jquery.js",
-        "js/libs/sweetalert2.all.min.js"
-      ]
-    }
-  ],
+  "action": { "default_title": "Click to run" },
+  "homepage_url": "https://jonlu.ca",
   "icons": {
     "64": "images/icon64.png",
     "32": "images/icon32.png",
     "38": "images/icon.png",
     "128": "images/icon128.png"
   },
-  "browser_action": {
-    "default_icon": "images/icon.png"
-  },
-  "homepage_url": "https://jonlu.ca",
-  "web_accessible_resources": [
-    "js/*",
-    "html/*",
-    "css/*",
-    "fonts/*",
-    "images/*"
-  ]
+  "background": {
+    "service_worker": "src/scripts/background",
+    "type": "module"
+  }
 }

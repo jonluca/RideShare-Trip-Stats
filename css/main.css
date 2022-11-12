@@ -1,291 +1,287 @@
 @font-face {
-    font-family: "Regular";
-    src: url("chrome-extension://__MSG_@@extension_id__/fonts/sf-compact-thin.woff") format("woff2");
+  font-family: "Regular";
+  src: url("chrome-extension://__MSG_@@extension_id__/fonts/sf-compact-thin.woff")
+    format("woff2");
 }
 
 @font-face {
-    font-family: "Medium";
-    src: url("chrome-extension://__MSG_@@extension_id__/fonts/sf-compact-medium.woff") format("woff2");
+  font-family: "Medium";
+  src: url("chrome-extension://__MSG_@@extension_id__/fonts/sf-compact-medium.woff")
+    format("woff2");
 }
 
 @font-face {
-    font-family: "Bold";
-    src: url("chrome-extension://__MSG_@@extension_id__/fonts/sf-compact-bold.ttf") format("truetype");
+  font-family: "Bold";
+  src: url("chrome-extension://__MSG_@@extension_id__/fonts/sf-compact-bold.ttf")
+    format("truetype");
 }
 
 body {
-    font-family: Medium, serif;
-    background-color: black;
-    color: white;
+  font-family: Medium, sans-serif;
+  background-color: black;
+  color: white;
 }
 
 .link {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .eatsBody {
-    background-color: rgb(117, 180, 55);
+  background-color: rgb(117, 180, 55);
 }
 
 header {
-    font-size: 56px;
-    font-family: Bold, serif;
-    margin-left: 50px;
-    font-weight: bold;
-    display: flex;
-    justify-content: center;
+  font-size: 56px;
+  font-family: Bold, sans-serif;
+  margin-left: 50px;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
 }
 
 .header {
-    /* Uber Stats */
-    font-style: normal;
-    font-weight: bold;
-    font-size: 28px;
-    line-height: 33px;
-    color: #ffffff;
-    font-family: Bold, serif;
-    margin: 35px 195px;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
+  /* Uber Stats */
+  font-style: normal;
+  font-weight: bold;
+  font-size: 28px;
+  line-height: 33px;
+  color: #ffffff;
+  font-family: Bold, sans-serif;
+  margin: 35px 195px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .logo {
-    margin-right: 8px;
+  margin-right: 8px;
 }
 
 .menu {
-    display: flex;
-    flex-direction: row;
-    margin-left: 135px;
-    font-size: 18px;
+  display: flex;
+  flex-direction: row;
+  margin-left: 135px;
+  font-size: 18px;
 }
 
 .menu-entry {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    color: #ffffff;
-    opacity: 0.4;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  color: #ffffff;
+  opacity: 0.4;
 }
 
 .selected-menu {
-    opacity: 1.0;
+  opacity: 1;
 }
 
 .spacer {
-    margin: 0 45px;
+  margin: 0 45px;
 }
 
 footer {
-    position: absolute;
-    bottom: 0;
-    text-align: center;
-    margin-top: 20px;
-    width: 100%;
+  position: absolute;
+  bottom: 0;
+  text-align: center;
+  margin-top: 20px;
+  width: 100%;
 }
 
 h1 {
-    font-family: Medium, serif;
-    margin-left: 50px;
+  font-family: Medium, sans-serif;
+  margin-left: 50px;
 }
 
 a {
-    text-decoration: none;
-    color: white;
+  text-decoration: none;
+  color: white;
 }
 
 .lifetime {
-    margin: 10px 0 10px 50px;
-    display: flex;
+  margin: 10px 0 10px 50px;
+  display: flex;
 }
 
 .individual-stat {
-    font-size: 18px;
-    padding-top: 5px;
+  font-size: 18px;
+  padding-top: 10px;
 }
 
 .stat {
-    color: #a8a8a8;
+  color: #a8a8a8;
+  margin-left: 4px;
 }
 
 .stat-eats {
-    color: #092a00;
+  color: #092a00;
 }
 
 .stats-view {
-    padding-right: 40px;
+  padding-right: 40px;
 }
 
 .spacer {
-    line-height: 40px;
+  line-height: 40px;
 }
 
 .subheading {
-    font-size: 14px;
-    padding-left: 5px;
-    padding-right: 5px;
-    color: white;
+  font-size: 14px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: white;
 }
 
 .buttons {
-    display: flex;
-    width: 700px;
-    margin: 0 auto;
+  display: flex;
+  width: 700px;
+  margin: 0 auto;
 }
 
 .button {
-    font-size: 20px;
-    width: 200px;
-    height: 100px;
-    line-height: 100px;
-    flex: 1 1 auto;
-    text-transform: uppercase;
-    padding: 1px;
-    margin: 20px 5px;
-    color: black;
-    text-align: center;
-    display: inline-block;
-    background-color: white;
-    border: 1px transparent;
+  font-size: 20px;
+  width: 200px;
+  height: 100px;
+  line-height: 100px;
+  flex: 1 1 auto;
+  text-transform: uppercase;
+  padding: 1px;
+  margin: 20px 5px;
+  color: black;
+  text-align: center;
+  display: inline-block;
+  background-color: white;
+  border: 1px transparent;
 }
 
 .button:hover {
-    color: white;
-    background-color: black;
-    cursor: pointer;
-    padding: 0;
-    border: 1px solid white;
+  color: white;
+  background-color: black;
+  cursor: pointer;
+  padding: 0;
+  border: 1px solid white;
 }
 
 .chart-container {
-    width: 1000px;
-    height: 600px;
-    margin: 0 auto;
-    padding: 20px;
+  width: 1000px;
+  height: 600px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 .hidden {
-    display: none;
+  display: none;
 }
 
 .info-container {
-    padding: 20px;
-    width: 800px;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-sizing: border-box;
-    border-radius: 5px;
-    margin: 20px 0;
+  padding: 20px;
+  width: 800px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-sizing: border-box;
+  border-radius: 5px;
+  margin: 20px 0;
 }
 
 .info-header {
-    /* Total carbon footprint */
-    font-family: Bold, serif;
-    font-style: normal;
-    font-weight: bold;
-    font-size: 14px;
-    line-height: 17px;
-    /* identical to box height */
-    color: #ffffff;
-    opacity: 0.5;
-    margin-bottom: 8px;
+  /* Total carbon footprint */
+  font-family: Bold, sans-serif;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 14px;
+  line-height: 17px;
+  /* identical to box height */
+  color: #ffffff;
+  opacity: 0.5;
+  margin-bottom: 8px;
 }
 
 .info-text {
-    /* By poolsharing, you’ve saved 15kt of C02, equivalent to the anual offset of 284 trees */
-    font-family: SF Compact Display;
-    font-style: normal;
-    font-weight: bold;
-    font-size: 24px;
-    line-height: 29px;
-    color: #ffffff;
+  /* By poolsharing, you’ve saved 15kt of C02, equivalent to the anual offset of 284 trees */
+  font-family: SF Compact Display, sans-serif;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 24px;
+  line-height: 29px;
+  color: #ffffff;
 }
 
 #first {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    align-items: center;
-}
-
-#main-content {
-    display: none;
-}
-
-#main-view {
-    display: none;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 }
 
 #page-container {
-    position: relative;
-    min-height: 100vh;
+  position: relative;
+  min-height: 100vh;
 }
 
 @-webkit-keyframes rightarrow {
-    0% {
-        -webkit-transform: translateX(0);
-    }
-    50% {
-        -webkit-transform: translateX(10px);
-    }
-    100% {
-        -webkit-transform: translateX(-0em);
-    }
+  0% {
+    -webkit-transform: translateX(0);
+  }
+  50% {
+    -webkit-transform: translateX(10px);
+  }
+  100% {
+    -webkit-transform: translateX(-0em);
+  }
 }
 
 #next {
-    font-size: 40px;
-    cursor: pointer;
-    animation: rightarrow 2000ms linear infinite;
-    animation-delay: 2s;
+  font-size: 40px;
+  cursor: pointer;
+  animation: rightarrow 2000ms linear infinite;
+  animation-delay: 2s;
 }
 
 .info-value {
-    font-weight: bold;
-    color: #1fd470;
+  font-weight: bold;
+  color: #1fd470;
 }
 
 .stat-box {
-    /* Rectangle 3 */
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-sizing: border-box;
-    border-radius: 5px;
-    padding: 18px;
-    height: 88px;
-    display: flex;
-    margin-right: 24px;
-    flex-direction: column;
+  /* Rectangle 3 */
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-sizing: border-box;
+  border-radius: 5px;
+  padding: 18px;
+  height: 88px;
+  display: flex;
+  margin-right: 24px;
+  flex-direction: column;
 }
 
 .stat-header {
-    /* Total rides */
-    font-family: Medium, serif;
-    font-style: normal;
-    font-weight: bold;
-    font-size: 14px;
-    line-height: 17px;
-    /* identical to box height */
-    color: #ffffff;
-    opacity: 0.4;
+  /* Total rides */
+  font-family: Medium, sans-serif;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 14px;
+  line-height: 17px;
+  /* identical to box height */
+  color: #ffffff;
+  opacity: 0.4;
 }
 
 .stat-value {
-    font-size: 24px;
+  font-size: 24px;
 }
 
 #dashboard-content {
-    display: none;
-    margin-left: 195px;
+  display: none;
+  margin-left: 195px;
 }
 
 .content-row {
-    margin-top: 24px;
-    display: flex;
+  margin-top: 24px;
+  display: flex;
 }
 
 #new-spend-chart {
-    width: 50vw;
-    max-width: 1200px;
+  width: 50vw;
+  max-width: 1200px;
 }
