@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "RideShare Trip Stats",
-  "version": "10.0",
+  "version": "10.1",
   "description": "Analyzes your rideshare profile to show statistics on your rides!",
   "permissions": ["tabs", "scripting", "storage", "unlimitedStorage"],
   "host_permissions": [
