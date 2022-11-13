@@ -1252,7 +1252,7 @@ supports-preserve-symlinks-flag@^1.0.0:
   resolved "https://registry.npmjs.org/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz#6eda4bd344a3c94aea376d4cc31bc77311039e09"
   integrity sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==
 
-sweetalert2@^11.6.8:
+sweetalert2@^11.6.4:
   version "11.6.8"
   resolved "https://registry.npmjs.org/sweetalert2/-/sweetalert2-11.6.8.tgz#5a515284367bc21b9f7830cbfbbfd09341576cca"
   integrity sha512-0YHMaqF3DC67EI9uZzHpbU34rQV3acEFlnUCYmDSDNkeNOSFtSlF4DbWilfln+iUYv9s9aqbREXmKZRJqh5G5w==
