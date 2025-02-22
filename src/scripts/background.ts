@@ -17,10 +17,6 @@ browser.runtime.onMessage.addListener(async (request) => {
     const { global } = await browser.storage.local.get("global");
     return global;
   }
-  if (request.requestDataEats) {
-    const { globalEats } = await browser.storage.local.get("globalEats");
-    return globalEats;
-  }
 });
 
 if (runtime) {
