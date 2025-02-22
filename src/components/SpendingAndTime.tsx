@@ -1,12 +1,13 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment } from "react";
 import { useDataContext } from "../context";
 import {
   getCurrencyConversionIfExists,
   getSymbolFromCode,
 } from "../utils/currencies";
-import { countBy, capitalize, sum } from "lodash-es";
+import { countBy, capitalize } from "lodash-es";
+
 function getSortedKeysFromObject(obj: any, reverse = false) {
-  let keys = Object.keys(obj);
+  const keys = Object.keys(obj);
   keys.sort((a, b) => {
     const usdEquivA = getCurrencyConversionIfExists(a, obj[a]);
     const usdEquivB = getCurrencyConversionIfExists(b, obj[b]);
@@ -27,9 +28,9 @@ export const SpendingAndTime = () => {
   let completedTrips = 0;
   let minSpent = 999999;
   let maxSpent = -1;
-  let trips = Object.values(data);
+  const trips = Object.values(data);
   for (const trip of trips) {
-    let currency = trip.trip.currency || "USD";
+    const currency = trip.trip.currency || "USD";
     totals[currency] ??= 0;
     totals[currency] += trip.trip.fareAmount;
     totalAcrossAllCurrencies += trip.trip.usdAmount;
@@ -57,10 +58,10 @@ export const SpendingAndTime = () => {
     uuid: l.trip.uuid,
   }));
   tripLengths.sort((a, b) => a.time - b.time);
-  let shortestTrip = tripLengths[0];
+  const shortestTrip = tripLengths[0];
   const shortestTime =
     tripLengths.length && Math.abs(Math.round(shortestTrip.time / (60 * 1000)));
-  let longestTrip = tripLengths[tripLengths.length - 1];
+  const longestTrip = tripLengths[tripLengths.length - 1];
   const longestTime =
     tripLengths.length && Math.abs(Math.round(longestTrip.time / (60 * 1000)));
 
@@ -83,7 +84,7 @@ export const SpendingAndTime = () => {
       continue;
     }
     const { distance, distanceLabel } = trip.receipt;
-    let distanceNum = parseFloat(distance) || 0;
+    const distanceNum = parseFloat(distance) || 0;
     if (distanceLabel === "miles") {
       totalDistance += distanceNum;
     } else if (distanceLabel === "kilometers") {
@@ -93,7 +94,7 @@ export const SpendingAndTime = () => {
 
   return (
     <div
-      className="stats-view"
+      className={"stats-view"}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -103,19 +104,19 @@ export const SpendingAndTime = () => {
         margin: 4,
       }}
     >
-      <div className="individual-stat">
+      <div className={"individual-stat"}>
         <span>Total Spent</span>
-        <span className="stat" id="total-payment">
+        <span className={"stat"} id={"total-payment"}>
           {formatter.format(val)}
         </span>
-        <div id="total-spent">
+        <div id={"total-spent"}>
           {currencyKeys.map((key) => {
             const currencySymbol = getSymbolFromCode(key);
             const usdEquiv = getCurrencyConversionIfExists(key, totals[key]);
             return (
               <Fragment key={key}>
-                <span className="subheading">{key}</span>
-                <span className="stat">
+                <span className={"subheading"}>{key}</span>
+                <span className={"stat"}>
                   {currencySymbol + totals[key].toLocaleString()}{" "}
                   {usdEquiv && (
                     <span style={{ fontSize: 12 }}>
@@ -130,41 +131,41 @@ export const SpendingAndTime = () => {
         </div>
       </div>
 
-      <div className="individual-stat">
+      <div className={"individual-stat"}>
         <span>Average Price</span>
-        <span className="stat" id="average-price">
+        <span className={"stat"} id={"average-price"}>
           ~${(totalAcrossAllCurrencies / completedTrips).toFixed(2)}
         </span>
       </div>
       {maxSpent > 0 && (
-        <div className="individual-stat">
+        <div className={"individual-stat"}>
           <span>Max Price</span>
-          <span className="stat" id="max-price">
+          <span className={"stat"} id={"max-price"}>
             ~${maxSpent.toFixed(2)}
           </span>
         </div>
       )}
       {minSpent > 0 && (
-        <div className="individual-stat">
+        <div className={"individual-stat"}>
           <span>Min Price</span>
-          <span className="stat" id="min-price">
+          <span className={"stat"} id={"min-price"}>
             ~${minSpent.toFixed(2)}
           </span>
         </div>
       )}
       {totalDistance !== 0 && (
-        <div className="individual-stat">
+        <div className={"individual-stat"}>
           <span>Total Distance</span>
-          <span className="stat" id="total-payment" style={{ marginLeft: 2 }}>
+          <span className={"stat"} id={"total-payment"} style={{ marginLeft: 2 }}>
             {totalDistance.toLocaleString()} miles
           </span>
         </div>
       )}
-      <div className="individual-stat">
+      <div className={"individual-stat"}>
         <span>Total Time</span>
-        <div id="total-time">
-          <span className="subheading">Seconds</span>
-          <span className="stat">
+        <div id={"total-time"}>
+          <span className={"subheading"}>Seconds</span>
+          <span className={"stat"}>
             {" "}
             {Math.round((totalTime /= 1000)).toLocaleString()}
           </span>
@@ -172,8 +173,8 @@ export const SpendingAndTime = () => {
 
           {totalTime > 60 && (
             <>
-              <span className="subheading">Minutes</span>
-              <span id="minutes" className="stat">
+              <span className={"subheading"}>Minutes</span>
+              <span id={"minutes"} className={"stat"}>
                 {Math.round((totalTime /= 60)).toLocaleString()}
               </span>
               <br />
@@ -181,8 +182,8 @@ export const SpendingAndTime = () => {
           )}
           {totalTime > 60 && (
             <>
-              <span className="subheading">Hours</span>
-              <span id="hours" className="stat">
+              <span className={"subheading"}>Hours</span>
+              <span id={"hours"} className={"stat"}>
                 {" "}
                 {Math.round((totalTime /= 60)).toLocaleString()}
               </span>
@@ -192,20 +193,20 @@ export const SpendingAndTime = () => {
 
           {totalTime > 24 && (
             <>
-              <span className="subheading">Days</span>
-              <span className="stat"> {(totalTime / 24).toFixed(2)}</span>
+              <span className={"subheading"}>Days</span>
+              <span className={"stat"}> {(totalTime / 24).toFixed(2)}</span>
               <br />
             </>
           )}
         </div>
       </div>
       {shortestTrip && (
-        <div className="individual-stat">
+        <div className={"individual-stat"}>
           <span>Shortest Time</span>
-          <span className="stat" style={{ marginLeft: 4 }} id="shortest-ride">
+          <span className={"stat"} style={{ marginLeft: 4 }} id={"shortest-ride"}>
             <a
-              target="_blank"
-              className="link"
+              target={"_blank"}
+              className={"link"}
               href={`https://riders.uber.com/trips/${shortestTrip.uuid}`}
             >
               {shortestTime} minutes
@@ -214,12 +215,12 @@ export const SpendingAndTime = () => {
         </div>
       )}
       {longestTime && (
-        <div className="individual-stat">
+        <div className={"individual-stat"}>
           <span>Longest Time</span>
-          <span className="stat" style={{ marginLeft: 4 }} id="longest-ride">
+          <span className={"stat"} style={{ marginLeft: 4 }} id={"longest-ride"}>
             <a
-              target="_blank"
-              className="link"
+              target={"_blank"}
+              className={"link"}
               href={`https://riders.uber.com/trips/${longestTrip.uuid}`}
             >
               {longestTime} minutes
@@ -227,41 +228,41 @@ export const SpendingAndTime = () => {
           </span>
         </div>
       )}
-      <div className="individual-stat">
+      <div className={"individual-stat"}>
         <span>Ride Types</span>
-        <div id="total-spent">
-          <span className="subheading">Surge</span>
-          <span className="stat">
+        <div id={"total-spent"}>
+          <span className={"subheading"}>Surge</span>
+          <span className={"stat"}>
             {surge.toLocaleString()} Ride{surge === 1 ? "" : "s"}
           </span>
           <br />
-          <span className="subheading">Rideshare</span>
-          <span className="stat">
+          <span className={"subheading"}>Rideshare</span>
+          <span className={"stat"}>
             {rideshare.toLocaleString()} Ride{rideshare === 1 ? "" : "s"}
           </span>
           <br />
-          <span className="subheading">Reserved</span>
-          <span className="stat">
+          <span className={"subheading"}>Reserved</span>
+          <span className={"stat"}>
             {reserve.toLocaleString()} Ride{reserve === 1 ? "" : "s"}
           </span>
           <br />
-          <span className="subheading">Scheduled</span>
-          <span className="stat">
+          <span className={"subheading"}>Scheduled</span>
+          <span className={"stat"}>
             {scheduled.toLocaleString()} Ride{scheduled === 1 ? "" : "s"}
           </span>
         </div>
       </div>
-      <div className="individual-stat">
+      <div className={"individual-stat"}>
         <span>Rides</span>
-        <div id="total-spent">
+        <div id={"total-spent"}>
           {Object.keys(countedByType)
             .sort((a, b) => countedByType[b] - countedByType[a])
             .map((key) => {
-              let numRides = countedByType[key];
+              const numRides = countedByType[key];
               return (
                 <Fragment key={key}>
-                  <span className="subheading">{capitalize(key)}</span>
-                  <span className="stat">
+                  <span className={"subheading"}>{capitalize(key)}</span>
+                  <span className={"stat"}>
                     {numRides.toLocaleString()} Ride
                     {numRides === 1 ? "" : "s"}
                   </span>

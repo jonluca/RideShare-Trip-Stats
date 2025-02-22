@@ -152,7 +152,7 @@ export function getCurrencyConversionIfExists(
   code = code.toUpperCase();
   code = code.trim();
   if (currencyConversionToUSD.rates.hasOwnProperty(code)) {
-    let exchangeToUSD =
+    const exchangeToUSD =
       currencyConversionToUSD.rates[
         code as keyof typeof currencyConversionToUSD["rates"]
       ];

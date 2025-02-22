@@ -1,8 +1,9 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { browser } from "webextension-polyfill-ts";
-import { GetTrip, GetTrips, Trip } from "./types/UberApi";
-import dayjs, { Dayjs } from "dayjs";
+import type { GetTrip, Trip } from "./types/UberApi";
+import type { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import parseCurrency from "parse-money";
 import { getCurrencyConversionIfExists } from "./utils/currencies";
 
@@ -38,8 +39,8 @@ const DataContextProvider = (props: React.PropsWithChildren) => {
         entry.trip.lengthMs =
           entry.trip.end.toDate().getTime() -
           entry.trip.begin.toDate().getTime();
-        let fare = entry.trip.fare;
-        let money = parseCurrency(fare)!;
+        const fare = entry.trip.fare;
+        const money = parseCurrency(fare)!;
         if (money && fare.startsWith("CA")) {
           // @ts-ignore
           money.currency = "CAD";

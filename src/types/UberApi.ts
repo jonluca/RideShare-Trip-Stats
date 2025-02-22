@@ -1,12 +1,73 @@
-export interface GetTripsResponse {
+export interface ActivitiesResponse {
   data: Data;
 }
 export interface GetTripResponse {
-  data: Data;
+  data: { getTrip: GetTrip };
 }
 
 export interface Data {
-  getTrip: GetTrip;
+  activities: Activities;
+}
+
+export interface Activities {
+  cityID: number;
+  past: Past;
+  __typename: string;
+}
+
+export interface Past {
+  activities: Activity[];
+  nextPageToken: string;
+  __typename: string;
+}
+
+export interface Activity {
+  buttons: Button[];
+  cardURL: string;
+  description: string;
+  imageURL: ImageURL;
+  subtitle: string;
+  title: string;
+  uuid: string;
+  __typename: ActivityTypename;
+}
+
+export enum ActivityTypename {
+  RVWebCommonActivity = "RVWebCommonActivity",
+}
+
+export interface Button {
+  isDefault: boolean;
+  startEnhancerIcon: StartEnhancerIcon;
+  text: Text;
+  url: string;
+  __typename: ButtonTypename;
+}
+
+export enum ButtonTypename {
+  RVWebCommonActivityButton = "RVWebCommonActivityButton",
+}
+
+export enum StartEnhancerIcon {
+  ArrowClockwiseFilled = "ARROW_CLOCKWISE_FILLED",
+  LifebuoyFilled = "LIFEBUOY_FILLED",
+  ReceiptFilled = "RECEIPT_FILLED",
+}
+
+export enum Text {
+  Details = "Details",
+  Help = "Help",
+  Rebook = "Rebook",
+}
+
+export interface ImageURL {
+  light: string;
+  dark: string;
+  __typename: ImageURLTypename;
+}
+
+export enum ImageURLTypename {
+  RVWebCommonColorModeImage = "RVWebCommonColorModeImage",
 }
 
 export interface GetTrip {

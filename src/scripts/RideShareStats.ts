@@ -1,12 +1,11 @@
 import $ from "jquery";
-import { chunk } from "lodash-es";
 import axios from "axios";
-import Swal from "sweetalert2";
 import plimit from "p-limit";
-import {
+import type {
+  ActivitiesResponse,
+  Activity,
   GetTrip,
   GetTripResponse,
-  GetTripsResponse,
   Trip,
 } from "../types/UberApi";
 // export for others scripts to use
@@ -15,9 +14,9 @@ window.jQuery = $;
 
 class RideShareStats {
   csrf: string = "x";
-  total: number = 0;
 
   tripMap: Record<string, Trip> = {};
+  activitiesMap: Record<string, Activity> = {};
   fullTripMap: Record<string, GetTrip> = {};
   constructor() {
     $(() => {
@@ -30,13 +29,63 @@ class RideShareStats {
   ENDPOINT = "https://riders.uber.com/graphql";
 
   async requestIndividualTripInfo(tripUUID: string) {
-    let body = {
+    const body = {
       operationName: "GetTrip",
       variables: {
-        tripUUID: tripUUID,
+        tripUUID,
       },
-      query:
-        "query GetTrip($tripUUID: String!) {\n  getTrip(tripUUID: $tripUUID) {\n    trip {\n      beginTripTime\n      cityID\n      countryID\n      disableCanceling\n      driver\n      dropoffTime\n      fare\n      isRidepoolTrip\n      isScheduledRide\n      isSurgeTrip\n      isUberReserve\n      jobUUID\n      marketplace\n      paymentProfileUUID\n      status\n      uuid\n      vehicleDisplayName\n      vehicleViewID\n      waypoints\n      __typename\n    }\n    mapURL\n    polandTaxiLicense\n    rating\n    receipt {\n      carYear\n      distance\n      distanceLabel\n      duration\n      vehicleType\n      __typename\n    }\n    __typename\n  }\n}\n",
+      query: `query GetTrip($tripUUID: String!) {
+  getTrip(tripUUID: $tripUUID) {
+    trip {
+      beginTripTime
+      cityID
+      countryID
+      disableCanceling
+      disableRating
+      disableResendReceipt
+      driver
+      dropoffTime
+      fare
+      guest
+      isRidepoolTrip
+      isScheduledRide
+      isSurgeTrip
+      isUberReserve
+      jobUUID
+      marketplace
+      paymentProfileUUID
+      showRating
+      status
+      uuid
+      vehicleDisplayName
+      vehicleViewID
+      waypoints
+      __typename
+    }
+    mapURL
+    polandTaxiLicense
+    rating
+    reviewer
+    receipt {
+      carYear
+      distance
+      distanceLabel
+      duration
+      vehicleType
+      __typename
+    }
+    concierge {
+      sourceType
+      __typename
+    }
+    organization {
+      name
+      __typename
+    }
+    __typename
+  }
+}
+`,
     };
     const headers = {
       "x-csrf-token": this.csrf,
@@ -51,13 +100,10 @@ class RideShareStats {
             headers,
           }
         );
-        let trips = response.data.data.getTrip;
+        const trips = response.data.data.getTrip;
         this.fullTripMap[trips.trip.uuid] = trips;
-        const suffix = this.total ? ` of ${this.total}` : "";
         $("#text").html(
-          `Requests Completed <br>${
-            Object.keys(this.fullTripMap).length
-          }${suffix}`
+          `Requests Completed <br>${Object.keys(this.fullTripMap).length}`
         );
         return;
       } catch (e) {
@@ -68,7 +114,7 @@ class RideShareStats {
 
   startUberRidesAnalysis() {
     if (!this.csrf) {
-      let text = $("#__CSRF_TOKEN__").text();
+      const text = $("#__CSRF_TOKEN__").text();
       this.csrf = text.replace(/\\u0022/g, "") || "x";
     }
     // Insert CSS for overlay
@@ -104,16 +150,68 @@ class RideShareStats {
     this.fetchData();
   }
 
-  async makeRequestByOffset(offset: number) {
+  async makeRequestByOffset(nextPageToken?: string) {
     const d = {
-      operationName: "GetTrips",
+      operationName: "Activities",
       variables: {
-        cursor: `${offset}`,
-        fromTime: null,
-        toTime: null,
+        includePast: true,
+        includeUpcoming: false,
+        limit: 100,
+        orderTypes: ["RIDES", "TRAVEL"],
+        profileType: "PERSONAL",
+        cityID: 1,
+        nextPageToken,
       },
-      query:
-        "query GetTrips($cursor: String, $fromTime: Float, $toTime: Float) {\n  getTrips(cursor: $cursor, fromTime: $fromTime, toTime: $toTime) {\n    count\n    pagingResult {\n      hasMore\n      nextCursor\n      __typename\n    }\n    reservations {\n      ...TripFragment\n      __typename\n    }\n    trips {\n      ...TripFragment\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment TripFragment on Trip {\n  beginTripTime\n  disableCanceling\n  driver\n  dropoffTime\n  fare\n  isRidepoolTrip\n  isScheduledRide\n  isSurgeTrip\n  isUberReserve\n  jobUUID\n  marketplace\n  paymentProfileUUID\n  status\n  uuid\n  vehicleDisplayName\n  waypoints\n  __typename\n}\n",
+      query: `query Activities($cityID: Int, $endTimeMs: Float, $includePast: Boolean = true, $includeUpcoming: Boolean = true, $limit: Int = 5, $nextPageToken: String, $orderTypes: [RVWebCommonActivityOrderType!] = [RIDES, TRAVEL], $profileType: RVWebCommonActivityProfileType = PERSONAL, $startTimeMs: Float) {
+  activities(cityID: $cityID) {
+    cityID
+    past(
+      endTimeMs: $endTimeMs
+      limit: $limit
+      nextPageToken: $nextPageToken
+      orderTypes: $orderTypes
+      profileType: $profileType
+      startTimeMs: $startTimeMs
+    ) @include(if: $includePast) {
+      activities {
+        ...RVWebCommonActivityFragment
+        __typename
+      }
+      nextPageToken
+      __typename
+    }
+    upcoming @include(if: $includeUpcoming) {
+      activities {
+        ...RVWebCommonActivityFragment
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment RVWebCommonActivityFragment on RVWebCommonActivity {
+  buttons {
+    isDefault
+    startEnhancerIcon
+    text
+    url
+    __typename
+  }
+  cardURL
+  description
+  imageURL {
+    light
+    dark
+    __typename
+  }
+  subtitle
+  title
+  uuid
+  __typename
+}
+`,
     };
     const headers = {
       "x-csrf-token": this.csrf || "x",
@@ -121,18 +219,17 @@ class RideShareStats {
     };
     for (let i = 0; i < 3; i++) {
       try {
-        const resp = await axios.post<GetTripsResponse>(this.ENDPOINT, d, {
+        const resp = await axios.post<ActivitiesResponse>(this.ENDPOINT, d, {
           headers,
         });
-        let trips = resp.data.data.getTrips;
-        trips.trips.forEach((trip) => {
-          this.tripMap[trip.uuid] = trip;
+        const pastActivities = resp.data.data.activities.past;
+        pastActivities.activities.forEach((activity) => {
+          this.activitiesMap[activity.uuid] = activity;
         });
-        const suffix = this.total ? ` of ${this.total}` : "";
         $("#text").html(
-          `Requests Completed <br>${Object.keys(this.tripMap).length}${suffix}`
+          `Requests Completed <br>${Object.keys(this.tripMap).length}`
         );
-        return trips;
+        return pastActivities;
       } catch (e) {
         console.error(e);
       }
@@ -149,37 +246,28 @@ class RideShareStats {
     $("#overlay").hide();
   }
   async fetchData() {
-    const trips = await this.makeRequestByOffset(0);
-    this.total = trips?.count || 0;
-    const promises = [];
-    let offset = Object.keys(this.tripMap).length;
-    while (offset < this.total) {
-      promises.push(this.makeRequestByOffset(offset));
-      offset += 10;
+    const trips = await this.makeRequestByOffset();
+    if (trips) {
+      let nextPageToken = trips.nextPageToken;
+      while (true) {
+        const trips = await this.makeRequestByOffset(nextPageToken);
+        if (!trips || !trips.nextPageToken) {
+          break;
+        }
+        nextPageToken = trips.nextPageToken;
+      }
     }
-    await Promise.all(promises);
-    this.completeBaseApiRequests();
+    await this.completeBaseApiRequests();
   }
 
   async completeBaseApiRequests() {
-    $("#overlay").hide();
-    const result = await Swal.fire({
-      title: "Request individual trip data?",
-      html: "Takes significantly longer, and might trigger email receipts due to Uber's cache!<br><br>Clicking No will still show most stats.",
-      showDenyButton: true,
-      confirmButtonText: "Yes",
-      denyButtonText: "No",
-    });
-    if (result.value) {
-      this.requestAllTripInfo();
-    } else {
-      this.sendCompletedDataToExtension();
-    }
+    await this.requestAllTripInfo();
+    this.sendCompletedDataToExtension();
   }
 
   async requestAllTripInfo() {
     $("#overlay").show();
-    const uuids = Object.keys(this.tripMap);
+    const uuids = Object.keys(this.activitiesMap);
     const limit = plimit(150);
 
     const promises = uuids.map((u) =>

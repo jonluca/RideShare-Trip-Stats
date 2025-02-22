@@ -1,9 +1,8 @@
 import $ from "jquery";
-import { chunk } from "lodash-es";
 import axios from "axios";
-import Swal from "sweetalert2";
 
-import { GetTripResponse, GetTripsResponse, Trip } from "../types/UberApi";
+import type { Trip } from "../types/UberApi";
+
 window.$ = $;
 window.jQuery = $;
 
@@ -63,7 +62,7 @@ class EatsStats {
   async fetchData() {
     let data = await this.makeRequestByCursor(null);
     while (data?.meta?.hasMore) {
-      let uuids = data.orderUuids;
+      const uuids = data.orderUuids;
       data = await this.makeRequestByCursor(uuids[uuids.length - 1]);
     }
     this.complete();
@@ -77,15 +76,15 @@ class EatsStats {
     let limit = 10;
     for (let i = 0; i < 3; i++) {
       try {
-        let body = {
+        const body = {
           lastWorkflowUUID: cursor,
           limit,
         };
         const response = await axios.post("EATS_ENDPOINT", body, {
-          headers: headers,
+          headers,
         });
         const data = response?.data;
-        let uuids = data.orderUuids;
+        const uuids = data.orderUuids;
         if (data?.ordersMap) {
           const orders = data.ordersMap;
           for (const order of Object.keys(orders)) {

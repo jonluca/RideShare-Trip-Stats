@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "RideShare Trip Stats",
-  "version": "10.1",
-  "description": "Analyzes your rideshare profile to show statistics on your rides!",
+  "version": "10.2",
+  "description": "Visit https://www.uber.com/us/en/rider-home/ to view your uber statistics",
   "permissions": ["tabs", "scripting", "storage", "unlimitedStorage"],
   "host_permissions": [
     "https://uber.com/*",
