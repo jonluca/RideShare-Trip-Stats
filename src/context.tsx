@@ -4,8 +4,8 @@ import { browser } from "webextension-polyfill-ts";
 import type { GetTrip, Trip } from "./types/UberApi";
 import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
-import parseCurrency from "parse-money";
 import { getCurrencyConversionIfExists } from "./utils/currencies";
+import parseMoney from "./parseMoney";
 
 interface CustomTrip extends Trip {
   begin: Dayjs;
@@ -37,7 +37,7 @@ const DataContextProvider = (props: React.PropsWithChildren) => {
         entry.trip.end = dayjs(entry.trip.dropoffTime);
         entry.trip.lengthMs = entry.trip.end.toDate().getTime() - entry.trip.begin.toDate().getTime();
         const fare = entry.trip.fare;
-        const money = parseCurrency(fare)!;
+        const money = parseMoney(fare)!;
         if (money && fare.startsWith("CA")) {
           // @ts-ignore
           money.currency = "CAD";

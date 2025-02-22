@@ -9,7 +9,6 @@ window.jQuery = $;
 class RideShareStats {
   csrf: string = "x";
 
-  tripMap: Record<string, Trip> = {};
   activitiesMap: Record<string, Activity> = {};
   fullTripMap: Record<string, GetTrip> = {};
   constructor() {
@@ -90,9 +89,10 @@ class RideShareStats {
         const response = await axios.post<GetTripResponse>(this.ENDPOINT, body, {
           headers,
         });
+        const total = Object.keys(this.activitiesMap).length;
         const trips = response.data.data.getTrip;
         this.fullTripMap[trips.trip.uuid] = trips;
-        $("#text").html(`Requests Completed <br>${Object.keys(this.fullTripMap).length}`);
+        $("#text").html(`Requests Completed <br>${Object.keys(this.fullTripMap).length} of ${total}`);
         return;
       } catch (e) {
         console.error(e);
@@ -142,7 +142,7 @@ class RideShareStats {
       variables: {
         includePast: true,
         includeUpcoming: false,
-        limit: 100,
+        limit: 1000,
         orderTypes: ["RIDES", "TRAVEL"],
         profileType: "PERSONAL",
         cityID: 1,
@@ -212,7 +212,7 @@ fragment RVWebCommonActivityFragment on RVWebCommonActivity {
         pastActivities.activities.forEach((activity) => {
           this.activitiesMap[activity.uuid] = activity;
         });
-        $("#text").html(`Requests Completed <br>${Object.keys(this.tripMap).length}`);
+        $("#text").html(`Requests Completed <br>${Object.keys(this.activitiesMap).length}`);
         return pastActivities;
       } catch (e) {
         console.error(e);
@@ -222,8 +222,8 @@ fragment RVWebCommonActivityFragment on RVWebCommonActivity {
   sendCompletedDataToExtension() {
     // Once all requests have completed, trigger a new tab and send the data
     const full: Record<string, Trip | GetTrip> = {};
-    Object.keys(this.tripMap).forEach((key) => {
-      full[key] = this.fullTripMap[key] || { trip: this.tripMap[key] };
+    Object.keys(this.activitiesMap).forEach((key) => {
+      full[key] = this.fullTripMap[key] || { trip: this.activitiesMap[key] };
     });
     console.log(full);
     chrome.runtime.sendMessage({ global: full });
@@ -235,6 +235,7 @@ fragment RVWebCommonActivityFragment on RVWebCommonActivity {
       let nextPageToken = trips.nextPageToken;
       while (true) {
         const trips = await this.makeRequestByOffset(nextPageToken);
+        break;
         if (!trips || !trips.nextPageToken) {
           break;
         }

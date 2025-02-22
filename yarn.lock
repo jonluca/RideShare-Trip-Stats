@@ -3785,13 +3785,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"parse-money@npm:^1.0.12":
-  version: 1.0.12
-  resolution: "parse-money@npm:1.0.12"
-  checksum: 10c0/37c2efe9505d5d8b9badb32b0223a1e1ed02d25e09d04db8e7baa4a327145b81254eca3c01de55283b937f0cf89b53755be234b6a2a19021fa84f0c53badf60f
-  languageName: node
-  linkType: hard
-
 "parse5-htmlparser2-tree-adapter@npm:^7.0.0":
   version: 7.0.0
   resolution: "parse5-htmlparser2-tree-adapter@npm:7.0.0"
@@ -3808,13 +3801,6 @@ __metadata:
   dependencies:
     entities: "npm:^4.4.0"
   checksum: 10c0/20d4ffb1eccad4a2d6c320d2d98b07814f43ab7762e11ffea247b0d54981646f99eeba4da16e06c568877e532ca32a6b5c5e4fafc4eb87daf890957050482435
-  languageName: node
-  linkType: hard
-
-"parsecurrency@npm:^1.1.1":
-  version: 1.1.1
-  resolution: "parsecurrency@npm:1.1.1"
-  checksum: 10c0/e7ebfc17200fb29d9ed3e76fb19ab1a655d0b7a7e98e6a20592ed98f6e4ea2fb1e86538e3689f9a2795ca10ce94926cf34b4ddd56c07957ecef60a5a49175775
   languageName: node
   linkType: hard
 
@@ -4143,8 +4129,6 @@ __metadata:
     json2csv: "npm:^5.0.7"
     lodash-es: "npm:^4.17.21"
     p-limit: "npm:^6.2.0"
-    parse-money: "npm:^1.0.12"
-    parsecurrency: "npm:^1.1.1"
     prettier: "npm:^3.5.2"
     react: "npm:^19.0.0"
     react-dom: "npm:^19.0.0"

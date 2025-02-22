@@ -14,7 +14,7 @@ Currency conversion for total spent and averages are currently done using a loca
 
 They were taken from https://www.xe.com/currencytables/?from=USD. Copy the column and use the following regex replace to update.
 
-The regex for matching is `(.*)? (.*)? (.*) (.*)`. Replace with `"$1":"$4",` and place in `rates` key within `currency.json`.
+The regex for matching is `(.*)?\t(.*)?\t(.*)\t(.*)`. Replace with `"$1":"$4",` and place in `rates` key within `currency.json`.
 
 ## Changelog
 
