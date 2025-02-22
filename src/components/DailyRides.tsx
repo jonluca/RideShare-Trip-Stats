@@ -9,7 +9,7 @@ export const DailyRides = () => {
 
   const numTrips = Object.keys(data || {}).length;
   const times = Object.values(data || {})
-    .map((e) => e?.trip?.begin!)
+    .map((e) => e?.trip?.begin)
     .filter(Boolean)
     .sort((a, b) => (dayjs(a).isAfter(dayjs(b)) ? 1 : -1));
   const dateDiff = times[times.length - 1]?.diff(times[0], "days");

@@ -1,7 +1,8 @@
 declare global {
+  import type $ from "jquery";
   interface Window {
-    $: import("jquery");
-    jQuery: import("jquery");
+    $: $;
+    jQuery: $;
   }
 }
 export {};

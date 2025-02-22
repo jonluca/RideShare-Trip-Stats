@@ -141,7 +141,7 @@ export function getCurrencyConversionIfExists(
   if (typeof currencyAmount !== "number") {
     try {
       currencyAmount = parseFloat(currencyAmount);
-    } catch (e) {
+    } catch {
       return 0; // Failed to parse number, bail and return 0 as exchange
     }
   }
