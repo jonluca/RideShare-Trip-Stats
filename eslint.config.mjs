@@ -39,12 +39,7 @@ const configs = tseslint.config(
   {
     ignores,
 
-    extends: [
-      eslint.configs.recommended,
-      ...tseslint.configs.recommended,
-      promisePlugin.configs["flat/recommended"],
-      prettierExtends,
-    ],
+    extends: [eslint.configs.recommended, ...tseslint.configs.recommended, promisePlugin.configs["flat/recommended"], prettierExtends],
     plugins: {
       promise: promisePlugin,
       prettierPlugin,
@@ -82,10 +77,7 @@ const configs = tseslint.config(
       ],
       "@typescript-eslint/ban-ts-comment": "off",
       "@typescript-eslint/no-explicit-any": "off",
-      "react/jsx-curly-brace-presence": [
-        "error",
-        { props: "always", children: "ignore", propElementValues: "always" },
-      ],
+      "react/jsx-curly-brace-presence": ["error", { props: "always", children: "ignore", propElementValues: "always" }],
       "unused-imports/no-unused-imports": "error",
       "object-shorthand": "error",
       "no-async-promise-executor": "off",
@@ -131,6 +123,6 @@ const configs = tseslint.config(
       },
     },
   },
-  { ignores }
+  { ignores },
 );
 export default configs;

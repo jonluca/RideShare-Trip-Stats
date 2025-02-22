@@ -1,9 +1,6 @@
 import React, { Fragment } from "react";
 import { useDataContext } from "../context";
-import {
-  getCurrencyConversionIfExists,
-  getSymbolFromCode,
-} from "../utils/currencies";
+import { getCurrencyConversionIfExists, getSymbolFromCode } from "../utils/currencies";
 import { countBy, capitalize } from "lodash-es";
 
 function getSortedKeysFromObject(obj: any, reverse = false) {
@@ -59,11 +56,9 @@ export const SpendingAndTime = () => {
   }));
   tripLengths.sort((a, b) => a.time - b.time);
   const shortestTrip = tripLengths[0];
-  const shortestTime =
-    tripLengths.length && Math.abs(Math.round(shortestTrip.time / (60 * 1000)));
+  const shortestTime = tripLengths.length && Math.abs(Math.round(shortestTrip.time / (60 * 1000)));
   const longestTrip = tripLengths[tripLengths.length - 1];
-  const longestTime =
-    tripLengths.length && Math.abs(Math.round(longestTrip.time / (60 * 1000)));
+  const longestTime = tripLengths.length && Math.abs(Math.round(longestTrip.time / (60 * 1000)));
 
   let totalTime = 0;
   for (const time of tripLengths) {
@@ -118,11 +113,7 @@ export const SpendingAndTime = () => {
                 <span className={"subheading"}>{key}</span>
                 <span className={"stat"}>
                   {currencySymbol + totals[key].toLocaleString()}{" "}
-                  {usdEquiv && (
-                    <span style={{ fontSize: 12 }}>
-                      ({formatter.format(usdEquiv)} USD)
-                    </span>
-                  )}
+                  {usdEquiv && <span style={{ fontSize: 12 }}>({formatter.format(usdEquiv)} USD)</span>}
                 </span>
                 <br />
               </Fragment>
@@ -165,10 +156,7 @@ export const SpendingAndTime = () => {
         <span>Total Time</span>
         <div id={"total-time"}>
           <span className={"subheading"}>Seconds</span>
-          <span className={"stat"}>
-            {" "}
-            {Math.round((totalTime /= 1000)).toLocaleString()}
-          </span>
+          <span className={"stat"}> {Math.round((totalTime /= 1000)).toLocaleString()}</span>
           <br />
 
           {totalTime > 60 && (
@@ -204,11 +192,7 @@ export const SpendingAndTime = () => {
         <div className={"individual-stat"}>
           <span>Shortest Time</span>
           <span className={"stat"} style={{ marginLeft: 4 }} id={"shortest-ride"}>
-            <a
-              target={"_blank"}
-              className={"link"}
-              href={`https://riders.uber.com/trips/${shortestTrip.uuid}`}
-            >
+            <a target={"_blank"} className={"link"} href={`https://riders.uber.com/trips/${shortestTrip.uuid}`}>
               {shortestTime} minutes
             </a>
           </span>
@@ -218,11 +202,7 @@ export const SpendingAndTime = () => {
         <div className={"individual-stat"}>
           <span>Longest Time</span>
           <span className={"stat"} style={{ marginLeft: 4 }} id={"longest-ride"}>
-            <a
-              target={"_blank"}
-              className={"link"}
-              href={`https://riders.uber.com/trips/${longestTrip.uuid}`}
-            >
+            <a target={"_blank"} className={"link"} href={`https://riders.uber.com/trips/${longestTrip.uuid}`}>
               {longestTime} minutes
             </a>
           </span>

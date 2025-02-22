@@ -15,11 +15,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "typeRoots": [
-      "./node_modules/@types",
-      "./src/types",
-      "./node_modules/@crxjs/vite-plugin/client.d.ts"
-    ]
+    "typeRoots": ["./node_modules/@types", "./src/types", "./node_modules/@crxjs/vite-plugin/client.d.ts"]
   },
   "include": ["src", "vite.config.ts"]
 }

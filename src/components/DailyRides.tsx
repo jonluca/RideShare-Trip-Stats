@@ -19,11 +19,8 @@ export const DailyRides = () => {
       <div className={"info-header"}>Daily rides</div>
       {numTrips && (
         <div className={"info-text"} id={"daily-rides"}>
-          You’ve taken{" "}
-          <span className={"info-value"}>{numTrips.toLocaleString()}</span>{" "}
-          trips with Uber, over{" "}
-          <span className={"info-value"}>{dateDiff.toLocaleString()}</span>{" "}
-          days, for an average of 1 uber every{" "}
+          You’ve taken <span className={"info-value"}>{numTrips.toLocaleString()}</span> trips with Uber, over{" "}
+          <span className={"info-value"}>{dateDiff.toLocaleString()}</span> days, for an average of 1 uber every{" "}
           <span className={"info-value"}>{daysBetweenUbers}</span> days
         </div>
       )}

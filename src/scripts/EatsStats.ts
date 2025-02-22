@@ -53,9 +53,7 @@ class EatsStats {
 }</style>`);
 
     // Set text to "Processing"
-    $("body").prepend(
-      `<div id="overlay"><div id="text">Processing API</div></div>`
-    );
+    $("body").prepend(`<div id="overlay"><div id="text">Processing API</div></div>`);
     this.fetchData();
   }
 
@@ -95,9 +93,7 @@ class EatsStats {
           limit = 1;
           continue;
         }
-        $("#text").html(
-          `Processing API <br>Loaded ${Object.keys(this.tripMap).length} orders`
-        );
+        $("#text").html(`Processing API <br>Loaded ${Object.keys(this.tripMap).length} orders`);
         return data;
       } catch (e) {
         console.error(e);

@@ -1,13 +1,7 @@
 import $ from "jquery";
 import axios from "axios";
 import plimit from "p-limit";
-import type {
-  ActivitiesResponse,
-  Activity,
-  GetTrip,
-  GetTripResponse,
-  Trip,
-} from "../types/UberApi";
+import type { ActivitiesResponse, Activity, GetTrip, GetTripResponse, Trip } from "../types/UberApi";
 // export for others scripts to use
 window.$ = $;
 window.jQuery = $;
@@ -93,18 +87,12 @@ class RideShareStats {
     };
     for (let i = 0; i < 3; i++) {
       try {
-        const response = await axios.post<GetTripResponse>(
-          this.ENDPOINT,
-          body,
-          {
-            headers,
-          }
-        );
+        const response = await axios.post<GetTripResponse>(this.ENDPOINT, body, {
+          headers,
+        });
         const trips = response.data.data.getTrip;
         this.fullTripMap[trips.trip.uuid] = trips;
-        $("#text").html(
-          `Requests Completed <br>${Object.keys(this.fullTripMap).length}`
-        );
+        $("#text").html(`Requests Completed <br>${Object.keys(this.fullTripMap).length}`);
         return;
       } catch (e) {
         console.error(e);
@@ -144,9 +132,7 @@ class RideShareStats {
 }</style>`);
 
     // Set text to "Processing"
-    $("body").prepend(
-      `<div id="overlay"><div id="text">Processing API</div></div>`
-    );
+    $("body").prepend(`<div id="overlay"><div id="text">Processing API</div></div>`);
     this.fetchData();
   }
 
@@ -226,9 +212,7 @@ fragment RVWebCommonActivityFragment on RVWebCommonActivity {
         pastActivities.activities.forEach((activity) => {
           this.activitiesMap[activity.uuid] = activity;
         });
-        $("#text").html(
-          `Requests Completed <br>${Object.keys(this.tripMap).length}`
-        );
+        $("#text").html(`Requests Completed <br>${Object.keys(this.tripMap).length}`);
         return pastActivities;
       } catch (e) {
         console.error(e);
@@ -270,9 +254,7 @@ fragment RVWebCommonActivityFragment on RVWebCommonActivity {
     const uuids = Object.keys(this.activitiesMap);
     const limit = plimit(150);
 
-    const promises = uuids.map((u) =>
-      limit(() => this.requestIndividualTripInfo(u))
-    );
+    const promises = uuids.map((u) => limit(() => this.requestIndividualTripInfo(u)));
     await Promise.all(promises);
     this.sendCompletedDataToExtension();
   }

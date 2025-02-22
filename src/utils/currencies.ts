@@ -134,10 +134,7 @@ export function getSymbolFromCode(code: string): string {
  * @returns {number} returns either 0, if invalid values were passed to the function or its unable to do the
  *   conversion, or the currency conversion to USD
  */
-export function getCurrencyConversionIfExists(
-  code: string,
-  currencyAmount: number | string
-) {
+export function getCurrencyConversionIfExists(code: string, currencyAmount: number | string) {
   if (typeof currencyAmount !== "number") {
     try {
       currencyAmount = parseFloat(currencyAmount);
@@ -152,10 +149,7 @@ export function getCurrencyConversionIfExists(
   code = code.toUpperCase();
   code = code.trim();
   if (currencyConversionToUSD.rates.hasOwnProperty(code)) {
-    const exchangeToUSD =
-      currencyConversionToUSD.rates[
-        code as keyof typeof currencyConversionToUSD["rates"]
-      ];
+    const exchangeToUSD = currencyConversionToUSD.rates[code as keyof (typeof currencyConversionToUSD)["rates"]];
     return Number(exchangeToUSD) * Number(currencyAmount);
   }
   return 0; // return nothing if we weren't able to convert

@@ -1,19 +1,16 @@
 @font-face {
   font-family: "Regular";
-  src: url("chrome-extension://__MSG_@@extension_id__/fonts/sf-compact-thin.woff")
-    format("woff2");
+  src: url("chrome-extension://__MSG_@@extension_id__/fonts/sf-compact-thin.woff") format("woff2");
 }
 
 @font-face {
   font-family: "Medium";
-  src: url("chrome-extension://__MSG_@@extension_id__/fonts/sf-compact-medium.woff")
-    format("woff2");
+  src: url("chrome-extension://__MSG_@@extension_id__/fonts/sf-compact-medium.woff") format("woff2");
 }
 
 @font-face {
   font-family: "Bold";
-  src: url("chrome-extension://__MSG_@@extension_id__/fonts/sf-compact-bold.ttf")
-    format("truetype");
+  src: url("chrome-extension://__MSG_@@extension_id__/fonts/sf-compact-bold.ttf") format("truetype");
 }
 
 body {
@@ -199,7 +196,9 @@ a {
 
 .info-text {
   /* By poolsharing, you’ve saved 15kt of C02, equivalent to the anual offset of 284 trees */
-  font-family: SF Compact Display, sans-serif;
+  font-family:
+    SF Compact Display,
+    sans-serif;
   font-style: normal;
   font-weight: bold;
   font-size: 24px;

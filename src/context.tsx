@@ -31,14 +31,11 @@ const DataContextProvider = (props: React.PropsWithChildren) => {
 
   useEffect(() => {
     const run = async () => {
-      const data: Record<string, CustomGetTrip> =
-        await browser.runtime.sendMessage({ requestData: true });
+      const data: Record<string, CustomGetTrip> = await browser.runtime.sendMessage({ requestData: true });
       for (const entry of Object.values(data)) {
         entry.trip.begin = dayjs(entry.trip.beginTripTime);
         entry.trip.end = dayjs(entry.trip.dropoffTime);
-        entry.trip.lengthMs =
-          entry.trip.end.toDate().getTime() -
-          entry.trip.begin.toDate().getTime();
+        entry.trip.lengthMs = entry.trip.end.toDate().getTime() - entry.trip.begin.toDate().getTime();
         const fare = entry.trip.fare;
         const money = parseCurrency(fare)!;
         if (money && fare.startsWith("CA")) {
@@ -59,10 +56,7 @@ const DataContextProvider = (props: React.PropsWithChildren) => {
         }
         entry.trip.currency = money?.currency || "USD";
         entry.trip.fareAmount = money?.amount || 0;
-        const usdEquivalentAmount = getCurrencyConversionIfExists(
-          entry.trip.currency,
-          entry.trip.fareAmount
-        );
+        const usdEquivalentAmount = getCurrencyConversionIfExists(entry.trip.currency, entry.trip.fareAmount);
         entry.trip.usdAmount = usdEquivalentAmount;
       }
       setData(data);

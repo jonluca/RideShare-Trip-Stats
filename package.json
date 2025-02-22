@@ -51,5 +51,12 @@
     "typescript-eslint": "^8.24.1",
     "vite": "^6.1.1"
   },
-  "packageManager": "yarn@4.6.0"
+  "packageManager": "yarn@4.6.0",
+  "prettier": {
+    "printWidth": 140,
+    "arrowParens": "always",
+    "semi": true,
+    "tabWidth": 2,
+    "trailingComma": "all"
+  }
 }
