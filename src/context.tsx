@@ -57,7 +57,7 @@ const DataContextProvider = (props: React.PropsWithChildren) => {
           // @ts-ignore
           money.currency = "MX";
         }
-        entry.trip.currency = money?.currency! || "USD";
+        entry.trip.currency = money?.currency || "USD";
         entry.trip.fareAmount = money?.amount || 0;
         const usdEquivalentAmount = getCurrencyConversionIfExists(
           entry.trip.currency,

@@ -8,7 +8,7 @@ function openResultsPage() {
   browser.tabs.create({ url: browser.runtime.getURL("index.html") });
 }
 
-browser.runtime.onMessage.addListener(async (request, sender) => {
+browser.runtime.onMessage.addListener(async (request) => {
   if (request.global) {
     await browser.storage.local.set({ global: request.global });
     openResultsPage();

@@ -1,18 +1,8 @@
 import React from "react";
 import { useDataContext } from "../context";
 
-const _MS_PER_DAY = 1000 * 60 * 60 * 24;
 import dayjs from "dayjs";
-// a and b are javascript Date objects
-function dateDiffInDays(a: Date, b: Date) {
-  if (!a || !b) {
-    return 0;
-  }
-  // Discard the time and time-zone information.
-  const utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
-  const utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
-  return Math.floor((utc2 - utc1) / _MS_PER_DAY);
-}
+
 export const DailyRides = () => {
   const { data } = useDataContext();
   console.log(data);
@@ -30,10 +20,10 @@ export const DailyRides = () => {
       {numTrips && (
         <div className={"info-text"} id={"daily-rides"}>
           You’ve taken{" "}
-          <span className={"info-value"}>{numTrips.toLocaleString()}</span> trips
-          with Uber, over{" "}
-          <span className={"info-value"}>{dateDiff.toLocaleString()}</span> days,
-          for an average of 1 uber every{" "}
+          <span className={"info-value"}>{numTrips.toLocaleString()}</span>{" "}
+          trips with Uber, over{" "}
+          <span className={"info-value"}>{dateDiff.toLocaleString()}</span>{" "}
+          days, for an average of 1 uber every{" "}
           <span className={"info-value"}>{daysBetweenUbers}</span> days
         </div>
       )}
