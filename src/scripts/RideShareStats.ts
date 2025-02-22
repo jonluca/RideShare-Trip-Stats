@@ -235,7 +235,6 @@ fragment RVWebCommonActivityFragment on RVWebCommonActivity {
       let nextPageToken = trips.nextPageToken;
       while (true) {
         const trips = await this.makeRequestByOffset(nextPageToken);
-        break;
         if (!trips || !trips.nextPageToken) {
           break;
         }
