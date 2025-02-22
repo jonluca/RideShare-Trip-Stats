@@ -160,7 +160,7 @@ class RideShareStats {
       startTimeMs: $startTimeMs
     ) @include(if: $includePast) {
       activities {
-        ...RVWebCommonActivityFragment
+        uuid
         __typename
       }
       nextPageToken
@@ -168,7 +168,7 @@ class RideShareStats {
     }
     upcoming @include(if: $includeUpcoming) {
       activities {
-        ...RVWebCommonActivityFragment
+        uuid
         __typename
       }
       __typename
@@ -177,26 +177,6 @@ class RideShareStats {
   }
 }
 
-fragment RVWebCommonActivityFragment on RVWebCommonActivity {
-  buttons {
-    isDefault
-    startEnhancerIcon
-    text
-    url
-    __typename
-  }
-  cardURL
-  description
-  imageURL {
-    light
-    dark
-    __typename
-  }
-  subtitle
-  title
-  uuid
-  __typename
-}
 `,
     };
     const headers = {

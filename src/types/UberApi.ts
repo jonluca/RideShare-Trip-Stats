@@ -22,60 +22,17 @@ export interface Past {
 }
 
 export interface Activity {
-  buttons: Button[];
-  cardURL: string;
-  description: string;
-  imageURL: ImageURL;
-  subtitle: string;
-  title: string;
   uuid: string;
-  __typename: ActivityTypename;
 }
-
-export enum ActivityTypename {
-  RVWebCommonActivity = "RVWebCommonActivity",
-}
-
-export interface Button {
-  isDefault: boolean;
-  startEnhancerIcon: StartEnhancerIcon;
-  text: Text;
-  url: string;
-  __typename: ButtonTypename;
-}
-
-export enum ButtonTypename {
-  RVWebCommonActivityButton = "RVWebCommonActivityButton",
-}
-
-export enum StartEnhancerIcon {
-  ArrowClockwiseFilled = "ARROW_CLOCKWISE_FILLED",
-  LifebuoyFilled = "LIFEBUOY_FILLED",
-  ReceiptFilled = "RECEIPT_FILLED",
-}
-
-export enum Text {
-  Details = "Details",
-  Help = "Help",
-  Rebook = "Rebook",
-}
-
-export interface ImageURL {
-  light: string;
-  dark: string;
-  __typename: ImageURLTypename;
-}
-
-export enum ImageURLTypename {
-  RVWebCommonColorModeImage = "RVWebCommonColorModeImage",
-}
-
 export interface GetTrip {
   trip: Trip;
   mapURL: string;
   polandTaxiLicense: string;
   rating: string;
+  reviewer: string;
   receipt: Receipt;
+  concierge: null;
+  organization: null;
   __typename: string;
 }
 
@@ -93,50 +50,24 @@ export interface Trip {
   cityID: number;
   countryID: number;
   disableCanceling: boolean;
+  disableRating: boolean;
+  disableResendReceipt: boolean;
   driver: string;
   dropoffTime: string;
   fare: string;
+  guest: string;
   isRidepoolTrip: boolean;
   isScheduledRide: boolean;
   isSurgeTrip: boolean;
   isUberReserve: boolean;
   jobUUID: string;
-  marketplace: Marketplace;
+  marketplace: string;
   paymentProfileUUID: string;
-  status: Status;
+  showRating: boolean;
+  status: string;
   uuid: string;
-  vehicleDisplayName: VehicleDisplayName;
+  vehicleDisplayName: string;
   vehicleViewID: number;
   waypoints: string[];
   __typename: string;
-}
-
-export interface Data {
-  getTrips: GetTrips;
-}
-
-export interface GetTrips {
-  count: number;
-  pagingResult: PagingResult;
-  reservations: any[];
-  trips: Trip[];
-  __typename: string;
-}
-
-export interface PagingResult {
-  hasMore: boolean;
-  nextCursor: string;
-  __typename: string;
-}
-
-export enum Marketplace {
-  PersonalTransport = "personal_transport",
-}
-
-export enum Status {
-  Completed = "COMPLETED",
-}
-
-export enum VehicleDisplayName {
-  UberX = "UberX",
 }
