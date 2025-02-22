@@ -4,7 +4,7 @@ import { SpendingAndTime } from "./components/SpendingAndTime";
 import Swal from "sweetalert2";
 import { downloadFile } from "./utils";
 import { useDataContext } from "./context";
-import { json2csvAsync } from "json-2-csv";
+import { json2csv } from "json-2-csv";
 import { cloneDeep } from "lodash-es";
 
 function App() {
@@ -42,7 +42,7 @@ function App() {
                     delete c.trip.begin;
                     delete c.trip.end;
                   }
-                  const csv = await json2csvAsync(cloned);
+                  const csv = json2csv(cloned);
                   downloadFile("trips.csv", csv);
                 } else if (value === "json") {
                   const json = JSON.stringify(trips);
