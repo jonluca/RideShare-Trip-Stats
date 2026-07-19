@@ -52,7 +52,7 @@ const DataContextProvider = (props: React.PropsWithChildren) => {
         }
         if (money && fare.startsWith("MX")) {
           // @ts-ignore
-          money.currency = "MX";
+          money.currency = "MXN";
         }
         entry.trip.currency = money?.currency || "USD";
         entry.trip.fareAmount = money?.amount || 0;

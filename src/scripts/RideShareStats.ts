@@ -236,7 +236,6 @@ class RideShareStats {
 
     const promises = uuids.map((u) => limit(() => this.requestIndividualTripInfo(u)));
     await Promise.all(promises);
-    this.sendCompletedDataToExtension();
   }
 }
 

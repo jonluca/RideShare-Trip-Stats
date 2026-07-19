@@ -73,51 +73,17 @@ const normalizeNumber = (numberStr: string, config: CurrencyConfig): number | nu
     return null;
   }
 
-  // Count separators
-  const dots = numberStr.split(".").length - 1;
-  const commas = numberStr.split(",").length - 1;
+  const decimalIndex = numberStr.lastIndexOf(config.decimalSeparator);
+  const decimalDigits = decimalIndex === -1 ? Number.POSITIVE_INFINITY : numberStr.length - decimalIndex - 1;
+  const hasDecimalPart = decimalDigits > 0 && decimalDigits <= config.maxDecimals;
+  let normalized: string;
 
-  // Handle different number formats
-  let normalized = numberStr;
-
-  if (dots === 0 && commas === 0) {
-    // Integer
-    return parseInt(normalized, 10);
-  }
-
-  if (dots > 1 || commas > 1) {
-    // Multiple separators - identify thousand separators vs decimal
-    const lastDotIndex = numberStr.lastIndexOf(".");
-    const lastCommaIndex = numberStr.lastIndexOf(",");
-
-    // Use the last separator as decimal point based on currency config
-    if (config.decimalSeparator === ".") {
-      normalized = numberStr.replace(/,/g, "");
-      if (lastDotIndex !== numberStr.length - 3) {
-        normalized = normalized.replace(/\./g, "");
-      }
-    } else {
-      normalized = numberStr.replace(/\./g, "");
-      if (lastCommaIndex !== numberStr.length - 3) {
-        normalized = normalized.replace(/,/g, "");
-      }
-    }
-  } else if (dots === 1 || commas === 1) {
-    // Single separator - check if it's decimal or thousand
-    const segments = dots === 1 ? numberStr.split(".") : numberStr.split(",");
-    const lastSegment = segments[segments.length - 1];
-
-    if (lastSegment.length <= config.maxDecimals) {
-      // Likely decimal separator
-      if (config.decimalSeparator === ".") {
-        normalized = numberStr.replace(/,/g, "");
-      } else {
-        normalized = numberStr.replace(/\./g, "").replace(",", ".");
-      }
-    } else {
-      // Likely thousands separator
-      normalized = numberStr.replace(/[.,]/g, "");
-    }
+  if (hasDecimalPart) {
+    const integerPart = numberStr.slice(0, decimalIndex).replace(/[.,]/g, "");
+    const fractionalPart = numberStr.slice(decimalIndex + 1).replace(/[.,]/g, "");
+    normalized = `${integerPart}.${fractionalPart}`;
+  } else {
+    normalized = numberStr.replace(/[.,]/g, "");
   }
 
   const amount = parseFloat(normalized);
