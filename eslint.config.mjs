@@ -1,7 +1,6 @@
 import eslint from "@eslint/js";
 import prettierPlugin from "eslint-plugin-prettier";
 import unusedImportsPlugin from "eslint-plugin-unused-imports";
-import reactPlugin from "eslint-plugin-react";
 import prettierExtends from "eslint-config-prettier";
 import { fixupPluginRules } from "@eslint/compat";
 import globals from "globals";
@@ -44,7 +43,6 @@ const configs = tseslint.config(
       promise: promisePlugin,
       prettierPlugin,
       "unused-imports": fixupPluginRules(unusedImportsPlugin),
-      react: reactPlugin,
       "react-hooks": fixupPluginRules(hooksPlugin),
     },
     rules: {
@@ -77,7 +75,6 @@ const configs = tseslint.config(
       ],
       "@typescript-eslint/ban-ts-comment": "off",
       "@typescript-eslint/no-explicit-any": "off",
-      "react/jsx-curly-brace-presence": ["error", { props: "always", children: "ignore", propElementValues: "always" }],
       "unused-imports/no-unused-imports": "error",
       "object-shorthand": "error",
       "no-async-promise-executor": "off",
@@ -99,7 +96,6 @@ const configs = tseslint.config(
       },
     },
     settings: {
-      react: { version: "detect" },
       "import-x/resolver": {
         typescript: {
           alwaysTryTypes: true, // always try to resolve types under `<root>@types` directory even it doesn't contain any source code, like `@types/unist`
