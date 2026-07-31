@@ -5,7 +5,6 @@ export default defineConfig({
   targetBrowsers: ["chrome", "edge", "firefox", "safari"],
   zip: {
     includeSources: [
-      ".yarnrc.yml",
       "LICENSE",
       "PRIVACY.md",
       "README.md",
@@ -18,7 +17,6 @@ export default defineConfig({
       "src/**",
       "tsconfig.json",
       "wxt.config.ts",
-      "yarn.lock",
     ],
   },
   manifest: ({ browser }) => ({
@@ -40,9 +38,13 @@ export default defineConfig({
           browser_specific_settings: {
             gecko: {
               id: "rideshare-trip-stats@jonluca.com",
+              strict_min_version: "140.0",
               data_collection_permissions: {
                 required: ["none"],
               },
+            },
+            gecko_android: {
+              strict_min_version: "142.0",
             },
           },
         }

@@ -7,16 +7,17 @@
     "dev": "wxt -b chrome --mv3",
     "dev:firefox": "wxt -b firefox --mv3",
     "typecheck": "wxt prepare && tsc --noEmit",
-    "build": "wxt build -b chrome --mv3",
+    "build": "npm run build:chrome && npm run build:edge && npm run build:firefox && npm run build:safari",
+    "build:chrome": "wxt build -b chrome --mv3",
     "build:edge": "wxt build -b edge --mv3",
     "build:firefox": "wxt build -b firefox --mv3",
     "build:safari": "wxt build -b safari --mv3",
-    "build:all": "yarn build && yarn build:edge && yarn build:firefox && yarn build:safari",
-    "zip": "wxt zip -b chrome --mv3",
+    "zip": "npm run zip:chrome && npm run zip:edge && npm run zip:firefox && npm run zip:safari",
+    "zip:chrome": "wxt zip -b chrome --mv3",
     "zip:edge": "wxt zip -b edge --mv3",
     "zip:firefox": "wxt zip -b firefox --mv3",
     "zip:safari": "wxt zip -b safari --mv3",
-    "zip:all": "yarn zip && yarn zip:edge && yarn zip:firefox && yarn zip:safari",
+    "lint:firefox": "web-ext lint --source-dir .output/firefox-mv3",
     "postinstall": "wxt prepare"
   },
   "dependencies": {
@@ -46,14 +47,23 @@
     "typescript": "6.0.3",
     "typescript-eslint": "^8.65.0",
     "vite": "^8.2.0",
-    "wxt": "0.21.2"
+    "web-ext": "10.5.0",
+    "wxt": "0.21.3"
   },
-  "packageManager": "yarn@4.18.0",
+  "packageManager": "npm@12.0.1",
   "prettier": {
     "printWidth": 140,
     "arrowParens": "always",
     "semi": true,
     "tabWidth": 2,
     "trailingComma": "all"
+  },
+  "overrides": {
+    "adm-zip": "0.6.0",
+    "esbuild": "0.28.1",
+    "next": "16.2.12",
+    "postcss": "8.5.25",
+    "sharp": "0.35.3",
+    "shell-quote": "1.10.0"
   }
 }
