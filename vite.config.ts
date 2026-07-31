@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import type { ManifestV3Export } from "@crxjs/vite-plugin";
 import { crx } from "@crxjs/vite-plugin";
-import manifestJson from "./manifest.json";
+import manifestJson from "./manifest.json" with { type: "json" };
 
 const manifest: ManifestV3Export = manifestJson as ManifestV3Export;
 export default defineConfig({

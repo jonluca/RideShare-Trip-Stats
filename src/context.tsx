@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
-import { browser } from "webextension-polyfill-ts";
+import browser from "webextension-polyfill";
 import type { GetTrip, Trip } from "./types/UberApi";
 import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
@@ -64,15 +64,9 @@ const DataContextProvider = (props: React.PropsWithChildren) => {
     run();
   }, []);
 
-  return (
-    <DataContext.Provider
-      value={{
-        data,
-      }}
-    >
-      {props.children}
-    </DataContext.Provider>
-  );
+  const value = React.useMemo(() => ({ data }), [data]);
+
+  return <DataContext.Provider value={value}>{props.children}</DataContext.Provider>;
 };
 
 const useDataContext = () => React.useContext(DataContext);

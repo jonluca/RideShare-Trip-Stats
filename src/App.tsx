@@ -1,7 +1,6 @@
 import React from "react";
 import { DailyRides } from "./components/DailyRides";
 import { SpendingAndTime } from "./components/SpendingAndTime";
-import Swal from "sweetalert2";
 import { downloadFile } from "./utils";
 import { useDataContext } from "./context";
 import { json2csv } from "json-2-csv";
@@ -9,6 +8,22 @@ import { cloneDeep } from "lodash-es";
 
 function App() {
   const { data } = useDataContext();
+
+  const exportTrips = (format: "csv" | "json") => {
+    const trips = Object.values(data);
+
+    if (format === "csv") {
+      const cloned: any = cloneDeep(trips);
+      for (const trip of cloned) {
+        delete trip.trip.begin;
+        delete trip.trip.end;
+      }
+      downloadFile("trips.csv", json2csv(cloned));
+      return;
+    }
+
+    downloadFile("trips.json", JSON.stringify(trips));
+  };
 
   return (
     <div id={"page-container"}>
@@ -21,38 +36,16 @@ function App() {
           </div>
         </div>
         <div className={"buttons"}>
-          <div
+          <button
+            type={"button"}
             className={"button"}
-            id={"export"}
-            onClick={async () => {
-              const trips = Object.values(data);
-              const { value } = await Swal.fire({
-                title: "CSV or JSON",
-                input: "radio",
-                inputValue: "csv",
-                inputOptions: {
-                  csv: "CSV",
-                  json: "JSON",
-                },
-              });
-              if (value) {
-                if (value === "csv") {
-                  const cloned: any = cloneDeep(trips);
-                  for (const c of cloned) {
-                    delete c.trip.begin;
-                    delete c.trip.end;
-                  }
-                  const csv = json2csv(cloned);
-                  downloadFile("trips.csv", csv);
-                } else if (value === "json") {
-                  const json = JSON.stringify(trips);
-                  downloadFile("trips.json", json);
-                }
-              }
-            }}
+            onClick={() => exportTrips("csv")}
           >
-            Export
-          </div>
+            Export CSV
+          </button>
+          <button type={"button"} className={"button"} onClick={() => exportTrips("json")}>
+            Export JSON
+          </button>
         </div>
       </div>
       <footer>

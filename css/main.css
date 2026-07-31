@@ -1,16 +1,16 @@
 @font-face {
   font-family: "Regular";
-  src: url("chrome-extension://__MSG_@@extension_id__/fonts/sf-compact-thin.woff") format("woff2");
+  src: url("../fonts/sf-compact-thin.woff") format("woff");
 }
 
 @font-face {
   font-family: "Medium";
-  src: url("chrome-extension://__MSG_@@extension_id__/fonts/sf-compact-medium.woff") format("woff2");
+  src: url("../fonts/sf-compact-medium.woff") format("woff");
 }
 
 @font-face {
   font-family: "Bold";
-  src: url("chrome-extension://__MSG_@@extension_id__/fonts/sf-compact-bold.ttf") format("truetype");
+  src: url("../fonts/sf-compact-bold.ttf") format("truetype");
 }
 
 body {
@@ -138,6 +138,7 @@ a {
 }
 
 .button {
+  font-family: inherit;
   font-size: 20px;
   width: 200px;
   height: 100px;

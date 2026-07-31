@@ -1,12 +1,11 @@
 {
   "manifest_version": 3,
   "name": "RideShare Trip Stats",
-  "version": "11.0",
-  "description": "Visit https://www.uber.com/us/en/rider-home/ to view your uber statistics",
-  "permissions": ["tabs", "scripting", "storage", "unlimitedStorage"],
-  "host_permissions": ["https://uber.com/*", "https://*.uber.com/*", "https://*.ubereats.com/*"],
-  "action": { "default_title": "Click to run" },
-  "homepage_url": "https://jonlu.ca",
+  "version": "11.1",
+  "description": "Analyzes your Uber ride history and displays trip, spending, distance, and time statistics.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "action": { "default_title": "Analyze Uber ride history" },
+  "homepage_url": "https://github.com/jonluca/Uber-Trip-Stats",
   "icons": {
     "64": "images/icon64.png",
     "32": "images/icon32.png",
@@ -16,5 +15,11 @@
   "background": {
     "service_worker": "src/scripts/background",
     "type": "module"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["<dynamic_resource>"],
+      "matches": ["https://riders.uber.com/*"]
+    }
+  ]
 }
