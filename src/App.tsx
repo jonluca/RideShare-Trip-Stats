@@ -4,7 +4,6 @@ import { SpendingAndTime } from "./components/SpendingAndTime";
 import { downloadFile } from "./utils";
 import { useDataContext } from "./context";
 import { json2csv } from "json-2-csv";
-import { cloneDeep } from "lodash-es";
 
 function App() {
   const { data } = useDataContext();
@@ -13,12 +12,11 @@ function App() {
     const trips = Object.values(data);
 
     if (format === "csv") {
-      const cloned: any = cloneDeep(trips);
-      for (const trip of cloned) {
-        delete trip.trip.begin;
-        delete trip.trip.end;
-      }
-      downloadFile("trips.csv", json2csv(cloned));
+      const csvTrips = trips.map(({ trip, ...entry }) => {
+        const { begin: _begin, end: _end, ...tripData } = trip;
+        return { ...entry, trip: tripData };
+      });
+      downloadFile("trips.csv", json2csv(csvTrips));
       return;
     }
 
@@ -36,11 +34,7 @@ function App() {
           </div>
         </div>
         <div className={"buttons"}>
-          <button
-            type={"button"}
-            className={"button"}
-            onClick={() => exportTrips("csv")}
-          >
+          <button type={"button"} className={"button"} onClick={() => exportTrips("csv")}>
             Export CSV
           </button>
           <button type={"button"} className={"button"} onClick={() => exportTrips("json")}>

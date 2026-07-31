@@ -110,7 +110,11 @@ export const parseMoney = (text: string): Money | null => {
   const numberStr = extractNumberString(text, currencyInfo.symbolIndex, currencyInfo.symbol.length);
 
   // Parse and normalize the number according to currency rules
-  const amount = normalizeNumber(numberStr, currencyConfigs[currencyInfo.currency]);
+  const config = currencyConfigs[currencyInfo.currency];
+  if (!config) {
+    return null;
+  }
+  const amount = normalizeNumber(numberStr, config);
   if (amount === null) {
     return null;
   }

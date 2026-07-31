@@ -22,6 +22,8 @@ const ignores = [
   ".next/**/*",
   "**/.next/**/*",
   "**/.yarn/**/*",
+  "**/.wxt/**/*",
+  "**/.output/**/*",
   "**/.expo/**/*",
   "**/dist/**/*",
   "public/js/*",

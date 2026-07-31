@@ -4,7 +4,33 @@
 
 View your rideshare profile statistics!
 
-To use this extension, go to https://riders.uber.com/trips and sign in. Then click the extension logo from the top bar in Chrome!
+To use this extension, go to https://riders.uber.com/trips and sign in. Then click the extension icon in your browser toolbar.
+
+## Browser support
+
+The extension is built with [WXT](https://wxt.dev/) and React from one codebase. Manifest V3 builds are available for:
+
+- Chrome, Brave, Arc, Opera, and other Chromium browsers
+- Microsoft Edge
+- Firefox
+- Safari (requires conversion to a Safari Web Extension with Xcode before distribution)
+
+## Development
+
+Node.js 22 or newer and Yarn are required.
+
+```sh
+yarn install
+yarn dev
+```
+
+Use `yarn dev:firefox` for Firefox development. Create production builds for every target with:
+
+```sh
+yarn build:all
+```
+
+WXT writes browser-specific extensions to `.output/`. Create archives for every target with `yarn zip:all`. The Safari archive still needs to be converted into a native Safari Web Extension wrapper with Xcode before distribution.
 
 ![image](https://i.imgur.com/TBOTsi4.png)
 

@@ -1,25 +1,52 @@
-import $ from "jquery";
-import axios from "axios";
 import plimit from "p-limit";
-import type { ActivitiesResponse, Activity, GetTrip, GetTripResponse, Trip } from "../types/UberApi";
-// export for others scripts to use
-window.$ = $;
-window.jQuery = $;
+import { browser } from "wxt/browser";
+import { defineUnlistedScript } from "wxt/utils/define-unlisted-script";
+import type { ActivitiesResponse, Activity, GetTrip, GetTripResponse } from "../src/types/UberApi";
 
 class RideShareStats {
   csrf: string = "x";
 
   activitiesMap: Record<string, Activity> = {};
   fullTripMap: Record<string, GetTrip> = {};
-  constructor() {
-    $(() => {
-      if (window.location.hostname === "riders.uber.com") {
-        this.startUberRidesAnalysis();
-      }
+  ENDPOINT = "https://riders.uber.com/graphql";
+
+  async postGraphQL<T>(body: unknown): Promise<T> {
+    const response = await fetch(this.ENDPOINT, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "x-csrf-token": this.csrf || "x",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
     });
+
+    if (!response.ok) {
+      throw new Error(`Uber request failed with status ${response.status}`);
+    }
+
+    return (await response.json()) as T;
   }
 
-  ENDPOINT = "https://riders.uber.com/graphql";
+  updateProgress(completed: number, total?: number) {
+    const progress = document.getElementById("text");
+    if (!progress) {
+      return;
+    }
+
+    progress.replaceChildren(
+      document.createTextNode("Requests Completed"),
+      document.createElement("br"),
+      document.createTextNode(total === undefined ? String(completed) : `${completed} of ${total}`),
+    );
+  }
+
+  setOverlayVisible(visible: boolean) {
+    const overlay = document.getElementById("overlay");
+    if (overlay) {
+      overlay.style.display = visible ? "block" : "none";
+    }
+  }
 
   async requestIndividualTripInfo(tripUUID: string) {
     const body = {
@@ -80,19 +107,13 @@ class RideShareStats {
 }
 `,
     };
-    const headers = {
-      "x-csrf-token": this.csrf,
-      "Content-Type": "application/json",
-    };
     for (let i = 0; i < 3; i++) {
       try {
-        const response = await axios.post<GetTripResponse>(this.ENDPOINT, body, {
-          headers,
-        });
+        const response = await this.postGraphQL<GetTripResponse>(body);
         const total = Object.keys(this.activitiesMap).length;
-        const trips = response.data.data.getTrip;
+        const trips = response.data.getTrip;
         this.fullTripMap[trips.trip.uuid] = trips;
-        $("#text").html(`Requests Completed <br>${Object.keys(this.fullTripMap).length} of ${total}`);
+        this.updateProgress(Object.keys(this.fullTripMap).length, total);
         return;
       } catch (e) {
         console.error(e);
@@ -102,11 +123,12 @@ class RideShareStats {
 
   startUberRidesAnalysis() {
     if (!this.csrf) {
-      const text = $("#__CSRF_TOKEN__").text();
+      const text = document.getElementById("__CSRF_TOKEN__")?.textContent ?? "";
       this.csrf = text.replace(/\\u0022/g, "") || "x";
     }
     // Insert CSS for overlay
-    $(document.head).append(`<style>
+    const style = document.createElement("style");
+    style.textContent = `
 #overlay {
   position: fixed;
   width: 100%;
@@ -129,11 +151,18 @@ class RideShareStats {
   transform: translate(-50%,-50%);
   -ms-transform: translate(-50%,-50%);
   text-align: center;
-}</style>`);
+}`;
+    document.head.append(style);
 
     // Set text to "Processing"
-    $("body").prepend(`<div id="overlay"><div id="text">Processing API</div></div>`);
-    this.fetchData();
+    const overlay = document.createElement("div");
+    overlay.id = "overlay";
+    const progress = document.createElement("div");
+    progress.id = "text";
+    progress.textContent = "Processing API";
+    overlay.append(progress);
+    document.body.prepend(overlay);
+    void this.fetchData();
   }
 
   async makeRequestByOffset(nextPageToken?: string) {
@@ -179,20 +208,14 @@ class RideShareStats {
 
 `,
     };
-    const headers = {
-      "x-csrf-token": this.csrf || "x",
-      "Content-Type": "application/json",
-    };
     for (let i = 0; i < 3; i++) {
       try {
-        const resp = await axios.post<ActivitiesResponse>(this.ENDPOINT, d, {
-          headers,
-        });
-        const pastActivities = resp.data.data.activities.past;
+        const response = await this.postGraphQL<ActivitiesResponse>(d);
+        const pastActivities = response.data.activities.past;
         pastActivities.activities.forEach((activity) => {
           this.activitiesMap[activity.uuid] = activity;
         });
-        $("#text").html(`Requests Completed <br>${Object.keys(this.activitiesMap).length}`);
+        this.updateProgress(Object.keys(this.activitiesMap).length);
         return pastActivities;
       } catch (e) {
         console.error(e);
@@ -201,13 +224,9 @@ class RideShareStats {
   }
   sendCompletedDataToExtension() {
     // Once all requests have completed, trigger a new tab and send the data
-    const full: Record<string, Trip | GetTrip> = {};
-    Object.keys(this.activitiesMap).forEach((key) => {
-      full[key] = this.fullTripMap[key] || { trip: this.activitiesMap[key] };
-    });
-    console.log(full);
-    chrome.runtime.sendMessage({ global: full });
-    $("#overlay").hide();
+    console.log(this.fullTripMap);
+    void browser.runtime.sendMessage({ global: this.fullTripMap });
+    this.setOverlayVisible(false);
   }
   async fetchData() {
     const trips = await this.makeRequestByOffset();
@@ -230,7 +249,7 @@ class RideShareStats {
   }
 
   async requestAllTripInfo() {
-    $("#overlay").show();
+    this.setOverlayVisible(true);
     const uuids = Object.keys(this.activitiesMap);
     const limit = plimit(150);
 
@@ -239,4 +258,8 @@ class RideShareStats {
   }
 }
 
-new RideShareStats();
+export default defineUnlistedScript(() => {
+  if (window.location.hostname === "riders.uber.com") {
+    new RideShareStats().startUberRidesAnalysis();
+  }
+});

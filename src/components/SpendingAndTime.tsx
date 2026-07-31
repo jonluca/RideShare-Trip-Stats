@@ -1,7 +1,15 @@
 import React, { Fragment } from "react";
 import { useDataContext } from "../context";
 import { getCurrencyConversionIfExists, getSymbolFromCode } from "../utils/currencies";
-import { countBy, capitalize } from "lodash-es";
+
+function capitalize(value: string) {
+  return value.length === 0 ? value : value[0]!.toUpperCase() + value.slice(1);
+}
+
+const usdFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+});
 
 function getSortedKeysFromObject(obj: any, reverse = false) {
   const keys = Object.keys(obj);
@@ -27,24 +35,19 @@ export const SpendingAndTime = () => {
   let maxSpent = -1;
   const trips = Object.values(data);
   for (const trip of trips) {
-    const currency = trip.trip.currency || "USD";
+    const { currency = "USD", fareAmount, status, usdAmount } = trip.trip;
     totals[currency] ??= 0;
-    totals[currency] += trip.trip.fareAmount;
-    totalAcrossAllCurrencies += trip.trip.usdAmount;
-    if (trip.trip.usdAmount) {
-      minSpent = Math.min(minSpent, trip.trip.usdAmount);
-      maxSpent = Math.max(maxSpent, trip.trip.usdAmount);
+    totals[currency] += fareAmount;
+    totalAcrossAllCurrencies += usdAmount;
+    if (usdAmount) {
+      minSpent = Math.min(minSpent, usdAmount);
+      maxSpent = Math.max(maxSpent, usdAmount);
     }
 
-    if (trip.trip.status === "COMPLETED") {
+    if (status === "COMPLETED") {
       completedTrips++;
     }
   }
-
-  const formatter = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  });
 
   const val = totalAcrossAllCurrencies;
 
@@ -56,18 +59,20 @@ export const SpendingAndTime = () => {
   }));
   tripLengths.sort((a, b) => a.time - b.time);
   const shortestTrip = tripLengths[0];
-  const shortestTime = tripLengths.length && Math.abs(Math.round(shortestTrip.time / (60 * 1000)));
+  const shortestTime = shortestTrip ? Math.abs(Math.round(shortestTrip.time / (60 * 1000))) : 0;
   const longestTrip = tripLengths[tripLengths.length - 1];
-  const longestTime = tripLengths.length && Math.abs(Math.round(longestTrip.time / (60 * 1000)));
+  const longestTime = longestTrip ? Math.abs(Math.round(longestTrip.time / (60 * 1000))) : 0;
 
   let totalTime = 0;
   for (const time of tripLengths) {
     totalTime += time.time;
   }
 
-  const countedByType = countBy(trips, (t) => {
-    return t.trip.vehicleDisplayName?.split(":")[0]?.toLowerCase();
-  });
+  const countedByType: Record<string, number> = {};
+  for (const trip of trips) {
+    const vehicleType = trip.trip.vehicleDisplayName?.split(":")[0]?.toLowerCase() || "unknown";
+    countedByType[vehicleType] = (countedByType[vehicleType] ?? 0) + 1;
+  }
 
   const surge = trips.filter((t) => t.trip.isSurgeTrip).length;
   const reserve = trips.filter((t) => t.trip.isUberReserve).length;
@@ -102,18 +107,19 @@ export const SpendingAndTime = () => {
       <div className={"individual-stat"}>
         <span>Total Spent</span>
         <span className={"stat"} id={"total-payment"}>
-          {formatter.format(val)}
+          {usdFormatter.format(val)}
         </span>
         <div id={"total-spent"}>
           {currencyKeys.map((key) => {
             const currencySymbol = getSymbolFromCode(key);
-            const usdEquiv = getCurrencyConversionIfExists(key, totals[key]);
+            const total = totals[key] ?? 0;
+            const usdEquiv = getCurrencyConversionIfExists(key, total);
             return (
               <Fragment key={key}>
                 <span className={"subheading"}>{key}</span>
                 <span className={"stat"}>
-                  {currencySymbol + totals[key].toLocaleString()}{" "}
-                  {usdEquiv && <span style={{ fontSize: 12 }}>({formatter.format(usdEquiv)} USD)</span>}
+                  {currencySymbol + total.toLocaleString()}{" "}
+                  {usdEquiv && <span style={{ fontSize: 12 }}>({usdFormatter.format(usdEquiv)} USD)</span>}
                 </span>
                 <br />
               </Fragment>
@@ -125,7 +131,7 @@ export const SpendingAndTime = () => {
       <div className={"individual-stat"}>
         <span>Average Price</span>
         <span className={"stat"} id={"average-price"}>
-          ~${(totalAcrossAllCurrencies / completedTrips).toFixed(2)}
+          ~${(completedTrips > 0 ? totalAcrossAllCurrencies / completedTrips : 0).toFixed(2)}
         </span>
       </div>
       {maxSpent > 0 && (
@@ -198,7 +204,7 @@ export const SpendingAndTime = () => {
           </span>
         </div>
       )}
-      {longestTime && (
+      {longestTrip && (
         <div className={"individual-stat"}>
           <span>Longest Time</span>
           <span className={"stat"} style={{ marginLeft: 4 }} id={"longest-ride"}>
@@ -236,9 +242,9 @@ export const SpendingAndTime = () => {
         <span>Rides</span>
         <div id={"total-spent"}>
           {Object.keys(countedByType)
-            .sort((a, b) => countedByType[b] - countedByType[a])
+            .sort((a, b) => (countedByType[b] ?? 0) - (countedByType[a] ?? 0))
             .map((key) => {
-              const numRides = countedByType[key];
+              const numRides = countedByType[key] ?? 0;
               return (
                 <Fragment key={key}>
                   <span className={"subheading"}>{capitalize(key)}</span>

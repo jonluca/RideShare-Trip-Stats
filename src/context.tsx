@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
-import browser from "webextension-polyfill";
+import { browser } from "wxt/browser";
 import type { GetTrip, Trip } from "./types/UberApi";
 import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
