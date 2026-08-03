@@ -9,7 +9,8 @@ RideShare Trip Stats is a private, open-source browser extension that turns your
 1. Open [Uber Trips](https://riders.uber.com/trips) and sign in.
 2. Wait until your past trips appear.
 3. Click the RideShare Trip Stats icon in the browser toolbar. If it is hidden, open the extensions menu and pin it first.
-4. Keep the Uber tab open while the extension reads your history. The results dashboard opens automatically.
+4. A draggable **Analyze trips** button appears on Uber. Move it wherever you like, then click it to start.
+5. Keep the Uber tab open while the extension reads your history. The results dashboard opens automatically.
 
 Clicking the extension from another page opens Uber Trips for you.
 
@@ -48,6 +49,7 @@ WXT writes browser-specific builds to `.output/`. Run `npm run zip` to create st
 
 ## Architecture
 
+- `entrypoints/launcher.ts` injects the draggable on-page trigger after the user clicks the extension toolbar icon.
 - `entrypoints/rideshare.ts` collects activity IDs, reuses stable cached trips, and fetches new or recent trip details with bounded concurrency and retry backoff.
 - `src/data/` owns local persistence, trip normalization, and CSV export.
 - `src/analytics/` calculates the complete dashboard in one pass over normalized trips.

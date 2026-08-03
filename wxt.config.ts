@@ -25,7 +25,7 @@ export default defineConfig({
     description: "Analyzes your Uber ride history and displays trip, spending, distance, and time statistics.",
     permissions: ["activeTab", "scripting", "storage"],
     action: {
-      default_title: "Analyze Uber ride history",
+      default_title: "Show the trip-analysis launcher",
     },
     homepage_url: "https://github.com/jonluca/RideShare-Trip-Stats",
     icons: {

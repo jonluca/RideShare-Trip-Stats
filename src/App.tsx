@@ -38,8 +38,7 @@ function EmptyState({ error }: { error?: string | null }) {
         <p className="eyebrow">{error ? "Something went wrong" : "No trip data yet"}</p>
         <h1>{error ? "We couldn’t open your results." : "Run the extension from Uber Trips."}</h1>
         <p>
-          {error ??
-            "Sign in to Uber, wait for your trip history to appear, then click the RideShare Trip Stats icon in your browser toolbar."}
+          {error ?? "Sign in to Uber, click the RideShare Trip Stats toolbar icon, then use the Analyze trips button added to the page."}
         </p>
         <a className="primary-button" href={UBER_TRIPS_URL} target="_blank" rel="noreferrer">
           Open Uber Trips <span aria-hidden="true">↗</span>

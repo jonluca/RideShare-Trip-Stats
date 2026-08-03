@@ -3,6 +3,7 @@ import { browser } from "wxt/browser";
 import { defineUnlistedScript } from "wxt/utils/define-unlisted-script";
 import { COLLECTION_COMPLETE, GET_CACHED_TRIPS, type CollectionCompleteMessage } from "../src/data/messages";
 import type { StoredTripData } from "../src/data/storage";
+import { createActivitiesRequest, createGetTripRequest } from "../src/data/uberRequests";
 import type { ActivitiesResponse, GetTrip, GetTripResponse, Past } from "../src/types/UberApi";
 
 const ENDPOINT = "https://riders.uber.com/graphql";
@@ -55,6 +56,7 @@ class RideShareStats {
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
+        "x-uber-rv-session-type": "desktop_session",
         "x-csrf-token": this.csrf,
       },
       body: JSON.stringify(body),
@@ -168,51 +170,12 @@ class RideShareStats {
   }
 
   private async requestActivityPage(nextPageToken?: string): Promise<Past> {
-    const body = {
-      operationName: "Activities",
-      variables: {
-        cityID: 1,
-        includePast: true,
-        includeUpcoming: false,
-        limit: 1000,
-        nextPageToken,
-        orderTypes: ["RIDES", "TRAVEL"],
-        profileType: "PERSONAL",
-      },
-      query: `query Activities($cityID: Int, $endTimeMs: Float, $includePast: Boolean = true, $includeUpcoming: Boolean = true, $limit: Int = 5, $nextPageToken: String, $orderTypes: [RVWebCommonActivityOrderType!] = [RIDES, TRAVEL], $profileType: RVWebCommonActivityProfileType = PERSONAL, $startTimeMs: Float) {
-  activities(cityID: $cityID) {
-    past(endTimeMs: $endTimeMs, limit: $limit, nextPageToken: $nextPageToken, orderTypes: $orderTypes, profileType: $profileType, startTimeMs: $startTimeMs) @include(if: $includePast) {
-      activities { uuid }
-      nextPageToken
-    }
-  }
-}`,
-    };
-
-    const response = await this.withRetry(() => this.postGraphQL<ActivitiesResponse>(body));
+    const response = await this.withRetry(() => this.postGraphQL<ActivitiesResponse>(createActivitiesRequest(nextPageToken)));
     return response.data.activities.past;
   }
 
   private async requestTrip(tripUUID: string): Promise<GetTrip> {
-    const body = {
-      operationName: "GetTrip",
-      variables: { tripUUID },
-      query: `query GetTrip($tripUUID: String!) {
-  getTrip(tripUUID: $tripUUID) {
-    trip {
-      beginTripTime cityID countryID disableCanceling disableRating disableResendReceipt driver dropoffTime fare guest
-      isRidepoolTrip isScheduledRide isSurgeTrip isUberReserve jobUUID marketplace paymentProfileUUID showRating status
-      uuid vehicleDisplayName vehicleViewID waypoints
-    }
-    mapURL polandTaxiLicense rating reviewer
-    receipt { carYear distance distanceLabel duration vehicleType }
-    concierge { sourceType }
-    organization { name }
-  }
-}`,
-    };
-
-    const response = await this.withRetry(() => this.postGraphQL<GetTripResponse>(body));
+    const response = await this.withRetry(() => this.postGraphQL<GetTripResponse>(createGetTripRequest(tripUUID)));
     if (!response.data.getTrip) {
       throw new RequestError(`Uber returned no details for trip ${tripUUID}`);
     }
