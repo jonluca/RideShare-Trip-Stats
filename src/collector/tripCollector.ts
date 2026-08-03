@@ -1,14 +1,14 @@
 import pLimit from "p-limit";
 import { browser } from "wxt/browser";
 import { COLLECTION_COMPLETE, GET_CACHED_TRIPS, type CollectionCompleteMessage, type StartCollectionResponse } from "../data/messages";
-import type { StoredTripData } from "../data/storage";
+import { mergeTripMaps, type StoredTripData } from "../data/storage";
 import { createActivitiesRequest, createGetTripRequest } from "../data/uberRequests";
 import type { ActivitiesResponse, GetTrip, GetTripResponse, Past } from "../types/UberApi";
 
 const ENDPOINT = "https://riders.uber.com/graphql";
-const CONCURRENT_TRIP_REQUESTS = 20;
+const CONCURRENT_TRIP_REQUESTS = 8;
 const CACHE_REFRESH_AGE_MS = 7 * 24 * 60 * 60 * 1000;
-const MAX_ATTEMPTS = 3;
+const MAX_ATTEMPTS = 5;
 
 class RequestError extends Error {
   constructor(
@@ -30,18 +30,38 @@ function delay(milliseconds: number): Promise<void> {
 
 function retryDelay(attempt: number, error: unknown): number {
   if (error instanceof RequestError && error.retryAfterMs !== null) {
-    return Math.min(error.retryAfterMs, 10_000);
+    return Math.min(error.retryAfterMs, 30_000);
   }
-  return 350 * 2 ** attempt + Math.floor(Math.random() * 180);
+  return Math.min(750 * 2 ** attempt, 15_000) + Math.floor(Math.random() * 350);
 }
 
 function isRetryable(error: unknown): boolean {
-  return !(error instanceof RequestError) || error.status === null || error.status === 429 || error.status >= 500;
+  return (
+    !(error instanceof RequestError) ||
+    error.status === null ||
+    error.status === 408 ||
+    error.status === 425 ||
+    error.status === 429 ||
+    error.status >= 500
+  );
+}
+
+function retryAfterMilliseconds(value: string | null): number | null {
+  if (!value) {
+    return null;
+  }
+  const seconds = Number(value);
+  if (Number.isFinite(seconds) && seconds > 0) {
+    return seconds * 1000;
+  }
+  const date = Date.parse(value);
+  return Number.isFinite(date) ? Math.max(0, date - Date.now()) : null;
 }
 
 class RideShareStats {
   private readonly activityIds = new Set<string>();
   private readonly fullTripMap: Record<string, GetTrip> = {};
+  private cooldownUntil = 0;
   private csrf = "x";
   private failedTripCount = 0;
   private overlay: HTMLElement | null = null;
@@ -50,6 +70,11 @@ class RideShareStats {
   private progressTitle: HTMLElement | null = null;
 
   private async postGraphQL<T>(body: unknown): Promise<T> {
+    const cooldown = this.cooldownUntil - Date.now();
+    if (cooldown > 0) {
+      await delay(cooldown);
+    }
+
     const response = await fetch(ENDPOINT, {
       method: "POST",
       credentials: "include",
@@ -63,12 +88,11 @@ class RideShareStats {
     });
 
     if (!response.ok) {
-      const retryAfter = Number(response.headers.get("retry-after"));
-      throw new RequestError(
-        `Uber request failed with status ${response.status}`,
-        response.status,
-        Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : null,
-      );
+      const retryAfter = retryAfterMilliseconds(response.headers.get("retry-after"));
+      if (response.status === 429) {
+        this.cooldownUntil = Math.max(this.cooldownUntil, Date.now() + (retryAfter ?? 1500));
+      }
+      throw new RequestError(`Uber request failed with status ${response.status}`, response.status, retryAfter);
     }
 
     const payload = (await response.json()) as T & GraphQLPayload;
@@ -246,11 +270,11 @@ class RideShareStats {
     );
   }
 
-  private async finish() {
+  private async finish(cached: StoredTripData | null) {
     const payload: StoredTripData = {
       collectedAt: new Date().toISOString(),
       failedTripCount: this.failedTripCount,
-      trips: this.fullTripMap,
+      trips: mergeTripMaps(cached?.trips, this.fullTripMap),
       version: 2,
     };
     const message: CollectionCompleteMessage = { payload, type: COLLECTION_COMPLETE };
@@ -281,8 +305,9 @@ class RideShareStats {
     try {
       const cachedTripsPromise = this.getCachedTrips();
       await this.findActivities();
-      await this.loadTripDetails(await cachedTripsPromise);
-      await this.finish();
+      const cached = await cachedTripsPromise;
+      await this.loadTripDetails(cached);
+      await this.finish(cached);
     } catch (error) {
       this.showError(error);
     }

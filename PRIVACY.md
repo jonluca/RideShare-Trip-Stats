@@ -1,6 +1,6 @@
 # Privacy Policy for RideShare Trip Stats
 
-Last updated: July 31, 2026
+Last updated: August 3, 2026
 
 RideShare Trip Stats is a browser extension that analyzes the signed-in user's Uber ride history and displays trip, spending, distance, and time statistics.
 
@@ -14,13 +14,15 @@ When the user invokes the extension on `https://riders.uber.com`, it requests th
 
 The extension relies on the user's existing Uber session and a transient CSRF token to make these user-requested calls. It does not ask for, read, or store the user's Uber password, and it does not use the Chrome cookies permission.
 
+The user may optionally select an official Uber data-download ZIP or rider Trips Data CSV to add history that Uber no longer returns through its live activity feed. The selected file is read locally in the results page and is not uploaded by the extension.
+
 ## How data is used
 
 RideShare Trip Stats uses ride-history data only to calculate and display statistics requested by the user and to let the user export those results. The extension does not use the data for advertising, profiling, credit decisions, or any unrelated purpose.
 
 ## Storage and retention
 
-The most recently retrieved ride-history data is stored locally on the user's device with the browser's extension storage API so the results page can display it. It remains there until it is replaced by a later analysis, the user clears the extension's data, or the extension is uninstalled.
+Retrieved and user-imported ride-history data is merged and stored locally on the user's device with the browser's extension storage API so the results page can display it. Historical records are preserved across later analyses. The data remains until the user clears the extension's data or uninstalls the extension.
 
 An exported file is saved only when the user chooses to export it and is then controlled by the user.
 
@@ -33,10 +35,9 @@ The extension communicates directly with Uber over HTTPS to retrieve the ride hi
 The extension requests only these permissions:
 
 - `activeTab`: temporarily access the active Uber Riders tab after the user clicks the extension.
-- `scripting`: run the ride-history analysis script in that user-invoked Uber Riders tab.
 - `storage`: keep the retrieved data locally so the extension's results page can display and export it.
 
-The extension does not request persistent host access and does not load or execute remote code.
+The extension declares a content script limited to `https://riders.uber.com/*`. It adds the on-page launcher and waits for the user to start analysis. The extension does not load or execute remote code.
 
 ## Limited Use
 

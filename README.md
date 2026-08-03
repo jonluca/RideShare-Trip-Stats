@@ -13,9 +13,15 @@ RideShare Trip Stats is a private, open-source browser extension that turns your
 
 You can also click the RideShare Trip Stats toolbar icon to start. Clicking it from another page opens Uber Trips for you.
 
+### Adding older history
+
+Uber's live Riders activity feed may expose only a recent window. The extension preserves trips collected by earlier versions and never removes cached trips simply because they disappear from that feed.
+
+To add older rides that Uber no longer returns live, request your official [Uber data download](https://help.uber.com/riders/article/download-your-data?nodeId=2c86900d-8408-4bac-b92a-956d793acd11). On the results dashboard, choose **Add older trips** and select either the downloaded ZIP or its rider Trips Data CSV. The import is processed locally and merged without duplicating rides already fetched.
+
 ## Privacy
 
-The extension reads data directly from Uber while you are signed in, performs analysis locally, and saves the latest dataset in local extension storage. Trip data is not sent to an analytics server. See [PRIVACY.md](./PRIVACY.md) for the complete policy.
+The extension reads data directly from Uber while you are signed in, performs analysis locally, and saves the merged dataset in local extension storage. User-selected Uber ZIP/CSV exports are also processed entirely in the browser. Trip data is not sent to an analytics server. See [PRIVACY.md](./PRIVACY.md) for the complete policy.
 
 Cross-currency estimates use a dated snapshot of the [European Central Bank reference rates](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html). Native-currency totals remain available when a USD reference rate is unavailable.
 
@@ -50,7 +56,7 @@ WXT writes browser-specific builds to `.output/`. Run `npm run zip` to create st
 
 - `entrypoints/launcher.content.ts` adds the draggable trigger automatically on Uber and starts collection only when requested.
 - `src/collector/` collects activity IDs, reuses stable cached trips, and fetches new or recent trip details with bounded concurrency and retry backoff.
-- `src/data/` owns local persistence, trip normalization, and CSV export.
+- `src/data/` owns legacy-cache recovery, local persistence, Uber archive import, trip normalization, and CSV export.
 - `src/analytics/` calculates the complete dashboard in one pass over normalized trips.
 - `src/components/` contains presentation-only dashboard components.
 

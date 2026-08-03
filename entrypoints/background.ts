@@ -8,7 +8,7 @@ import {
   type GetCachedTripsMessage,
   type StartCollectionMessage,
 } from "../src/data/messages";
-import { TRIP_DATA_STORAGE_KEY, type StoredTripData } from "../src/data/storage";
+import { LEGACY_TRIP_DATA_STORAGE_KEY, mergeTripMaps, TRIP_DATA_STORAGE_KEY, type StoredTripData } from "../src/data/storage";
 
 const UBER_TRIPS_URL = "https://riders.uber.com/trips";
 
@@ -29,9 +29,19 @@ async function openResultsPage() {
 }
 
 async function getCachedTrips(): Promise<StoredTripData | null> {
-  const stored = await browser.storage.local.get(TRIP_DATA_STORAGE_KEY);
+  const stored = await browser.storage.local.get([TRIP_DATA_STORAGE_KEY, LEGACY_TRIP_DATA_STORAGE_KEY]);
   const dataset = stored[TRIP_DATA_STORAGE_KEY] as StoredTripData | undefined;
-  return dataset?.version === 2 ? dataset : null;
+  const trips = mergeTripMaps(stored[LEGACY_TRIP_DATA_STORAGE_KEY], dataset?.version === 2 ? dataset.trips : undefined);
+
+  if (Object.keys(trips).length === 0 && dataset?.version !== 2) {
+    return null;
+  }
+  return {
+    collectedAt: dataset?.collectedAt ?? new Date(0).toISOString(),
+    failedTripCount: dataset?.failedTripCount ?? 0,
+    trips,
+    version: 2,
+  };
 }
 
 type BackgroundMessage = CollectionCompleteMessage | GetCachedTripsMessage;

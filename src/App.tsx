@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import { AnalyticsPanels } from "./components/AnalyticsPanels";
 import { formatDate, formatInteger } from "./components/formatters";
 import { SummaryGrid } from "./components/SummaryGrid";
@@ -7,6 +8,7 @@ import { tripsToCsv } from "./data/exportTrips";
 import { downloadFile } from "./utils";
 
 const UBER_TRIPS_URL = "https://riders.uber.com/trips";
+const UBER_DATA_URL = "https://help.uber.com/riders/article/download-your-data?nodeId=2c86900d-8408-4bac-b92a-956d793acd11";
 
 function filename(extension: "csv" | "json") {
   return `rideshare-trips-${new Date().toISOString().slice(0, 10)}.${extension}`;
@@ -58,7 +60,10 @@ function LoadingState() {
 }
 
 export default function App() {
-  const { analytics, collectedAt, error, failedTripCount, records, status, trips } = useDataContext();
+  const { analytics, collectedAt, error, failedTripCount, importUberData, records, status, trips } = useDataContext();
+  const importInput = useRef<HTMLInputElement>(null);
+  const [importMessage, setImportMessage] = useState<string | null>(null);
+  const [importState, setImportState] = useState<"error" | "idle" | "loading" | "success">("idle");
 
   const exportTrips = (format: "csv" | "json") => {
     if (format === "csv") {
@@ -67,6 +72,31 @@ export default function App() {
     }
 
     downloadFile(filename("json"), JSON.stringify(records, null, 2), "application/json;charset=utf-8");
+  };
+
+  const handleImport = async (file: File | undefined) => {
+    if (!file) {
+      return;
+    }
+
+    setImportState("loading");
+    setImportMessage("Reading your Uber export locally…");
+    try {
+      const result = await importUberData(file);
+      setImportState("success");
+      setImportMessage(
+        result.added > 0
+          ? `Added ${formatInteger(result.added)} historical trips. ${formatInteger(result.duplicates)} duplicates were skipped.`
+          : `No new trips were added. All ${formatInteger(result.duplicates)} imported trips were already present.`,
+      );
+    } catch (reason) {
+      setImportState("error");
+      setImportMessage(reason instanceof Error ? reason.message : "Could not read this Uber data export.");
+    } finally {
+      if (importInput.current) {
+        importInput.current.value = "";
+      }
+    }
   };
 
   if (status === "loading") {
@@ -119,6 +149,16 @@ export default function App() {
             </p>
           </div>
           <div className="export-actions" aria-label="Export trip data">
+            <button type="button" disabled={importState === "loading"} onClick={() => importInput.current?.click()}>
+              {importState === "loading" ? "Importing…" : "Add older trips"} <span aria-hidden="true">＋</span>
+            </button>
+            <input
+              ref={importInput}
+              hidden
+              type="file"
+              accept=".zip,.csv,application/zip,text/csv"
+              onChange={(event) => void handleImport(event.currentTarget.files?.[0])}
+            />
             <button type="button" onClick={() => exportTrips("csv")}>
               Export CSV <span aria-hidden="true">↓</span>
             </button>
@@ -135,6 +175,24 @@ export default function App() {
               <strong>{formatInteger(failedTripCount)} trips could not be loaded.</strong> Uber may have temporarily rate-limited those
               requests. Run the extension again to retry them.
             </p>
+          </aside>
+        )}
+
+        <aside className="notice notice-history">
+          <span aria-hidden="true">＋</span>
+          <p>
+            <strong>Rides older than Uber’s live history are missing?</strong> Add the ZIP or Trips Data CSV from your official Uber data
+            export. It is merged locally with fetched and previously cached trips.{" "}
+            <a href={UBER_DATA_URL} target="_blank" rel="noreferrer">
+              Request your Uber data ↗
+            </a>
+          </p>
+        </aside>
+
+        {importMessage && (
+          <aside className={`notice notice-import-${importState}`} role={importState === "error" ? "alert" : "status"}>
+            <span aria-hidden="true">{importState === "error" ? "!" : "✓"}</span>
+            <p>{importMessage}</p>
           </aside>
         )}
 
