@@ -4,8 +4,9 @@ import {
   COLLECTION_COMPLETE,
   GET_CACHED_TRIPS,
   START_COLLECTION,
-  type RuntimeMessage,
-  type StartCollectionResponse,
+  type CollectionCompleteMessage,
+  type GetCachedTripsMessage,
+  type StartCollectionMessage,
 } from "../src/data/messages";
 import { TRIP_DATA_STORAGE_KEY, type StoredTripData } from "../src/data/storage";
 
@@ -33,32 +34,19 @@ async function getCachedTrips(): Promise<StoredTripData | null> {
   return dataset?.version === 2 ? dataset : null;
 }
 
-async function startCollection(tabId: number): Promise<StartCollectionResponse> {
-  try {
-    await browser.scripting.executeScript({
-      target: { tabId },
-      files: ["/rideshare.js"],
-    });
-    return { started: true };
-  } catch (error) {
-    return {
-      error: error instanceof Error ? error.message : "Could not start trip analysis.",
-      started: false,
-    };
-  }
-}
+type BackgroundMessage = CollectionCompleteMessage | GetCachedTripsMessage;
 
-function isRuntimeMessage(value: unknown): value is RuntimeMessage {
+function isBackgroundMessage(value: unknown): value is BackgroundMessage {
   if (!value || typeof value !== "object" || !("type" in value)) {
     return false;
   }
   const type = (value as { type?: unknown }).type;
-  return type === COLLECTION_COMPLETE || type === GET_CACHED_TRIPS || type === START_COLLECTION;
+  return type === COLLECTION_COMPLETE || type === GET_CACHED_TRIPS;
 }
 
 export default defineBackground(() => {
-  browser.runtime.onMessage.addListener((message: unknown, sender) => {
-    if (!isRuntimeMessage(message)) {
+  browser.runtime.onMessage.addListener((message: unknown) => {
+    if (!isBackgroundMessage(message)) {
       return false;
     }
 
@@ -66,15 +54,7 @@ export default defineBackground(() => {
       return browser.storage.local.set({ [TRIP_DATA_STORAGE_KEY]: message.payload }).then(openResultsPage);
     }
 
-    if (message.type === GET_CACHED_TRIPS) {
-      return getCachedTrips();
-    }
-
-    const tabId = sender.tab?.id;
-    if (!tabId || !isUberPage(sender.tab?.url ?? sender.url)) {
-      return Promise.resolve({ error: "The Uber tab could not be identified.", started: false } satisfies StartCollectionResponse);
-    }
-    return startCollection(tabId);
+    return getCachedTrips();
   });
 
   browser.action.onClicked.addListener(async (tab) => {
@@ -88,7 +68,13 @@ export default defineBackground(() => {
       return;
     }
 
-    await browser.scripting.executeScript({ target: { tabId: tab.id }, files: ["/launcher.js"] });
+    try {
+      await browser.tabs.sendMessage(tab.id, { type: START_COLLECTION } satisfies StartCollectionMessage);
+    } catch {
+      // Static content scripts are added on navigation, so refresh a tab that
+      // was already open when the extension was installed or reloaded.
+      await browser.tabs.reload(tab.id);
+    }
   });
 
   browser.runtime.onInstalled.addListener(() => {

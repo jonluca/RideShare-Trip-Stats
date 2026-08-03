@@ -1,10 +1,9 @@
 import pLimit from "p-limit";
 import { browser } from "wxt/browser";
-import { defineUnlistedScript } from "wxt/utils/define-unlisted-script";
-import { COLLECTION_COMPLETE, GET_CACHED_TRIPS, type CollectionCompleteMessage } from "../src/data/messages";
-import type { StoredTripData } from "../src/data/storage";
-import { createActivitiesRequest, createGetTripRequest } from "../src/data/uberRequests";
-import type { ActivitiesResponse, GetTrip, GetTripResponse, Past } from "../src/types/UberApi";
+import { COLLECTION_COMPLETE, GET_CACHED_TRIPS, type CollectionCompleteMessage, type StartCollectionResponse } from "../data/messages";
+import type { StoredTripData } from "../data/storage";
+import { createActivitiesRequest, createGetTripRequest } from "../data/uberRequests";
+import type { ActivitiesResponse, GetTrip, GetTripResponse, Past } from "../types/UberApi";
 
 const ENDPOINT = "https://riders.uber.com/graphql";
 const CONCURRENT_TRIP_REQUESTS = 20;
@@ -290,8 +289,11 @@ class RideShareStats {
   }
 }
 
-export default defineUnlistedScript(() => {
-  if (window.location.hostname === "riders.uber.com") {
-    void new RideShareStats().start();
+export function startTripCollection(): StartCollectionResponse {
+  if (document.getElementById("rideshare-stats-overlay")) {
+    return { started: true };
   }
-});
+
+  void new RideShareStats().start();
+  return { started: true };
+}

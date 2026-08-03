@@ -23,9 +23,9 @@ export default defineConfig({
   manifest: ({ browser }) => ({
     name: "RideShare Trip Stats",
     description: "Analyzes your Uber ride history and displays trip, spending, distance, and time statistics.",
-    permissions: ["activeTab", "scripting", "storage"],
+    permissions: ["activeTab", "storage"],
     action: {
-      default_title: "Show the trip-analysis launcher",
+      default_title: "Analyze Uber ride history",
     },
     homepage_url: "https://github.com/jonluca/RideShare-Trip-Stats",
     icons: {

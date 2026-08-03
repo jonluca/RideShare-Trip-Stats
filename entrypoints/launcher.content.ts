@@ -1,6 +1,7 @@
 import { browser } from "wxt/browser";
-import { defineUnlistedScript } from "wxt/utils/define-unlisted-script";
-import { START_COLLECTION, type StartCollectionResponse } from "../src/data/messages";
+import { defineContentScript } from "wxt/utils/define-content-script";
+import { startTripCollection } from "../src/collector/tripCollector";
+import { START_COLLECTION } from "../src/data/messages";
 
 const HOST_ID = "rideshare-stats-launcher";
 const EDGE_PADDING = 12;
@@ -119,7 +120,7 @@ button[data-state="error"]{border-color:rgba(240,141,126,.7)}
   button.addEventListener("pointerup", finishDrag);
   button.addEventListener("pointercancel", finishDrag);
 
-  button.addEventListener("click", async () => {
+  button.addEventListener("click", () => {
     if (suppressClick) {
       suppressClick = false;
       return;
@@ -130,7 +131,7 @@ button[data-state="error"]{border-color:rgba(240,141,126,.7)}
     button.setAttribute("aria-label", "Starting Uber trip analysis");
 
     try {
-      const response = (await browser.runtime.sendMessage({ type: START_COLLECTION })) as StartCollectionResponse;
+      const response = startTripCollection();
       if (!response?.started) {
         throw new Error(response?.error || "Could not start trip analysis.");
       }
@@ -154,8 +155,16 @@ button[data-state="error"]{border-color:rgba(240,141,126,.7)}
   });
 }
 
-export default defineUnlistedScript(() => {
-  if (window.location.hostname === "riders.uber.com") {
+export default defineContentScript({
+  matches: ["https://riders.uber.com/*"],
+  runAt: "document_idle",
+  main() {
     mountLauncher();
-  }
+    browser.runtime.onMessage.addListener((message: unknown) => {
+      if (!message || typeof message !== "object" || !("type" in message) || message.type !== START_COLLECTION) {
+        return false;
+      }
+      return Promise.resolve(startTripCollection());
+    });
+  },
 });
