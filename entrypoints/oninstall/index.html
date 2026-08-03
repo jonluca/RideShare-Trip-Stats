@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#090b0a" />
+    <title>Get started · RideShare Trip Stats</title>
+    <link rel="icon" type="image/png" href="/images/icon32.png" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="https://riders.uber.com/trips" target="_blank" rel="noreferrer">
+        <span class="brand-mark" aria-hidden="true">R</span>
+        <span>RideShare Trip Stats</span>
+      </a>
+      <span class="privacy-badge"><span aria-hidden="true">●</span> Runs locally</span>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow">Installation complete</p>
+          <h1 id="hero-title">Your ride history,<br /><span>made useful.</span></h1>
+          <p class="lede">See your lifetime spend, distance, time, ride patterns, and more. Your trip data stays in your browser.</p>
+          <div class="hero-actions">
+            <a class="primary-button" href="https://riders.uber.com/trips" target="_blank" rel="noreferrer">
+              Open Uber Trips
+              <span aria-hidden="true">↗</span>
+            </a>
+            <a class="secondary-button" href="#instructions">See how it works</a>
+          </div>
+        </div>
+
+        <div class="preview" aria-label="Example analytics summary">
+          <div class="preview-header">
+            <span>Lifetime overview</span>
+            <span class="preview-status">Private</span>
+          </div>
+          <div class="preview-grid">
+            <article class="preview-card preview-card-wide">
+              <span class="preview-label">Trips analyzed</span>
+              <strong>1,248</strong>
+              <span class="preview-change">Across your complete history</span>
+            </article>
+            <article class="preview-card">
+              <span class="preview-label">Time on the road</span>
+              <strong>19d</strong>
+              <span class="preview-muted">11h 42m</span>
+            </article>
+            <article class="preview-card">
+              <span class="preview-label">Distance</span>
+              <strong>6,801</strong>
+              <span class="preview-muted">miles</span>
+            </article>
+          </div>
+          <div class="preview-bars" aria-hidden="true">
+            <span style="--bar-height: 34%"></span>
+            <span style="--bar-height: 52%"></span>
+            <span style="--bar-height: 43%"></span>
+            <span style="--bar-height: 74%"></span>
+            <span style="--bar-height: 61%"></span>
+            <span style="--bar-height: 89%"></span>
+            <span style="--bar-height: 70%"></span>
+            <span style="--bar-height: 100%"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="instructions" id="instructions" aria-labelledby="instructions-title">
+        <div class="section-heading">
+          <p class="eyebrow">Quick start</p>
+          <h2 id="instructions-title">Three steps. About a minute.</h2>
+          <p>Keep the Uber Trips tab open while the extension reads your history.</p>
+        </div>
+
+        <ol class="steps">
+          <li class="step">
+            <span class="step-number">01</span>
+            <div>
+              <h3>Sign in to Uber</h3>
+              <p>
+                Open <a href="https://riders.uber.com/trips" target="_blank" rel="noreferrer">riders.uber.com/trips</a> and make sure your
+                past trips appear.
+              </p>
+            </div>
+          </li>
+          <li class="step">
+            <span class="step-number">02</span>
+            <div>
+              <h3>Run the extension</h3>
+              <p>Click the RideShare Trip Stats icon in your toolbar. If it is hidden, open the browser’s extensions menu and pin it.</p>
+            </div>
+          </li>
+          <li class="step">
+            <span class="step-number">03</span>
+            <div>
+              <h3>Explore your results</h3>
+              <p>Leave the tab open while trips load. Your dashboard opens automatically when analysis finishes.</p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <section class="details" aria-label="Privacy and troubleshooting">
+        <article class="detail-card privacy-card">
+          <div class="detail-icon" aria-hidden="true">⌁</div>
+          <div>
+            <p class="eyebrow">Privacy by design</p>
+            <h2>Your data never leaves your browser.</h2>
+            <p>
+              The extension reads trips only while you are signed in, calculates the dashboard locally, and stores the latest result in
+              local extension storage. It does not use an analytics server.
+            </p>
+            <a href="https://github.com/jonluca/RideShare-Trip-Stats/blob/master/PRIVACY.md" target="_blank" rel="noreferrer"
+              >Read the privacy policy ↗</a
+            >
+          </div>
+        </article>
+
+        <article class="detail-card troubleshooting-card">
+          <p class="eyebrow">Having trouble?</p>
+          <h2>Two quick checks</h2>
+          <ul>
+            <li>Run the extension from the Uber Trips page—not from this page.</li>
+            <li>Refresh Uber after signing in, then click the extension icon again.</li>
+          </ul>
+          <a href="https://github.com/jonluca/RideShare-Trip-Stats/issues" target="_blank" rel="noreferrer">Report an issue ↗</a>
+        </article>
+      </section>
+    </main>
+
+    <footer>
+      <span>RideShare Trip Stats</span>
+      <span>Open source · Not affiliated with Uber</span>
+      <a href="https://github.com/jonluca/RideShare-Trip-Stats" target="_blank" rel="noreferrer">View source ↗</a>
+    </footer>
+  </body>
+</html>

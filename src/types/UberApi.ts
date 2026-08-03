@@ -2,7 +2,7 @@ export interface ActivitiesResponse {
   data: Data;
 }
 export interface GetTripResponse {
-  data: { getTrip: GetTrip };
+  data: { getTrip: GetTrip | null };
 }
 
 export interface Data {
@@ -17,7 +17,7 @@ export interface Activities {
 
 export interface Past {
   activities: Activity[];
-  nextPageToken: string;
+  nextPageToken: string | null;
   __typename: string;
 }
 
@@ -30,30 +30,30 @@ export interface GetTrip {
   polandTaxiLicense: string;
   rating: string;
   reviewer: string;
-  receipt: Receipt;
-  concierge: null;
-  organization: null;
+  receipt: Receipt | null;
+  concierge: { sourceType?: string } | null;
+  organization: { name?: string } | null;
   __typename: string;
 }
 
 export interface Receipt {
-  carYear: string;
-  distance: string;
-  distanceLabel: string;
-  duration: string;
-  vehicleType: string;
+  carYear: string | null;
+  distance: string | null;
+  distanceLabel: string | null;
+  duration: string | null;
+  vehicleType: string | null;
   __typename: string;
 }
 
 export interface Trip {
-  beginTripTime: string;
+  beginTripTime: string | null;
   cityID: number;
   countryID: number;
   disableCanceling: boolean;
   disableRating: boolean;
   disableResendReceipt: boolean;
   driver: string;
-  dropoffTime: string;
+  dropoffTime: string | null;
   fare: string;
   guest: string;
   isRidepoolTrip: boolean;
@@ -66,7 +66,7 @@ export interface Trip {
   showRating: boolean;
   status: string;
   uuid: string;
-  vehicleDisplayName: string;
+  vehicleDisplayName: string | null;
   vehicleViewID: number;
   waypoints: string[];
   __typename: string;

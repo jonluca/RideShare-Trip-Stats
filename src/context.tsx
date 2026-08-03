@@ -1,74 +1,71 @@
 import * as React from "react";
-import { useEffect, useState } from "react";
-import { browser } from "wxt/browser";
-import type { GetTrip, Trip } from "./types/UberApi";
-import type { Dayjs } from "dayjs";
-import dayjs from "dayjs";
-import { getCurrencyConversionIfExists } from "./utils/currencies";
-import parseMoney from "./parseMoney";
+import { useEffect, useMemo, useState } from "react";
+import { calculateTripAnalytics, type TripAnalytics } from "./analytics/tripAnalytics";
+import { loadTripData } from "./data/tripRepository";
+import { normalizeTrips, type NormalizedTrip } from "./data/trips";
+import type { GetTrip } from "./types/UberApi";
 
-interface CustomTrip extends Trip {
-  begin: Dayjs;
-  end: Dayjs;
-  usdAmount: number;
-  currency: string;
-  fareAmount: number;
-  lengthMs: number;
-}
-interface CustomGetTrip extends GetTrip {
-  trip: CustomTrip;
-}
+type LoadStatus = "error" | "loading" | "ready";
+
 export interface ExtensionContext {
-  data: Record<string, CustomGetTrip>;
+  analytics: TripAnalytics | null;
+  collectedAt: string | null;
+  error: string | null;
+  failedTripCount: number;
+  records: GetTrip[];
+  status: LoadStatus;
+  trips: NormalizedTrip[];
 }
 
-const DataContext = React.createContext<ExtensionContext>({
-  data: {},
-});
+const DataContext = React.createContext<ExtensionContext | null>(null);
 
-const DataContextProvider = (props: React.PropsWithChildren) => {
-  const [data, setData] = useState<Record<string, CustomGetTrip>>({});
+export function DataContextProvider({ children }: React.PropsWithChildren) {
+  const [loadedData, setLoadedData] = useState<Awaited<ReturnType<typeof loadTripData>> | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const run = async () => {
-      const data: Record<string, CustomGetTrip> = await browser.runtime.sendMessage({ requestData: true });
-      for (const entry of Object.values(data)) {
-        entry.trip.begin = dayjs(entry.trip.beginTripTime);
-        entry.trip.end = dayjs(entry.trip.dropoffTime);
-        entry.trip.lengthMs = entry.trip.end.toDate().getTime() - entry.trip.begin.toDate().getTime();
-        const fare = entry.trip.fare;
-        const money = parseMoney(fare)!;
-        if (money && fare.startsWith("CA")) {
-          // @ts-ignore
-          money.currency = "CAD";
+    let active = true;
+
+    void loadTripData()
+      .then((data) => {
+        if (active) {
+          setLoadedData(data);
         }
-        if (money && fare.startsWith("HK")) {
-          // @ts-ignore
-          money.currency = "HKD";
+      })
+      .catch((reason: unknown) => {
+        if (active) {
+          setError(reason instanceof Error ? reason.message : "Could not read your locally stored trip data.");
         }
-        if (money && fare.startsWith("COP")) {
-          // @ts-ignore
-          money.currency = "COP";
-        }
-        if (money && fare.startsWith("MX")) {
-          // @ts-ignore
-          money.currency = "MXN";
-        }
-        entry.trip.currency = money?.currency || "USD";
-        entry.trip.fareAmount = money?.amount || 0;
-        const usdEquivalentAmount = getCurrencyConversionIfExists(entry.trip.currency, entry.trip.fareAmount);
-        entry.trip.usdAmount = usdEquivalentAmount;
-      }
-      setData(data);
+      });
+
+    return () => {
+      active = false;
     };
-    run();
   }, []);
 
-  const value = React.useMemo(() => ({ data }), [data]);
+  const trips = useMemo(() => normalizeTrips(loadedData?.records ?? []), [loadedData?.records]);
+  const analytics = useMemo(() => (loadedData ? calculateTripAnalytics(trips) : null), [loadedData, trips]);
 
-  return <DataContext.Provider value={value}>{props.children}</DataContext.Provider>;
-};
+  const value = useMemo<ExtensionContext>(
+    () => ({
+      analytics,
+      collectedAt: loadedData?.collectedAt ?? null,
+      error,
+      failedTripCount: loadedData?.failedTripCount ?? 0,
+      records: loadedData?.records ?? [],
+      status: error ? "error" : loadedData ? "ready" : "loading",
+      trips,
+    }),
+    [analytics, error, loadedData, trips],
+  );
 
-const useDataContext = () => React.useContext(DataContext);
+  return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
+}
 
-export { DataContextProvider, useDataContext };
+export function useDataContext(): ExtensionContext {
+  const context = React.useContext(DataContext);
+  if (!context) {
+    throw new Error("useDataContext must be used inside DataContextProvider");
+  }
+  return context;
+}

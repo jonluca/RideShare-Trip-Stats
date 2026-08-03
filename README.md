@@ -1,53 +1,58 @@
-# RideShareStats
+# RideShare Trip Stats
 
-[Live version on Chrome Web Store](https://chrome.google.com/webstore/detail/uber-trip-stats/kddlnbejbpknoedebeojobofnbdfhpnm)
+RideShare Trip Stats is a private, open-source browser extension that turns your Uber trip history into a lifetime dashboard. It reports ride counts, spending by currency, estimated cross-currency totals, time, distance, yearly activity, ride patterns, and notable trips. Results can be exported as CSV or JSON.
 
-View your rideshare profile statistics!
+[Install from the Chrome Web Store](https://chrome.google.com/webstore/detail/uber-trip-stats/kddlnbejbpknoedebeojobofnbdfhpnm)
 
-To use this extension, go to https://riders.uber.com/trips and sign in. Then click the extension icon in your browser toolbar.
+## How to use it
+
+1. Open [Uber Trips](https://riders.uber.com/trips) and sign in.
+2. Wait until your past trips appear.
+3. Click the RideShare Trip Stats icon in the browser toolbar. If it is hidden, open the extensions menu and pin it first.
+4. Keep the Uber tab open while the extension reads your history. The results dashboard opens automatically.
+
+Clicking the extension from another page opens Uber Trips for you.
+
+## Privacy
+
+The extension reads data directly from Uber while you are signed in, performs analysis locally, and saves the latest dataset in local extension storage. Trip data is not sent to an analytics server. See [PRIVACY.md](./PRIVACY.md) for the complete policy.
+
+Cross-currency estimates use a dated snapshot of the [European Central Bank reference rates](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html). Native-currency totals remain available when a USD reference rate is unavailable.
 
 ## Browser support
 
-The extension is built with [WXT](https://wxt.dev/) and React from one codebase. Manifest V3 builds are available for:
+One WXT/React codebase produces Manifest V3 builds for:
 
 - Chrome, Brave, Arc, Opera, and other Chromium browsers
 - Microsoft Edge
 - Firefox
-- Safari (requires conversion to a Safari Web Extension with Xcode before distribution)
+- Safari, after conversion to a Safari Web Extension with Xcode
 
 ## Development
 
-Node.js 22 or newer and Yarn are required.
+Node.js 22 or newer and npm are required.
 
 ```sh
-yarn install
-yarn dev
+npm install
+npm run dev
 ```
 
-Use `yarn dev:firefox` for Firefox development. Create production builds for every target with:
+Use `npm run dev:firefox` for Firefox development. Before submitting a change, run:
 
 ```sh
-yarn build:all
+npm run check
+npm run build
 ```
 
-WXT writes browser-specific extensions to `.output/`. Create archives for every target with `yarn zip:all`. The Safari archive still needs to be converted into a native Safari Web Extension wrapper with Xcode before distribution.
+WXT writes browser-specific builds to `.output/`. Run `npm run zip` to create store-ready archives for each browser. The Safari archive still needs to be converted into a native Safari Web Extension wrapper with Xcode.
 
-![image](https://i.imgur.com/TBOTsi4.png)
+## Architecture
 
-## Note
-
-Currency conversion for total spent and averages are currently done using a locally cached conversion chart. It uses exchange rates as of 2/3/2018. These will slowly become incorrect, and may need updating.
-
-They were taken from https://www.xe.com/currencytables/?from=USD. Copy the column and use the following regex replace to update.
-
-The regex for matching is `(.*)?\t(.*)?\t(.*)\t(.*)`. Replace with `"$1":"$4",` and place in `rates` key within `currency.json`.
-
-## Changelog
-
-5/29/19: Added ability to view total spent by month, updated currencies
-
-11/12/22: Rewrote in React/Vite, fixed query logic to use ubers new API, rewrote front end to use data, deprecated ubereats due to changes
+- `entrypoints/rideshare.ts` collects activity IDs, reuses stable cached trips, and fetches new or recent trip details with bounded concurrency and retry backoff.
+- `src/data/` owns local persistence, trip normalization, and CSV export.
+- `src/analytics/` calculates the complete dashboard in one pass over normalized trips.
+- `src/components/` contains presentation-only dashboard components.
 
 ## Credits
 
-Thanks to Roberto Andrade for the designs of the stats page.
+Created by JonLuca DeCaro and Roberto Andrade. RideShare Trip Stats is not affiliated with Uber.
