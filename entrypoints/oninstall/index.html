@@ -29,6 +29,10 @@
               Open Uber Trips
               <span aria-hidden="true">↗</span>
             </a>
+            <a class="secondary-button" href="https://www.ubereats.com/orders" target="_blank" rel="noreferrer">
+              Open Eats Orders
+              <span aria-hidden="true">↗</span>
+            </a>
             <a class="secondary-button" href="#instructions">See how it works</a>
           </div>
         </div>
@@ -72,27 +76,28 @@
         <div class="section-heading">
           <p class="eyebrow">Quick start</p>
           <h2 id="instructions-title">Three steps. About a minute.</h2>
-          <p>Collect rides from Uber Trips, then optionally import your official Uber archive for Eats and older ride history.</p>
+          <p>Collect rides from Uber Trips or orders from Uber Eats, then optionally import your official archive as a fallback.</p>
         </div>
 
         <ol class="steps">
           <li class="step">
             <span class="step-number">01</span>
             <div>
-              <h3>Sign in to Uber</h3>
+              <h3>Open a history page</h3>
               <p>
-                Open <a href="https://riders.uber.com/trips" target="_blank" rel="noreferrer">riders.uber.com/trips</a> and make sure your
-                past trips appear.
+                Open <a href="https://riders.uber.com/trips" target="_blank" rel="noreferrer">Uber Trips</a> for rides or
+                <a href="https://www.ubereats.com/orders" target="_blank" rel="noreferrer">Uber Eats Past Orders</a> for deliveries, sign
+                in, and make sure recent history appears.
               </p>
             </div>
           </li>
           <li class="step">
             <span class="step-number">02</span>
             <div>
-              <h3>Find the trip launcher</h3>
+              <h3>Find the matching launcher</h3>
               <p>
-                A draggable <strong>Analyze trips</strong> button appears automatically on Uber. If the page was already open during
-                installation, refresh it once.
+                A draggable <strong>Analyze trips</strong> or <strong>Analyze Eats</strong> button appears automatically. If the page was
+                already open during installation, refresh it once.
               </p>
             </div>
           </li>
@@ -102,8 +107,7 @@
               <h3>Analyze and import</h3>
               <p>
                 Move the button wherever you like, then click it. You can also use the extension’s toolbar icon. Leave the tab open while
-                analysis runs. On the dashboard, choose <strong>Import Uber data</strong> to add Eats orders or older rides from your
-                official ZIP.
+                analysis runs. On the dashboard, choose <strong>Import Uber data</strong> to merge an official ZIP as an archive fallback.
               </p>
             </div>
           </li>
@@ -117,8 +121,8 @@
             <p class="eyebrow">Privacy by design</p>
             <h2>Your data never leaves your browser.</h2>
             <p>
-              The extension reads rides only while you are signed in and parses only the Uber ZIP/CSV files you select. Both dashboards are
-              calculated locally and stored in local extension storage. It does not use an analytics server.
+              The extension reads rides or Eats orders only when you start it while signed in, and parses only the Uber ZIP/CSV files you
+              select. Both dashboards are calculated locally and stored in local extension storage. It does not use an analytics server.
             </p>
             <a href="https://github.com/jonluca/RideShare-Trip-Stats/blob/master/PRIVACY.md" target="_blank" rel="noreferrer"
               >Read the privacy policy ↗</a
@@ -128,11 +132,11 @@
 
         <article class="detail-card troubleshooting-card">
           <p class="eyebrow">Having trouble?</p>
-          <h2>Two quick checks</h2>
+          <h2>Three quick checks</h2>
           <ul>
-            <li>Make sure past trips are visible at riders.uber.com/trips.</li>
+            <li>Make sure recent rides or orders are visible on the matching Uber history page.</li>
             <li>If the launcher does not appear after installation or an update, refresh the Uber tab once.</li>
-            <li>Use <strong>Import Uber data</strong> with your official ZIP to add Uber Eats and older ride history.</li>
+            <li>Use <strong>Import Uber data</strong> with your official ZIP to fill gaps or add older history.</li>
           </ul>
           <a href="https://github.com/jonluca/RideShare-Trip-Stats/issues" target="_blank" rel="noreferrer">Report an issue ↗</a>
         </article>

@@ -22,10 +22,11 @@ export default defineConfig({
   },
   manifest: ({ browser }) => ({
     name: "RideShare Trip Stats",
-    description: "Analyzes Uber rides and Uber Eats exports locally with lifetime trip, order, spending, distance, and pattern statistics.",
+    description:
+      "Analyzes Uber rides and Uber Eats web history locally with lifetime trip, order, spending, distance, and pattern statistics.",
     permissions: ["activeTab", "storage"],
     action: {
-      default_title: "Analyze Uber ride history",
+      default_title: "Analyze Uber ride or Eats history",
     },
     homepage_url: "https://github.com/jonluca/RideShare-Trip-Stats",
     icons: {

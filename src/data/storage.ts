@@ -13,10 +13,12 @@ export interface StoredTripData {
 }
 
 export interface StoredEatsData {
-  importedAt: string;
+  importedAt?: string;
   orders: Record<string, UberEatsOrder>;
   restaurants: Record<string, UberEatsRestaurant>;
   version: 1;
+  webCollectedAt?: string;
+  webHistoryComplete?: boolean;
 }
 
 export function isTripRecord(value: unknown): value is GetTrip {

@@ -15,12 +15,14 @@ You can also click the RideShare Trip Stats toolbar icon to start. Clicking it f
 
 ### Analyzing Uber Eats
 
-1. Request your official [Uber data download](https://help.uber.com/riders/article/download-your-data?nodeId=2c86900d-8408-4bac-b92a-956d793acd11).
-2. Open the results dashboard and choose **Import Uber data**.
-3. Select the downloaded ZIP. If you extracted it first, select **Eats Order Details** and **Eats Restaurant Names** together.
-4. Switch to the **Uber Eats** dashboard to explore order totals, favorite restaurants, repeat items, ordering cadence, yearly activity, and status breakdowns.
+1. Open [Uber Eats Past Orders](https://www.ubereats.com/orders) and sign in.
+2. Wait until your recent orders appear.
+3. Click the draggable **Analyze Eats** button. Keep the tab open while the extension follows Uber Eats' own order-history pages.
+4. The results dashboard opens automatically with order totals, favorite restaurants, repeat items, ordering cadence, yearly activity, and status breakdowns.
 
-The archive is parsed locally. Order items, customizations, special instructions, restaurant names, and prices are never uploaded by the extension.
+The live collector stores completed, cancelled, and other historical orders returned by Uber Eats, including items, customizations, restaurant details, and prices. Later refreshes stop as soon as they reach a page already present in a complete local cache, making repeat collections much faster.
+
+For an archive fallback, request your official [Uber data download](https://help.uber.com/riders/article/download-your-data?nodeId=2c86900d-8408-4bac-b92a-956d793acd11), choose **Import Uber data** on the dashboard, and select the ZIP. If you extracted it first, select **Eats Order Details** and **Eats Restaurant Names** together. Live and imported orders are merged by order ID without double-counting. Both collection methods run locally; your order data is never uploaded by the extension.
 
 ### Adding older history
 
@@ -30,7 +32,7 @@ To add older rides that Uber no longer returns live, request the same official d
 
 ## Privacy
 
-The extension reads ride data directly from Uber while you are signed in, performs all analysis locally, and saves the merged ride and Eats datasets in local extension storage. User-selected Uber ZIP/CSV exports are processed entirely in the browser. Ride and order data is not sent to an analytics server. See [PRIVACY.md](./PRIVACY.md) for the complete policy.
+The extension reads ride and Eats history directly from Uber while you are signed in, performs all analysis locally, and saves the merged datasets in local extension storage. User-selected Uber ZIP/CSV exports are processed entirely in the browser. Ride and order data is not sent to an analytics server. See [PRIVACY.md](./PRIVACY.md) for the complete policy.
 
 Cross-currency estimates use a dated snapshot of the [European Central Bank reference rates](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html). Native-currency totals remain available when a USD reference rate is unavailable.
 
@@ -63,8 +65,8 @@ WXT writes browser-specific builds to `.output/`. Run `npm run zip` to create st
 
 ## Architecture
 
-- `entrypoints/launcher.content.ts` adds the draggable trigger automatically on Uber and starts collection only when requested.
-- `src/collector/` collects activity IDs, reuses stable cached trips, and fetches new or recent trip details with bounded concurrency and retry backoff.
+- `entrypoints/launcher.content.ts` adds the matching draggable trigger on Uber Trips and Uber Eats Past Orders, including across client-side navigation.
+- `src/collector/` collects rides with bounded detail concurrency and Eats with cursor-based history pagination; both use local caching, retry backoff, and a shared progress overlay.
 - `src/data/` owns legacy-cache recovery, separate ride/Eats persistence, Uber archive import, normalization, and CSV export.
 - `src/analytics/` calculates ride and Eats dashboards independently in one pass over each normalized dataset.
 - `src/components/` contains presentation-only dashboard components.

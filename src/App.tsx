@@ -5,6 +5,7 @@ import { RideDashboard } from "./components/RideDashboard";
 import { useDataContext, type ImportUberDataResult } from "./context";
 
 const UBER_TRIPS_URL = "https://riders.uber.com/trips";
+const UBER_EATS_ORDERS_URL = "https://www.ubereats.com/orders";
 type DashboardView = "eats" | "rides";
 type ImportState = "error" | "idle" | "loading" | "success";
 
@@ -67,10 +68,10 @@ function EmptyState({
           ↗
         </span>
         <p className="eyebrow">{error ? "Something went wrong" : "No Uber history yet"}</p>
-        <h1>{error ? "We couldn’t open your results." : "Analyze rides or import your Uber history."}</h1>
+        <h1>{error ? "We couldn’t open your results." : "Analyze your rides and Eats history."}</h1>
         <p>
           {error ??
-            "Run the extension from Uber Trips for live ride data, or import your official Uber data ZIP for older rides and Uber Eats orders."}
+            "Run the extension from Uber Trips or Uber Eats Past Orders for live history, or import your official Uber data ZIP as an archive fallback."}
         </p>
         <ImportStatus message={importMessage} state={importState} />
         <div className="state-actions">
@@ -79,6 +80,9 @@ function EmptyState({
           </button>
           <a className="secondary-link" href={UBER_TRIPS_URL} target="_blank" rel="noreferrer">
             Open Uber Trips ↗
+          </a>
+          <a className="secondary-link" href={UBER_EATS_ORDERS_URL} target="_blank" rel="noreferrer">
+            Open Uber Eats ↗
           </a>
         </div>
       </div>
@@ -126,21 +130,19 @@ function ViewEmptyState({ importLoading, onImport, view }: { importLoading: bool
   return (
     <section className="view-empty">
       <span className="panel-kicker">{rides ? "Rides" : "Uber Eats"}</span>
-      <h1>{rides ? "No ride data yet." : "No Eats orders imported yet."}</h1>
+      <h1>{rides ? "No ride data yet." : "No Eats orders collected yet."}</h1>
       <p>
         {rides
           ? "Open Uber Trips to run the live collector, or import the Rider CSV from your official Uber data archive."
-          : "Import your official Uber data ZIP, or select Eats Order Details and Eats Restaurant Names CSV files together."}
+          : "Open Uber Eats Past Orders to run the live collector, or import your official Uber data ZIP."}
       </p>
       <div className="state-actions">
         <button className="primary-button" type="button" disabled={importLoading} onClick={onImport}>
           {importLoading ? "Importing…" : "Import Uber data"} <span aria-hidden="true">＋</span>
         </button>
-        {rides && (
-          <a className="secondary-link" href={UBER_TRIPS_URL} target="_blank" rel="noreferrer">
-            Open Uber Trips ↗
-          </a>
-        )}
+        <a className="secondary-link" href={rides ? UBER_TRIPS_URL : UBER_EATS_ORDERS_URL} target="_blank" rel="noreferrer">
+          Open {rides ? "Uber Trips" : "Eats history"} ↗
+        </a>
       </div>
     </section>
   );
@@ -171,7 +173,7 @@ export default function App() {
     analytics,
     collectedAt,
     eatsAnalytics,
-    eatsImportedAt,
+    eatsUpdatedAt,
     eatsRecords,
     error,
     failedTripCount,
@@ -274,10 +276,10 @@ export default function App() {
         ) : activeView === "eats" && eatsAnalytics && eatsAnalytics.totalOrders > 0 ? (
           <EatsDashboard
             analytics={eatsAnalytics}
-            importedAt={eatsImportedAt}
             importLoading={importLoading}
             onImport={openImport}
             orders={eatsRecords}
+            updatedAt={eatsUpdatedAt}
           />
         ) : (
           <ViewEmptyState importLoading={importLoading} onImport={openImport} view={activeView} />

@@ -16,7 +16,7 @@ export interface ExtensionContext {
   analytics: TripAnalytics | null;
   collectedAt: string | null;
   eatsAnalytics: EatsAnalytics | null;
-  eatsImportedAt: string | null;
+  eatsUpdatedAt: string | null;
   eatsOrders: NormalizedEatsOrder[];
   eatsRecords: UberEatsOrder[];
   error: string | null;
@@ -76,7 +76,7 @@ export function DataContextProvider({ children }: React.PropsWithChildren) {
     const imported = await importUberDataFiles(files);
     const [tripResult, eatsResult] = await Promise.all([
       imported.tripSourceFiles > 0 ? mergeTripRecords(imported.records) : null,
-      imported.eatsSourceFiles > 0 ? mergeEatsRecords(imported.orders, imported.restaurants) : null,
+      imported.eatsSourceFiles > 0 ? mergeEatsRecords(imported.orders, imported.restaurants, { source: "archive" }) : null,
     ]);
     const trips = tripResult?.data ?? (await loadTripData());
     const eats = eatsResult?.data ?? (await loadEatsData());
@@ -105,7 +105,7 @@ export function DataContextProvider({ children }: React.PropsWithChildren) {
       analytics,
       collectedAt: loadedData?.trips.collectedAt ?? null,
       eatsAnalytics,
-      eatsImportedAt: loadedData?.eats.importedAt ?? null,
+      eatsUpdatedAt: loadedData?.eats.updatedAt ?? null,
       eatsOrders,
       eatsRecords: loadedData?.eats.records ?? [],
       error,

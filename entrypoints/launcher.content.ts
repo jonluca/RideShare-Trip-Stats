@@ -1,10 +1,47 @@
 import { browser } from "wxt/browser";
 import { defineContentScript } from "wxt/utils/define-content-script";
+import { startEatsCollection } from "../src/collector/eatsCollector";
 import { startTripCollection } from "../src/collector/tripCollector";
-import { START_COLLECTION } from "../src/data/messages";
+import { START_COLLECTION, START_EATS_COLLECTION, type StartCollectionResponse } from "../src/data/messages";
 
 const HOST_ID = "rideshare-stats-launcher";
 const EDGE_PADDING = 12;
+
+type LauncherKind = "eats" | "rides";
+
+const launcherCopy: Record<
+  LauncherKind,
+  { aria: string; label: string; loadingAria: string; title: string; start: () => StartCollectionResponse }
+> = {
+  eats: {
+    aria: "Analyze Uber Eats orders",
+    label: "Analyze Eats",
+    loadingAria: "Starting Uber Eats analysis",
+    start: startEatsCollection,
+    title: "Analyze Uber Eats orders · drag to reposition",
+  },
+  rides: {
+    aria: "Analyze Uber trips",
+    label: "Analyze trips",
+    loadingAria: "Starting Uber trip analysis",
+    start: startTripCollection,
+    title: "Analyze Uber trips · drag to reposition",
+  },
+};
+
+function currentLauncherKind(): LauncherKind | null {
+  const { hostname, pathname, protocol } = window.location;
+  if (protocol !== "https:") {
+    return null;
+  }
+  if (hostname === "riders.uber.com" && (pathname === "/trips" || pathname.startsWith("/trips/"))) {
+    return "rides";
+  }
+  if (hostname === "www.ubereats.com" && (pathname === "/orders" || pathname.startsWith("/orders/"))) {
+    return "eats";
+  }
+  return null;
+}
 
 function createBar(height: string): HTMLSpanElement {
   const bar = document.createElement("span");
@@ -16,18 +53,17 @@ function clamp(value: number, minimum: number, maximum: number): number {
   return Math.min(Math.max(value, minimum), maximum);
 }
 
-function mountLauncher() {
+function mountLauncher(kind: LauncherKind) {
   const existing = document.getElementById(HOST_ID);
-  if (existing) {
-    existing.animate([{ transform: "scale(1)" }, { transform: "scale(1.08)" }, { transform: "scale(1)" }], {
-      duration: 320,
-      easing: "ease-out",
-    });
+  if (existing?.dataset.kind === kind) {
     return;
   }
+  existing?.remove();
 
+  const copy = launcherCopy[kind];
   const host = document.createElement("div");
   host.id = HOST_ID;
+  host.dataset.kind = kind;
   host.style.position = "fixed";
   host.style.right = "20px";
   host.style.bottom = "20px";
@@ -55,8 +91,8 @@ button[data-state="error"]{border-color:rgba(240,141,126,.7)}
   const button = document.createElement("button");
   button.type = "button";
   button.dataset.state = "idle";
-  button.setAttribute("aria-label", "Analyze Uber trips");
-  button.title = "Analyze Uber trips · drag to reposition";
+  button.setAttribute("aria-label", copy.aria);
+  button.title = copy.title;
 
   const icon = document.createElement("span");
   icon.className = "icon";
@@ -64,7 +100,7 @@ button[data-state="error"]{border-color:rgba(240,141,126,.7)}
   icon.append(createBar("7px"), createBar("12px"), createBar("16px"));
   const label = document.createElement("span");
   label.className = "label";
-  label.textContent = "Analyze trips";
+  label.textContent = copy.label;
   button.append(icon, label);
   shadow.append(style, button);
   document.documentElement.append(host);
@@ -128,43 +164,64 @@ button[data-state="error"]{border-color:rgba(240,141,126,.7)}
 
     button.dataset.state = "loading";
     label.textContent = "Starting…";
-    button.setAttribute("aria-label", "Starting Uber trip analysis");
+    button.setAttribute("aria-label", copy.loadingAria);
 
     try {
-      const response = startTripCollection();
+      const response = copy.start();
       if (!response?.started) {
-        throw new Error(response?.error || "Could not start trip analysis.");
+        throw new Error(response?.error || "Could not start analysis.");
       }
       label.textContent = "Analyzing…";
       window.setTimeout(() => {
         button.dataset.state = "idle";
-        label.textContent = "Analyze trips";
-        button.title = "Analyze Uber trips · drag to reposition";
-        button.setAttribute("aria-label", "Analyze Uber trips");
-      }, 1800);
+        label.textContent = copy.label;
+        button.title = copy.title;
+        button.setAttribute("aria-label", copy.aria);
+      }, 1_800);
     } catch (error) {
       button.dataset.state = "error";
       label.textContent = "Try again";
-      button.title = error instanceof Error ? error.message : "Could not start trip analysis.";
-      button.setAttribute("aria-label", "Trip analysis failed. Try again");
+      button.title = error instanceof Error ? error.message : "Could not start analysis.";
+      button.setAttribute("aria-label", "Analysis failed. Try again");
       window.setTimeout(() => {
         button.dataset.state = "idle";
-        label.textContent = "Analyze trips";
-      }, 2500);
+        label.textContent = copy.label;
+        button.title = copy.title;
+        button.setAttribute("aria-label", copy.aria);
+      }, 2_500);
     }
   });
 }
 
+function syncLauncher() {
+  const kind = currentLauncherKind();
+  if (kind) {
+    mountLauncher(kind);
+  } else {
+    document.getElementById(HOST_ID)?.remove();
+  }
+}
+
 export default defineContentScript({
-  matches: ["https://riders.uber.com/*"],
+  matches: ["https://riders.uber.com/*", "https://www.ubereats.com/*"],
   runAt: "document_idle",
-  main() {
-    mountLauncher();
-    browser.runtime.onMessage.addListener((message: unknown) => {
-      if (!message || typeof message !== "object" || !("type" in message) || message.type !== START_COLLECTION) {
+  main(ctx) {
+    syncLauncher();
+    ctx.addEventListener(window, "wxt:locationchange", syncLauncher);
+
+    const messageListener = (message: unknown) => {
+      if (!message || typeof message !== "object" || !("type" in message)) {
         return false;
       }
-      return Promise.resolve(startTripCollection());
-    });
+      if (message.type === START_COLLECTION) {
+        return Promise.resolve(startTripCollection());
+      }
+      if (message.type === START_EATS_COLLECTION) {
+        return Promise.resolve(startEatsCollection());
+      }
+      return false;
+    };
+    browser.runtime.onMessage.addListener(messageListener);
+    ctx.onInvalidated(() => browser.runtime.onMessage.removeListener(messageListener));
   },
 });

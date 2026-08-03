@@ -17,6 +17,7 @@ export interface UberEatsOrder {
   orderPriceText: string;
   restaurantId: string;
   restaurantName: string;
+  source?: "archive" | "web";
   status: string;
   territory: string;
 }

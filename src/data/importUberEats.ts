@@ -148,6 +148,7 @@ function readOrderSource(source: CsvSource, orders: Map<string, OrderBuilder>): 
         orderPriceText,
         restaurantId: orderCell(row, columns, "restaurantId"),
         restaurantName: orderCell(row, columns, "restaurantName"),
+        source: "archive",
         status: orderCell(row, columns, "status") || "UNKNOWN",
         territory: orderCell(row, columns, "territory"),
       };
