@@ -22,7 +22,7 @@ export default defineConfig({
   },
   manifest: ({ browser }) => ({
     name: "RideShare Trip Stats",
-    description: "Analyzes your Uber ride history and displays trip, spending, distance, and time statistics.",
+    description: "Analyzes Uber rides and Uber Eats exports locally with lifetime trip, order, spending, distance, and pattern statistics.",
     permissions: ["activeTab", "storage"],
     action: {
       default_title: "Analyze Uber ride history",

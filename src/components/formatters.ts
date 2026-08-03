@@ -1,13 +1,24 @@
 const integerFormatter = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 });
 const decimalFormatter = new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 });
 const usdFormatter = new Intl.NumberFormat("en-US", { currency: "USD", style: "currency" });
+const dateFormatter = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: "numeric" });
+const percentFormatter = new Intl.NumberFormat(undefined, { maximumFractionDigits: 1, style: "percent" });
 
 export function formatInteger(value: number): string {
   return integerFormatter.format(value);
 }
 
+export function formatCount(value: number, singular: string, plural = `${singular}s`): string {
+  return `${formatInteger(value)} ${value === 1 ? singular : plural}`;
+}
+
 export function formatDecimal(value: number): string {
   return decimalFormatter.format(value);
+}
+
+export function formatDecimalCount(value: number, singular: string, plural = `${singular}s`): string {
+  const displayedValue = Math.round(value * 10) / 10;
+  return `${formatDecimal(value)} ${displayedValue === 1 ? singular : plural}`;
 }
 
 export function formatUsd(value: number): string {
@@ -23,7 +34,7 @@ export function formatCurrency(value: number, currency: string): string {
 }
 
 export function formatDate(value: number): string {
-  return new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: "numeric" }).format(value);
+  return dateFormatter.format(value);
 }
 
 export function formatDuration(value: number): string {
@@ -42,5 +53,5 @@ export function formatDuration(value: number): string {
 }
 
 export function formatPercent(value: number): string {
-  return new Intl.NumberFormat(undefined, { maximumFractionDigits: 1, style: "percent" }).format(value);
+  return percentFormatter.format(value);
 }

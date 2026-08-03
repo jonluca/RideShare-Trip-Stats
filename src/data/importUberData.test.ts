@@ -43,7 +43,7 @@ describe("Uber data import", () => {
 
   it("rejects files that do not contain rider trip history", () => {
     expect(() => importUberDataBytes("profile.csv", strToU8("Name,Email\nExample,user@example.com\n"))).toThrow(
-      "No Uber rider trips CSV was found",
+      "No supported Uber trip or Eats order CSV was found",
     );
   });
 });

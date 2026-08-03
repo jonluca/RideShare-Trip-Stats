@@ -1,7 +1,7 @@
 {
   "name": "rideshare-trip-stats",
   "private": true,
-  "version": "11.3.0",
+  "version": "11.4.0",
   "type": "module",
   "scripts": {
     "dev": "wxt -b chrome --mv3",

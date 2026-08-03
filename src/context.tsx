@@ -1,45 +1,60 @@
 import * as React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { calculateEatsAnalytics, type EatsAnalytics } from "./analytics/eatsAnalytics";
 import { calculateTripAnalytics, type TripAnalytics } from "./analytics/tripAnalytics";
-import { importUberDataFile } from "./data/importUberData";
+import { loadEatsData, mergeEatsRecords } from "./data/eatsRepository";
+import { normalizeEatsOrders, type NormalizedEatsOrder } from "./data/eatsOrders";
+import { importUberDataFiles } from "./data/importUberData";
 import { loadTripData, mergeTripRecords } from "./data/tripRepository";
 import { normalizeTrips, type NormalizedTrip } from "./data/trips";
 import type { GetTrip } from "./types/UberApi";
+import type { UberEatsOrder } from "./types/UberEats";
 
 type LoadStatus = "error" | "loading" | "ready";
 
 export interface ExtensionContext {
   analytics: TripAnalytics | null;
   collectedAt: string | null;
+  eatsAnalytics: EatsAnalytics | null;
+  eatsImportedAt: string | null;
+  eatsOrders: NormalizedEatsOrder[];
+  eatsRecords: UberEatsOrder[];
   error: string | null;
   failedTripCount: number;
+  importUberData: (files: readonly File[]) => Promise<ImportUberDataResult>;
   records: GetTrip[];
   status: LoadStatus;
   trips: NormalizedTrip[];
-  importUberData: (file: File) => Promise<ImportUberDataResult>;
 }
 
 export interface ImportUberDataResult {
-  added: number;
-  duplicates: number;
+  orderDuplicates: number;
+  ordersAdded: number;
   parsedRows: number;
+  restaurants: number;
   skippedRows: number;
-  total: number;
+  totalOrders: number;
+  totalTrips: number;
+  tripDuplicates: number;
+  tripsAdded: number;
 }
 
 const DataContext = React.createContext<ExtensionContext | null>(null);
 
 export function DataContextProvider({ children }: React.PropsWithChildren) {
-  const [loadedData, setLoadedData] = useState<Awaited<ReturnType<typeof loadTripData>> | null>(null);
+  const [loadedData, setLoadedData] = useState<{
+    eats: Awaited<ReturnType<typeof loadEatsData>>;
+    trips: Awaited<ReturnType<typeof loadTripData>>;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
 
-    void loadTripData()
-      .then((data) => {
+    void Promise.all([loadTripData(), loadEatsData()])
+      .then(([trips, eats]) => {
         if (active) {
-          setLoadedData(data);
+          setLoadedData({ eats, trips });
         }
       })
       .catch((reason: unknown) => {
@@ -53,35 +68,54 @@ export function DataContextProvider({ children }: React.PropsWithChildren) {
     };
   }, []);
 
-  const importUberData = useCallback(async (file: File): Promise<ImportUberDataResult> => {
-    const imported = await importUberDataFile(file);
-    const merged = await mergeTripRecords(imported.records);
-    setLoadedData(merged.data);
+  const importUberData = useCallback(async (files: readonly File[]): Promise<ImportUberDataResult> => {
+    if (files.length === 0) {
+      throw new Error("Choose an Uber data ZIP or one or more Rider/Eater CSV files.");
+    }
+
+    const imported = await importUberDataFiles(files);
+    const [tripResult, eatsResult] = await Promise.all([
+      imported.tripSourceFiles > 0 ? mergeTripRecords(imported.records) : null,
+      imported.eatsSourceFiles > 0 ? mergeEatsRecords(imported.orders, imported.restaurants) : null,
+    ]);
+    const trips = tripResult?.data ?? (await loadTripData());
+    const eats = eatsResult?.data ?? (await loadEatsData());
+    setLoadedData({ eats, trips });
     setError(null);
     return {
-      added: merged.added,
-      duplicates: merged.duplicates,
+      orderDuplicates: eatsResult?.duplicates ?? 0,
+      ordersAdded: eatsResult?.added ?? 0,
       parsedRows: imported.parsedRows,
+      restaurants: eatsResult?.restaurants ?? 0,
       skippedRows: imported.skippedRows,
-      total: merged.total,
+      totalOrders: eats.records.length,
+      totalTrips: trips.records.length,
+      tripDuplicates: tripResult?.duplicates ?? 0,
+      tripsAdded: tripResult?.added ?? 0,
     };
   }, []);
 
-  const trips = useMemo(() => normalizeTrips(loadedData?.records ?? []), [loadedData?.records]);
+  const trips = useMemo(() => normalizeTrips(loadedData?.trips.records ?? []), [loadedData?.trips.records]);
+  const eatsOrders = useMemo(() => normalizeEatsOrders(loadedData?.eats.records ?? []), [loadedData?.eats.records]);
   const analytics = useMemo(() => (loadedData ? calculateTripAnalytics(trips) : null), [loadedData, trips]);
+  const eatsAnalytics = useMemo(() => (loadedData ? calculateEatsAnalytics(eatsOrders) : null), [eatsOrders, loadedData]);
 
   const value = useMemo<ExtensionContext>(
     () => ({
       analytics,
-      collectedAt: loadedData?.collectedAt ?? null,
+      collectedAt: loadedData?.trips.collectedAt ?? null,
+      eatsAnalytics,
+      eatsImportedAt: loadedData?.eats.importedAt ?? null,
+      eatsOrders,
+      eatsRecords: loadedData?.eats.records ?? [],
       error,
-      failedTripCount: loadedData?.failedTripCount ?? 0,
+      failedTripCount: loadedData?.trips.failedTripCount ?? 0,
       importUberData,
-      records: loadedData?.records ?? [],
+      records: loadedData?.trips.records ?? [],
       status: error ? "error" : loadedData ? "ready" : "loading",
       trips,
     }),
-    [analytics, error, importUberData, loadedData, trips],
+    [analytics, eatsAnalytics, eatsOrders, error, importUberData, loadedData, trips],
   );
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

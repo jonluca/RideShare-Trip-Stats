@@ -2,7 +2,7 @@
 
 Last updated: August 3, 2026
 
-RideShare Trip Stats is a browser extension that analyzes the signed-in user's Uber ride history and displays trip, spending, distance, and time statistics.
+RideShare Trip Stats is a browser extension that analyzes the signed-in user's Uber ride history and user-selected Uber Eats export data. It displays ride and order statistics locally.
 
 ## Data the extension handles
 
@@ -14,28 +14,28 @@ When the user invokes the extension on `https://riders.uber.com`, it requests th
 
 The extension relies on the user's existing Uber session and a transient CSRF token to make these user-requested calls. It does not ask for, read, or store the user's Uber password, and it does not use the Chrome cookies permission.
 
-The user may optionally select an official Uber data-download ZIP or rider Trips Data CSV to add history that Uber no longer returns through its live activity feed. The selected file is read locally in the results page and is not uploaded by the extension.
+The user may optionally select an official Uber data-download ZIP or Rider/Eater CSV files. Rider Trips Data can add history that Uber no longer returns through its live activity feed. Eater files can include order identifiers, dates, statuses, restaurant identifiers and names, cities, item names, quantities, prices, customizations, and special instructions. Selected files are read locally in the results page and are not uploaded by the extension.
 
 ## How data is used
 
-RideShare Trip Stats uses ride-history data only to calculate and display statistics requested by the user and to let the user export those results. The extension does not use the data for advertising, profiling, credit decisions, or any unrelated purpose.
+RideShare Trip Stats uses ride and Eats order-history data only to calculate and display statistics requested by the user and to let the user export those results. The extension does not use the data for advertising, profiling, credit decisions, or any unrelated purpose.
 
 ## Storage and retention
 
-Retrieved and user-imported ride-history data is merged and stored locally on the user's device with the browser's extension storage API so the results page can display it. Historical records are preserved across later analyses. The data remains until the user clears the extension's data or uninstalls the extension.
+Retrieved and user-imported ride-history data is merged and stored separately from imported Eats orders in the browser's extension storage. Historical records are preserved across later analyses and imports. The data remains until the user clears the extension's data or uninstalls the extension.
 
 An exported file is saved only when the user chooses to export it and is then controlled by the user.
 
 ## Data sharing and transfers
 
-The extension communicates directly with Uber over HTTPS to retrieve the ride history that the user requested. RideShare Trip Stats does not send ride-history data, authentication data, analytics, or telemetry to the developer or to developer-controlled servers. It does not sell or share user data with advertisers, data brokers, or other third parties.
+The extension communicates directly with Uber over HTTPS only to retrieve the ride history that the user requested. Uber Eats history is read from files the user explicitly selects. RideShare Trip Stats does not send ride history, Eats order data, authentication data, analytics, or telemetry to the developer or to developer-controlled servers. It does not sell or share user data with advertisers, data brokers, or other third parties.
 
 ## Browser permissions
 
 The extension requests only these permissions:
 
 - `activeTab`: temporarily access the active Uber Riders tab after the user clicks the extension.
-- `storage`: keep the retrieved data locally so the extension's results page can display and export it.
+- `storage`: keep retrieved rides and imported Eats orders locally so the results page can display and export them.
 
 The extension declares a content script limited to `https://riders.uber.com/*`. It adds the on-page launcher and waits for the user to start analysis. The extension does not load or execute remote code.
 

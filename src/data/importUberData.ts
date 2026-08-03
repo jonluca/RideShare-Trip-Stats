@@ -1,9 +1,10 @@
-import { strFromU8, unzipSync } from "fflate";
 import type { GetTrip } from "../types/UberApi";
+import type { UberEatsOrder, UberEatsRestaurant } from "../types/UberEats";
+import { csvCell, findCsvColumn, normalizeCsvHeader, parseCsv, type CsvSource } from "./csv";
+import { importUberEatsSources } from "./importUberEats";
+import { readUberCsvSources } from "./uberArchive";
 
-const MAX_ARCHIVE_BYTES = 250 * 1024 * 1024;
-const MAX_CSV_BYTES = 75 * 1024 * 1024;
-const MAX_UNCOMPRESSED_BYTES = 100 * 1024 * 1024;
+export { parseCsv } from "./csv";
 
 const aliases = {
   beginTime: ["begintriptime", "tripstarttime", "starttime", "requesttime", "triprequesttime"],
@@ -20,83 +21,23 @@ const aliases = {
 
 type AliasKey = keyof typeof aliases;
 
-interface CsvSource {
-  name: string;
-  text: string;
-}
-
 export interface UberDataImport {
+  eatsSourceFiles: number;
+  orders: UberEatsOrder[];
   parsedRows: number;
   records: GetTrip[];
+  restaurants: Record<string, UberEatsRestaurant>;
   skippedRows: number;
   sourceFiles: number;
-}
-
-function normalizeHeader(value: string): string {
-  return value
-    .replace(/^\uFEFF/u, "")
-    .normalize("NFKD")
-    .toLocaleLowerCase()
-    .replace(/[^a-z0-9]/g, "");
-}
-
-export function parseCsv(text: string): string[][] {
-  const rows: string[][] = [];
-  let cell = "";
-  let quoted = false;
-  let row: string[] = [];
-
-  for (let index = 0; index < text.length; index++) {
-    const character = text[index]!;
-    if (quoted) {
-      if (character === '"' && text[index + 1] === '"') {
-        cell += '"';
-        index++;
-      } else if (character === '"') {
-        quoted = false;
-      } else {
-        cell += character;
-      }
-      continue;
-    }
-
-    if (character === '"') {
-      quoted = true;
-    } else if (character === ",") {
-      row.push(cell);
-      cell = "";
-    } else if (character === "\n") {
-      row.push(cell.replace(/\r$/u, ""));
-      if (row.some((value) => value.trim() !== "")) {
-        rows.push(row);
-      }
-      row = [];
-      cell = "";
-    } else {
-      cell += character;
-    }
-  }
-
-  row.push(cell.replace(/\r$/u, ""));
-  if (row.some((value) => value.trim() !== "")) {
-    rows.push(row);
-  }
-  return rows;
+  tripSourceFiles: number;
 }
 
 function findColumn(headers: readonly string[], key: AliasKey): number {
-  for (const alias of aliases[key] as readonly string[]) {
-    const index = headers.indexOf(alias);
-    if (index >= 0) {
-      return index;
-    }
-  }
-  return -1;
+  return findCsvColumn(headers, aliases[key] as readonly string[]);
 }
 
 function cellFor(row: readonly string[], columns: Map<AliasKey, number>, key: AliasKey): string {
-  const index = columns.get(key) ?? -1;
-  return index >= 0 ? (row[index]?.trim() ?? "") : "";
+  return csvCell(row, columns.get(key) ?? -1);
 }
 
 function numericCell(value: string): string {
@@ -190,7 +131,7 @@ function rowToTrip(row: readonly string[], headers: readonly string[], columns: 
 
 function recordsFromCsv(source: CsvSource): { parsedRows: number; records: GetTrip[]; skippedRows: number } | null {
   const rows = parseCsv(source.text);
-  const headers = (rows[0] ?? []).map(normalizeHeader);
+  const headers = (rows[0] ?? []).map(normalizeCsvHeader);
   const columns = new Map<AliasKey, number>();
   for (const key of Object.keys(aliases) as AliasKey[]) {
     columns.set(key, findColumn(headers, key));
@@ -216,66 +157,116 @@ function recordsFromCsv(source: CsvSource): { parsedRows: number; records: GetTr
   return { parsedRows: Math.max(0, rows.length - 1), records, skippedRows };
 }
 
-function isRiderTripArchiveEntry(name: string): boolean {
-  const normalized = name.toLocaleLowerCase().replace(/\\/g, "/");
-  const fileName = normalized.split("/").at(-1) ?? "";
-  const excludedSection = /(^|\/)(driver|delivery|eater|restaurant|order)(\/|$)/u.test(normalized);
-  const riderSection = /(^|\/)(rider|riders)(\/|$)/u.test(normalized);
-  const tripFile = /\b(trip|trips|ride|rides)\b/u.test(fileName.replace(/[_-]/g, " "));
-  return !excludedSection && tripFile && (riderSection || !normalized.includes("/"));
-}
-
-function sourcesFromBytes(name: string, bytes: Uint8Array): CsvSource[] {
-  const isZip = name.toLocaleLowerCase().endsWith(".zip") || (bytes[0] === 0x50 && bytes[1] === 0x4b);
-  if (!isZip) {
-    return [{ name, text: strFromU8(bytes) }];
-  }
-
-  let selectedBytes = 0;
-  const files = unzipSync(bytes, {
-    filter: (file) => {
-      const selected =
-        file.name.toLocaleLowerCase().endsWith(".csv") &&
-        file.originalSize <= MAX_CSV_BYTES &&
-        isRiderTripArchiveEntry(file.name) &&
-        selectedBytes + file.originalSize <= MAX_UNCOMPRESSED_BYTES;
-      if (selected) {
-        selectedBytes += file.originalSize;
-      }
-      return selected;
-    },
-  });
-  return Object.entries(files).map(([fileName, contents]) => ({ name: fileName, text: strFromU8(contents) }));
-}
-
 export function importUberDataBytes(name: string, bytes: Uint8Array): UberDataImport {
-  if (bytes.byteLength > MAX_ARCHIVE_BYTES) {
-    throw new Error("This archive is larger than 250 MB. Extract it and select the rider trips CSV instead.");
-  }
-
-  const sources = sourcesFromBytes(name, bytes);
+  const sources = readUberCsvSources(name, bytes);
   const records: GetTrip[] = [];
-  let parsedRows = 0;
-  let skippedRows = 0;
-  let sourceFiles = 0;
+  let tripParsedRows = 0;
+  let tripSkippedRows = 0;
+  let tripSourceFiles = 0;
 
   for (const source of sources) {
     const result = recordsFromCsv(source);
     if (!result) {
       continue;
     }
-    sourceFiles++;
+    tripSourceFiles++;
     records.push(...result.records);
-    parsedRows += result.parsedRows;
-    skippedRows += result.skippedRows;
+    tripParsedRows += result.parsedRows;
+    tripSkippedRows += result.skippedRows;
   }
 
+  const eats = importUberEatsSources(sources);
+  const sourceFiles = tripSourceFiles + eats.sourceFiles;
   if (sourceFiles === 0) {
-    throw new Error("No Uber rider trips CSV was found. Select the Uber data ZIP or its Trips Data CSV file.");
+    throw new Error("No supported Uber trip or Eats order CSV was found. Select the official Uber data ZIP or its Rider/Eater CSV files.");
   }
-  return { parsedRows, records, skippedRows, sourceFiles };
+  return {
+    eatsSourceFiles: eats.sourceFiles,
+    orders: eats.orders,
+    parsedRows: tripParsedRows + eats.parsedRows,
+    records,
+    restaurants: eats.restaurants,
+    skippedRows: tripSkippedRows + eats.skippedRows,
+    sourceFiles,
+    tripSourceFiles,
+  };
 }
 
 export async function importUberDataFile(file: File): Promise<UberDataImport> {
   return importUberDataBytes(file.name, new Uint8Array(await file.arrayBuffer()));
+}
+
+function orderItemIdentity(orderId: string, item: UberEatsOrder["items"][number]): string {
+  return [orderId, item.name, item.customizations, item.specialInstructions, item.priceText, item.quantity].join("|");
+}
+
+export function combineUberDataImports(imports: readonly UberDataImport[]): UberDataImport {
+  const restaurants = Object.fromEntries(imports.flatMap((result) => Object.entries(result.restaurants)));
+  const orderMap = new Map<string, UberEatsOrder>();
+  for (const result of imports) {
+    for (const order of result.orders) {
+      const existing = orderMap.get(order.id);
+      if (!existing) {
+        orderMap.set(order.id, { ...order, items: [...order.items] });
+        continue;
+      }
+      const itemKeys = new Set(existing.items.map((item) => orderItemIdentity(order.id, item)));
+      for (const item of order.items) {
+        const identity = orderItemIdentity(order.id, item);
+        if (!itemKeys.has(identity)) {
+          existing.items.push(item);
+          itemKeys.add(identity);
+        }
+      }
+      existing.currency ??= order.currency;
+      existing.orderPrice ??= order.orderPrice;
+      existing.orderPriceText ||= order.orderPriceText;
+      existing.restaurantId ||= order.restaurantId;
+      if (existing.restaurantName === "Unknown restaurant") {
+        existing.restaurantName = order.restaurantName;
+      }
+    }
+  }
+
+  const orders = [...orderMap.values()].map((order) => {
+    const restaurant = restaurants[order.restaurantId];
+    return {
+      ...order,
+      city: order.city || restaurant?.city || "",
+      restaurantName:
+        order.restaurantName && order.restaurantName !== "Unknown restaurant"
+          ? order.restaurantName
+          : restaurant?.name || "Unknown restaurant",
+    };
+  });
+  return {
+    eatsSourceFiles: imports.reduce((total, result) => total + result.eatsSourceFiles, 0),
+    orders,
+    parsedRows: imports.reduce((total, result) => total + result.parsedRows, 0),
+    records: imports.flatMap((result) => result.records),
+    restaurants,
+    skippedRows: imports.reduce((total, result) => total + result.skippedRows, 0),
+    sourceFiles: imports.reduce((total, result) => total + result.sourceFiles, 0),
+    tripSourceFiles: imports.reduce((total, result) => total + result.tripSourceFiles, 0),
+  };
+}
+
+export async function importUberDataFiles(files: readonly File[]): Promise<UberDataImport> {
+  const attempts = await Promise.all(
+    files.map(async (file) => {
+      try {
+        return await importUberDataFile(file);
+      } catch (reason) {
+        if (reason instanceof Error && reason.message.startsWith("No supported Uber trip or Eats order CSV was found")) {
+          return null;
+        }
+        throw reason;
+      }
+    }),
+  );
+  const imports = attempts.filter((result): result is UberDataImport => result !== null);
+  if (imports.length === 0) {
+    throw new Error("No supported Uber trip or Eats order CSV was found. Select the official Uber data ZIP or its Rider/Eater CSV files.");
+  }
+  return combineUberDataImports(imports);
 }

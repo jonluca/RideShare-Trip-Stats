@@ -1,5 +1,5 @@
 import type { TripAnalytics } from "../analytics/tripAnalytics";
-import { formatCurrency, formatDecimal, formatDuration, formatInteger, formatUsd } from "./formatters";
+import { formatCount, formatCurrency, formatDecimal, formatDuration, formatInteger, formatUsd } from "./formatters";
 
 interface SummaryGridProps {
   analytics: TripAnalytics;
@@ -9,7 +9,7 @@ function spendSummary(analytics: TripAnalytics): { detail: string; value: string
   if (analytics.currencyTotals.length === 1) {
     const total = analytics.currencyTotals[0]!;
     return {
-      detail: `${formatInteger(analytics.paidTripCount)} trips with a recorded fare`,
+      detail: `${formatCount(analytics.paidTripCount, "trip")} with a recorded fare`,
       value: formatCurrency(total.amount, total.currency),
     };
   }
@@ -33,7 +33,7 @@ export function SummaryGrid({ analytics }: SummaryGridProps) {
         <span className="summary-label">Total trips</span>
         <strong>{formatInteger(analytics.totalTrips)}</strong>
         <span className="summary-detail">
-          {formatInteger(analytics.completedTrips)} completed · {formatInteger(analytics.activeDays)} active days
+          {formatCount(analytics.completedTrips, "completed trip")} · {formatCount(analytics.activeDays, "active day")}
         </span>
       </article>
       <article className="summary-card">

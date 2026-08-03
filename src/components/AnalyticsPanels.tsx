@@ -1,6 +1,16 @@
 import type { ReactNode } from "react";
 import type { CountedValue, TripAnalytics, TripExtreme } from "../analytics/tripAnalytics";
-import { formatCurrency, formatDate, formatDecimal, formatDuration, formatInteger, formatPercent, formatUsd } from "./formatters";
+import {
+  formatCount,
+  formatCurrency,
+  formatDate,
+  formatDecimal,
+  formatDecimalCount,
+  formatDuration,
+  formatInteger,
+  formatPercent,
+  formatUsd,
+} from "./formatters";
 
 interface AnalyticsPanelsProps {
   analytics: TripAnalytics;
@@ -56,7 +66,7 @@ export function AnalyticsPanels({ analytics }: AnalyticsPanelsProps) {
         <dl className="data-list">
           <DataRow
             label="Busiest month"
-            value={analytics.busiestMonth ? `${analytics.busiestMonth.label} · ${analytics.busiestMonth.count} rides` : "—"}
+            value={analytics.busiestMonth ? `${analytics.busiestMonth.label} · ${formatCount(analytics.busiestMonth.count, "ride")}` : "—"}
           />
           <DataRow label="Most common day" value={analytics.busiestWeekday ? `${analytics.busiestWeekday.label}s` : "—"} />
           <DataRow
@@ -65,7 +75,7 @@ export function AnalyticsPanels({ analytics }: AnalyticsPanelsProps) {
           />
           <DataRow
             label="Monthly pace"
-            value={analytics.averageTripsPerMonth === null ? "—" : `${formatDecimal(analytics.averageTripsPerMonth)} rides`}
+            value={analytics.averageTripsPerMonth === null ? "—" : formatDecimalCount(analytics.averageTripsPerMonth, "ride")}
           />
           <DataRow label="Completion rate" value={analytics.completionRate === null ? "—" : formatPercent(analytics.completionRate)} />
         </dl>
